@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíces Digitales | San Gregorio Atlapulco</title>
+    <style>
+        :root {
+            --verde-obscuro: #2d5a27;
+            --verde-claro: #8eb94e;
+            --tierra: #5d4037;
+            --blanco-fondo: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--blanco-fondo);
+        }
+
+        /* Barra Lateral */
+        .sidebar {
+            width: 280px;
+            background-color: var(--verde-obscuro);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h2 {
+            font-size: 1.4rem;
+            text-align: center;
+            border-bottom: 2px solid var(--verde-claro);
+            padding-bottom: 15px;
+        }
+
+        .nav-menu {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Botones con ID para que el buen Josué los use */
+        .nav-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #ecf0f1;
+            padding: 12px 15px;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--verde-claro);
+            color: var(--verde-obscuro);
+            font-weight: bold;
+        }
+
+        /* Área de Visualización de Datos */
+        .main-display {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .card-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            border-left: 5px solid var(--verde-claro);
+            padding: 15px;
+            background: #f1f8e9;
+            border-radius: 5px;
+        }
+
+        #graph-area {
+            width: 100%;
+            height: 300px;
+            background: #eee;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>Raíces Digitales</h2>
+        <p style="font-size: 12px; text-align: center;">U. Rosario Castellanos</p>
+        
+        <nav class="nav-menu">
+            <button class="nav-btn" id="btn-suelos">🧪 Recuperación de Suelos</button>
+            <button class="nav-btn" id="btn-riesgos">📉 Análisis de Probabilidad</button>
+            <button class="nav-btn" id="btn-ventas">🛒 Venta Directa SQL</button>
+            <button class="nav-btn" id="btn-activos">🌳 Activos: Ahuejotes</button>
+        </nav>
+    </aside>
+
+    <main class="main-display">
+        <div class="card-container">
+            <h1 id="section-title">Panel de Control: San Gregorio Atlapulco</h1>
+            <p>Monitoreo de salinización y subsidencia chinampera[cite: 4, 25].</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <strong>Salinidad</strong>
+                    <div id="val-salinidad">Calculando...</div>
+                </div>
+                <div class="stat-card">
+                    <strong>Tasa de Lixiviación</strong>
+                    <div id="val-lixiviacion">Pendiente (Integrales)</div>
+                </div>
+            </div>
+
+            <div id="graph-area">
+                Las gráficas dinámicas se cargarán aquí mediante JavaScript.
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Este es el espacio para que Josué escriba la interacción
+        document.getElementById('btn-suelos').onclick = function() {
+            document.getElementById('section-title').innerText = "Modelado de Recuperación de Suelos";
+            alert("Cargando modelos de Cálculo Integral para el lavado de suelos[cite: 12, 19]...");
+        };
+    </script>
+</body>
+</html>
