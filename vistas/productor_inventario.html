@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíces Digitales | Inventario de Insumos</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Top Navbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="../index.html" class="logo" style="text-decoration: none; color: inherit;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
+                    <span>Raíces Digitales | Productor Chinampero</span>
+                </a>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn notification" aria-label="Notificaciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <span>Rancho El Sol</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar Navigation -->
+            <aside class="left-sidebar">
+                <nav class="side-nav">
+                    <a href="productor_dashboard.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        MI RESUMEN
+                    </a>
+                    <a href="productor_analiticas.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        EXPLORADOR DE MERCADO
+                    </a>
+                    <a href="productor_inventario.html" class="nav-item active">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                        INVENTARIO
+                    </a>
+                    <a href="productor_cosechas.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        COSECHAS
+                    </a>
+                    <a href="productor_ajustes.html" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        AJUSTES
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Central Content -->
+            <main class="center-content">
+                <img src="../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg" onerror="this.src='../IMG/Fondo de Pagina.png'">
+                
+                <div class="analytics-content" style="padding-top: 1rem;">
+                    <div class="dashboard-header">
+                        <h1>Inventario de Insumos (Materia Prima)</h1>
+                    </div>
+
+                    <!-- Alertas de Escasez (KPIs) -->
+                    <div class="kpi-row">
+                        <div class="kpi-card warning">
+                            <div class="kpi-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                            <div class="kpi-content">
+                                <span class="kpi-label">Stock Crítico</span>
+                                <span class="kpi-value">Macetas (No. 4)</span>
+                                <span class="kpi-subtext">Quedan menos de 50 unidades</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" style="border-left-color: #f59e0b;">
+                            <div class="kpi-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            </div>
+                            <div class="kpi-content">
+                                <span class="kpi-label">Atención Próxima</span>
+                                <span class="kpi-value">Semilla de Rábano</span>
+                                <span class="kpi-subtext">Caduca en 15 días</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card opportunity">
+                            <div class="kpi-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            </div>
+                            <div class="kpi-content">
+                                <span class="kpi-label">Estado General</span>
+                                <span class="kpi-value">Óptimo</span>
+                                <span class="kpi-subtext">Suficiente lodo de chinampa para la temporada</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout Principal de Inventario -->
+                    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                        
+                        <!-- Columna Izquierda: Tabla de Insumos -->
+                        <div class="table-container" style="margin-top: 0;">
+                            <h3 class="table-title">Mis Insumos Disponibles</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Insumo / Semilla</th>
+                                        <th>Categoría</th>
+                                        <th>Cantidad</th>
+                                        <th>Caducidad / Estado</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Lodo de Chinampa</td>
+                                        <td>Tierra y Abono</td>
+                                        <td>15 m³</td>
+                                        <td>N/A</td>
+                                        <td><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bulto de Semilla de Cempasúchil</td>
+                                        <td>Semillas</td>
+                                        <td>3 Bultos (5kg)</td>
+                                        <td>Nov 2026</td>
+                                        <td><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button></td>
+                                    </tr>
+                                    <tr style="background: rgba(239, 68, 68, 0.1);">
+                                        <td>Macetas de Plástico (No. 4)</td>
+                                        <td>Herramientas</td>
+                                        <td><span style="color: #ef4444; font-weight: bold;">25 Unidades</span></td>
+                                        <td>Reabastecer</td>
+                                        <td><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button></td>
+                                    </tr>
+                                    <tr style="background: rgba(245, 158, 11, 0.1);">
+                                        <td>Semilla de Rábano Rápido</td>
+                                        <td>Semillas</td>
+                                        <td>0.5 Kg</td>
+                                        <td><span style="color: #f59e0b;">Próximo a caducar</span></td>
+                                        <td><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Columna Derecha: Formulario de Registro -->
+                        <aside class="settings-card" style="padding: 1.5rem;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Registrar Nuevo Insumo</h3>
+                            
+                            <form onsubmit="event.preventDefault(); mostrarAlerta('success', 'Insumo Registrado', 'El insumo se ha guardado exitosamente en tu inventario.', 5000);" class="details-form">
+                                
+                                <div class="input-group">
+                                    <label>Categoría</label>
+                                    <select required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none;">
+                                        <option value="">Selecciona...</option>
+                                        <option value="semilla">Semillas crudas</option>
+                                        <option value="tierra">Tierra y Abonos</option>
+                                        <option value="herramienta">Macetas y Herramientas</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Nombre del Insumo</label>
+                                    <input type="text" placeholder="Ej. Bulto de Composta" required>
+                                </div>
+
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Cantidad Inicial</label>
+                                    <input type="number" placeholder="Ej. 10" required>
+                                </div>
+
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Nivel de pH óptimo (Tierra/Semilla)</label>
+                                    <input type="number" step="0.1" placeholder="Ej. 6.5">
+                                </div>
+
+                                <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.5rem;">
+                                    Guardar en Inventario
+                                </button>
+                            </form>
+                        </aside>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script src="../js/alertas.js"></script>
+    <script src="../js/chatbot.js"></script>
+</body>
+</html>

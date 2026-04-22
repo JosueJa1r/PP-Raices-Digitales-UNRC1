@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíces Digitales | Mercado Agrícola</title>
+    <link rel="stylesheet" href="cliente_style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="store-header">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
+                Raíces Digitales
+            </a>
+
+            <div class="search-bar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" placeholder="Buscar semillas, cosechas, productores...">
+            </div>
+
+            <div class="nav-actions">
+                <button class="cart-btn" aria-label="Carrito de compras">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span class="cart-badge">3</span>
+                </button>
+                <button class="user-btn" aria-label="Perfil">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero-store">
+        <div class="hero-banner">
+            <div class="hero-bg-shape"></div>
+            <div class="hero-content">
+                <h1>Conecta directo con el origen</h1>
+                <p>Adquiere semillas certificadas y cosechas frescas directamente de nuestros productores locales. Calidad garantizada, precios justos.</p>
+                <button class="shop-now-btn">Explorar Catálogo</button>
+            </div>
+            <!-- Decorative Image -->
+            <div style="z-index: 2;">
+                <img src="../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" style="height: 150px; opacity: 0.8; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5)); mix-blend-mode: multiply;" onerror="this.src='../IMG/Fondo de Pagina.png'">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="store-layout">
+        
+        <!-- Sidebar Filters -->
+        <aside class="filters-sidebar">
+            <h3>Filtros</h3>
+            
+            <div class="filter-group">
+                <h4>Categorías</h4>
+                <label class="filter-option">
+                    <input type="checkbox" checked>
+                    <span>Verduras y Hortalizas</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox" checked>
+                    <span>Flores y Ornato</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox" checked>
+                    <span>Cosechas Recientes</span>
+                </label>
+            </div>
+
+            <div class="filter-group">
+                <h4>Productores</h4>
+                <label class="filter-option">
+                    <input type="checkbox">
+                    <span>Rancho El Sol</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox">
+                    <span>Finca Las Marías</span>
+                </label>
+                <label class="filter-option">
+                    <input type="checkbox">
+                    <span>AgroTech Norte</span>
+                </label>
+            </div>
+        </aside>
+
+        <!-- Product Grid -->
+        <section class="products-section">
+            <div class="products-header">
+                <h2>Catálogo de Productos</h2>
+                <select class="sort-select">
+                    <option>Recomendados</option>
+                    <option>Menor Precio</option>
+                    <option>Mayor Precio</option>
+                    <option>Más Recientes</option>
+                </select>
+            </div>
+
+            <div class="products-grid">
+                
+                <!-- Product 1 -->
+                <article class="product-card">
+                    <div class="product-image-container">
+                        <span class="product-badge" style="background: var(--accent-green);">Verdura</span>
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">Hortalizas Frescas</span>
+                        <h3 class="product-title">Lechuga Orejona (Docena)</h3>
+                        <div class="product-producer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Rancho El Sol
+                        </div>
+                        <div class="product-footer">
+                            <span class="product-price">$120.00 MXN</span>
+                            <button class="add-to-cart-btn" aria-label="Añadir al carrito" onclick="mostrarAlerta('success', 'Añadido al carrito', 'Docena de Lechuga Orejona añadida a tu orden.')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Product 2 -->
+                <article class="product-card">
+                    <div class="product-image-container">
+                        <span class="product-badge" style="background: var(--accent-blue);">Flores</span>
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><path d="M12 22V12"></path><path d="M12 12c-2.5-1-5 0-5 3s2.5 4 5 3c2.5 1 5 0 5-3s-2.5-4-5-3z"></path><path d="M12 2c-1.5 2-1.5 5 0 7 1.5-2 1.5-5 0-7z"></path></svg>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">Flores de Temporada</span>
+                        <h3 class="product-title">Maceta de Cempasúchil</h3>
+                        <div class="product-producer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Finca Las Marías
+                        </div>
+                        <div class="product-footer">
+                            <span class="product-price">$45.00 MXN</span>
+                            <button class="add-to-cart-btn" aria-label="Añadir al carrito" onclick="mostrarAlerta('success', 'Añadido al carrito', 'Maceta de Cempasúchil añadida a tu orden.')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Product 3 -->
+                <article class="product-card">
+                    <div class="product-image-container">
+                        <span class="product-badge">Verdura</span>
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5"><circle cx="12" cy="12" r="8"></circle><path d="M12 4V2"></path><path d="M12 22v-2"></path><path d="M12 12l4-4"></path></svg>
+                    </div>
+                    <div class="product-info">
+                        <span class="product-category">Verduras Frescas</span>
+                        <h3 class="product-title">Manojo de Rábanos Frescos</h3>
+                        <div class="product-producer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            AgroTech Norte
+                        </div>
+                        <div class="product-footer">
+                            <span class="product-price">$15.00 MXN</span>
+                            <button class="add-to-cart-btn" aria-label="Añadir al carrito" onclick="mostrarAlerta('success', 'Añadido al carrito', 'Manojo de Rábanos añadido a tu orden.')">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/alertas.js"></script>
+</body>
+</html>

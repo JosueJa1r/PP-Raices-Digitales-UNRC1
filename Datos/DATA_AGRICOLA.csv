@@ -1,0 +1,19 @@
+Nomunidad,Tonelada,,,,,,,,,,,,
+,,,,,,,,,,,,,
+Etiquetas de fila,Producción,Rendimiento.,Valor produccion,Precio.,,,,,,,,,
+Álvaro Obregón," $4,392.12 "," 1,099.55 "," 29,816,060.19 "," $1,434,523.62 ",,,,,,,,,
+Cuajimalpa de Morelos," $3,279.69 "," 1,115.35 "," 24,289,932.14 "," $1,919,199.00 ",,,,,,,,,
+La Magdalena Contreras," $19,816.97 "," 2,354.66 "," 78,079,626.69 "," $1,935,135.39 ",,,,,,,,,
+Milpa Alta," $2,718,460.30 "," 4,352.64 "," 8,008,879,312.03 "," $2,596,647.07 ",,,,,,,,,
+Tláhuac," $182,690.59 "," 6,793.55 "," 945,325,673.96 "," $3,770,906.99 ",,,,,,,,,
+Tlalpan," $1,042,368.91 "," 1,935.26 "," 2,830,927,208.74 "," $1,644,134.36 ",,,,,,,,,
+Xochimilco," $125,647.39 "," 4,070.77 "," 500,444,469.02 "," $2,940,441.91 ",,,,,,,,,
+Total general," $4,096,655.97 "," 21,721.78 "," 12,417,762,282.77 "," $16,240,988.34 ",,,,,,,,,
+,,,,,,,"Consecutivo
+en la base","Nombre
+de campo",Tipo,Long.,"Rangos
+válidos",Descripción,Observaciones
+,,,,D,,,21,Volumenproduccion,D,10,{########.##},Volumen de producción,"Volumen de producción de la superficie cosechada cuya unidad de medida son las toneladas, con excepción del maguey pulquero y trigo ornamental, con una métrica de miles de litros y gruesas, respectivamente."
+,,,,,,,22,Rendimiento,D,10,{########.###},Rendimiento,"Rendimiento, la unidad de medida son toneladas por hectárea, con excepción de los cultivos que tienen otra métrica la cual se señala en el nombre del cultivo (gruesa, manojo, planta, entre otros)."
+,,,,,,,23,Precio,D,7,{#######.###},Precio medio rural,"Precio medio rural, la unidad de medida son pesos por tonelada, con excepción de los cultivos que tienen otra métrica la cual se señala en el nombre del cultivo (gruesa, manojo, planta, entre otros)."
+,,,,,,,24,Valorproduccion,D,12,{##########.##},Valor de la producción,Valor expresado en pesos corrientes nacionales.

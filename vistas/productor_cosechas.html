@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíces Digitales | Mis Cosechas</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Top Navbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="../index.html" class="logo" style="text-decoration: none; color: inherit;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
+                    <span>Raíces Digitales | Productor Chinampero</span>
+                </a>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn notification" aria-label="Notificaciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <span>Rancho El Sol</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar Navigation -->
+            <aside class="left-sidebar">
+                <nav class="side-nav">
+                    <a href="productor_dashboard.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        MI RESUMEN
+                    </a>
+                    <a href="productor_analiticas.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        EXPLORADOR DE MERCADO
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                        INVENTARIO
+                    </a>
+                    <a href="productor_cosechas.html" class="nav-item active">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        COSECHAS
+                    </a>
+                    <a href="productor_ajustes.html" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        AJUSTES
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Central Content -->
+            <main class="center-content">
+                <img src="../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg" onerror="this.src='../IMG/Fondo de Pagina.png'">
+                
+                <div class="analytics-content" style="padding-top: 1rem;">
+                    <div class="dashboard-header">
+                        <h1>Productos de la Chinampa</h1>
+                    </div>
+
+                    <!-- Layout Principal de Cosechas -->
+                    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                        
+                        <!-- Columna Izquierda: Tabla de Stock Activo -->
+                        <div class="table-container" style="margin-top: 0;">
+                            <h3 class="table-title">Mis Productos en Venta (Tienda)</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Producto Terminado</th>
+                                        <th>Categoría</th>
+                                        <th>Stock Disponible</th>
+                                        <th>Precio / Unidad</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Macetas de Cempasúchil</td>
+                                        <td>Flores de Ornato</td>
+                                        <td>150 Unidades</td>
+                                        <td>$45.00 MXN</td>
+                                        <td><span style="color: var(--accent-green);">Publicado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lechuga Orejona (Manojo)</td>
+                                        <td>Verduras Frescas</td>
+                                        <td>45 Manojos</td>
+                                        <td>$25.00 MXN</td>
+                                        <td><span style="color: var(--accent-green);">Publicado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Rábanos Frescos</td>
+                                        <td>Verduras Frescas</td>
+                                        <td>0 Manojos</td>
+                                        <td>$15.00 MXN</td>
+                                        <td><span style="color: #ef4444;">Agotado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Nochebuenas (Tamaño Mediano)</td>
+                                        <td>Flores de Ornato</td>
+                                        <td>300 Unidades</td>
+                                        <td>$80.00 MXN</td>
+                                        <td><span style="color: var(--text-muted);">En Bodega</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Columna Derecha: Formulario de Publicación -->
+                        <aside class="settings-card" style="padding: 1.5rem;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Publicar Nueva Cosecha</h3>
+                            
+                            <form onsubmit="event.preventDefault(); mostrarAlerta('success', 'Cosecha Publicada', 'Tu producto ahora está visible para los clientes de Xochimilco.', 5000);" class="details-form">
+                                
+                                <div class="input-group">
+                                    <label>Tipo de Producto</label>
+                                    <select required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none;">
+                                        <option value="">Selecciona tu cosecha...</option>
+                                        <option value="flores">Flores y Ornato (Ej. Cempasúchil)</option>
+                                        <option value="verduras">Verduras y Hortalizas (Ej. Lechuga)</option>
+                                        <option value="plantas">Plantas Medicinales</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Nombre Específico</label>
+                                    <input type="text" placeholder="Ej. Maceta de Nochebuena" required>
+                                </div>
+
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Cantidad Disponible</label>
+                                    <input type="number" placeholder="Ej. 100" required>
+                                </div>
+
+                                <div class="setting-toggle-row" style="margin-top: 1rem; padding: 10px 0;">
+                                    <div class="setting-toggle-info">
+                                        <span class="setting-toggle-title">Vender Inmediatamente</span>
+                                        <span class="setting-toggle-desc">Publicar directo en la Tienda</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked onchange="document.getElementById('precio-container').style.display = this.checked ? 'block' : 'none'">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="input-group" id="precio-container" style="margin-top: 0.5rem;">
+                                    <label>Precio al Público (MXN)</label>
+                                    <input type="number" step="0.50" placeholder="$ 0.00" required>
+                                </div>
+
+                                <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.5rem;">
+                                    Registrar y Publicar
+                                </button>
+                            </form>
+                        </aside>
+
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script src="../js/alertas.js"></script>
+    <script src="../js/chatbot.js"></script>
+</body>
+</html>

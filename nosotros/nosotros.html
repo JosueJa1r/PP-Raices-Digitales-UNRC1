@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidad - Universidad Rosario Castellanos</title>
+    <!-- Integración de Tailwind CSS para el diseño rápido y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración de los colores institucionales de la URC -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        urcMaroon: '#681635', 
+                        urcGold: '#DAB27C',  
+                        urcGray: '#6B7280',   
+                        urcLightGray: '#F3F4F6',
+                        urcDark: '#2D3748'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Iconos para los avatares -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-urcLightGray min-h-screen flex items-center justify-center p-6 font-sans">
+
+    <div class="max-w-7xl w-full">
+        <!-- Encabezado -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-urcMaroon mb-3">Nuestra Comunidad</h1>
+            <p class="text-urcGray text-lg font-medium">Universidad Nacional Rosario Castellanos</p>
+            <div class="h-1 w-24 bg-urcGold mx-auto mt-4 rounded"></div>
+        </header>
+
+        <!-- Contenedor Principal (Grid para las 4 tarjetas) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            <!-- Mauricio -->
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
+                <div class="w-24 h-24 bg-urcMaroon/10 rounded-full flex items-center justify-center mb-4 text-urcMaroon border-2 border-urcMaroon">
+                    <i class="ph ph-student text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-urcDark mb-1">Ana López</h2>
+                <span class="text-sm font-bold text-urcGold mb-3 tracking-wide uppercase">Estudiante</span>
+                <p class="text-urcGray text-sm flex-grow leading-relaxed">
+                    Alumna destacada de la Licenciatura en Relaciones Internacionales, participando activamente en foros de debate y proyectos de sustentabilidad comunitaria.
+                </p>
+            </div>
+
+            <!-- Josue -->
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
+                <div class="w-24 h-24 bg-urcGold/20 rounded-full flex items-center justify-center mb-4 text-urcGold border-2 border-urcGold">
+                    <i class="ph ph-chalkboard-teacher text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-urcDark mb-1">Dr. Carlos Martínez</h2>
+                <span class="text-sm font-bold text-urcMaroon mb-3 tracking-wide uppercase">Docente Investigador</span>
+                <p class="text-urcGray text-sm flex-grow leading-relaxed">
+                    Especialista en Derecho Constitucional, con más de 15 años de experiencia académica impulsando la formación ética y profesional de los estudiantes.
+                </p>
+            </div>
+
+            <!-- Alicia -->
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
+                <div class="w-24 h-24 bg-urcMaroon/10 rounded-full flex items-center justify-center mb-4 text-urcMaroon border-2 border-urcMaroon">
+                    <i class="ph ph-microscope text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-urcDark mb-1">Dra. Sofía Ramírez</h2>
+                <span class="text-sm font-bold text-urcGold mb-3 tracking-wide uppercase">Coordinadora</span>
+                <p class="text-urcGray text-sm flex-grow leading-relaxed">
+                    Líder del área de Ciencias Ambientales. Sus investigaciones actuales se centran en el rescate ecológico de las áreas naturales de la Ciudad de México.
+                </p>
+            </div>
+
+            <!-- Axel-->
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
+                <div class="w-24 h-24 bg-urcGold/20 rounded-full flex items-center justify-center mb-4 text-urcGold border-2 border-urcGold">
+                    <i class="ph ph-graduation-cap text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-urcDark mb-1">Ing. Luis Fernández</h2>
+                <span class="text-sm font-bold text-urcMaroon mb-3 tracking-wide uppercase">Egresado</span>
+                <p class="text-urcGray text-sm flex-grow leading-relaxed">
+                    Orgulloso egresado de Tecnologías de la Información. Actualmente trabaja desarrollando software para la modernización de servicios públicos en la capital.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Botón de Página Principal -->
+        <div class="mt-12 flex justify-center">
+            <a href="../index.html" class="px-8 py-3 bg-urcMaroon text-white font-bold rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex items-center gap-2">
+                <i class="ph ph-house text-2xl"></i>
+                Página Principal
+            </a>
+        </div>
+        
+    </div>
+
+</body>
+</html>

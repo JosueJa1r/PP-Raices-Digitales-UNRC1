@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíces Digitales | Analíticas de Mercado</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos menores específicos de analíticas si se requieren */
+        .analytics-content {
+            padding: 2rem;
+            color: #fff;
+            height: 100%;
+            width: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Top Navbar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="../index.html" class="logo" style="text-decoration: none; color: inherit;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
+                    <span>Raíces Digitales | Productor</span>
+                </a>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn notification" aria-label="Notificaciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <span>Rancho El Sol</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar Navigation -->
+            <aside class="left-sidebar">
+                <nav class="side-nav">
+                    <a href="productor_dashboard.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        MI RESUMEN
+                    </a>
+                    <a href="productor_analiticas.html" class="nav-item active">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        EXPLORADOR DE MERCADO
+                    </a>
+                    <a href="productor_inventario.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                        INVENTARIO
+                    </a>
+                    <a href="productor_cosechas.html" class="nav-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        COSECHAS
+                    </a>
+                    <a href="productor_ajustes.html" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        AJUSTES
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Central Content -->
+            <main class="center-content">
+                <img src="../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg" onerror="this.src='../IMG/Fondo de Pagina.png'">
+                
+                <div class="analytics-content">
+                    <div class="dashboard-header">
+                        <h1>Analíticas del Ecosistema</h1>
+                    </div>
+
+                    <!-- KPIs (Alertas y Oportunidades) -->
+                    <div class="kpi-row">
+                        <div class="kpi-card warning">
+                            <div class="kpi-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                            <div class="kpi-content">
+                                <span class="kpi-label">Riesgo de Saturación</span>
+                                <span class="kpi-value">Maíz Blanco</span>
+                                <span class="kpi-subtext">50% más plantado que el año pasado</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card opportunity">
+                            <div class="kpi-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            </div>
+                            <div class="kpi-content">
+                                <span class="kpi-label">Oportunidad de Mercado</span>
+                                <span class="kpi-value">Tomate Cherry</span>
+                                <span class="kpi-subtext">Baja oferta, alta demanda local</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <div class="kpi-content">
+                                <span class="kpi-label">Agricultores Activos</span>
+                                <span class="kpi-value">142</span>
+                                <span class="kpi-subtext">+12 incorporados esta temporada</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficas (Charts Grid) -->
+                    <div class="analytics-grid">
+                        
+                        <!-- Barras: Volúmen por Producto y Temporada -->
+                        <div class="chart-card full-width">
+                            <div class="chart-title">
+                                <span>Volumen de Plantación (Hectáreas) por Producto y Temporada</span>
+                                <select style="background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border-color); padding: 5px; border-radius: 5px; outline: none;">
+                                    <option>Año Actual (2026)</option>
+                                    <option>Año Pasado (2025)</option>
+                                </select>
+                            </div>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="chartTemporada"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Pastel: Valor de Semilla -->
+                        <div class="chart-card">
+                            <div class="chart-title">
+                                <span>Inversión por Valor de Semilla</span>
+                            </div>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="chartValor"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Barras horizontales: Productores -->
+                        <div class="chart-card">
+                            <div class="chart-title">
+                                <span>Top Usuarios por Extensión Plantada</span>
+                            </div>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="chartAgricultores"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Datos Cruzados -->
+                    <div class="table-container">
+                        <h3 class="table-title">Desglose de Cultivos en el Ecosistema</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto (Semilla)</th>
+                                    <th>Categoría</th>
+                                    <th>Temporada Mayoritaria</th>
+                                    <th>Hectáreas en Red</th>
+                                    <th>Valor Prom. Semilla</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Maíz Blanco</td>
+                                    <td>Granos</td>
+                                    <td>Primavera/Verano</td>
+                                    <td>1,250 ha</td>
+                                    <td>$5,200 MXN / Lote</td>
+                                </tr>
+                                <tr>
+                                    <td>Tomate Saladette</td>
+                                    <td>Hortalizas</td>
+                                    <td>Verano</td>
+                                    <td>450 ha</td>
+                                    <td>$850 MXN / Lote</td>
+                                </tr>
+                                <tr>
+                                    <td>Aguacate Hass</td>
+                                    <td>Frutales</td>
+                                    <td>Perenne</td>
+                                    <td>800 ha</td>
+                                    <td>$1,500 MXN / Lote</td>
+                                </tr>
+                                <tr>
+                                    <td>Frijol Pinto</td>
+                                    <td>Leguminosas</td>
+                                    <td>Otoño/Invierno</td>
+                                    <td>300 ha</td>
+                                    <td>$3,100 MXN / Lote</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+    <!-- Script de Chart.js -->
+    <script src="../js/analiticas.js"></script>
+    <script src="../js/chatbot.js"></script>
+</body>
+</html>
