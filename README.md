@@ -1,56 +1,44 @@
-graph TD
-    %% Estilos de los nodos
-    classDef front fill:#3b82f6,stroke:#1e40af,stroke-width:2px,color:#fff;
-    classDef back fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff;
-    classDef db fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
+## Fórmulas Matemáticas y Financieras Aplicadas
 
-    %% Nodos Frontend
-    Inicio([index.html - Portal Principal]) ::: front
-    Portal(Selección de Perfil) ::: front
+A continuación se detallan las fórmulas y modelos matemáticos identificados y aplicados en el análisis y funcionamiento de la plataforma "Raíces Digitales":
 
-    %% Frontend: Productor
-    FormProdLogin[Formulario Login Productor] ::: front
-    FormProdReg[Formulario Registro Productor] ::: front
-    DashProd([vistas/agricola/productor_dashboard.html]) ::: front
+### 1. Contabilidad Financiera
+El módulo del panel de producción requiere modelos de contabilidad para el cálculo de ganancias, control de inventario y estimaciones de valor neto para el catálogo de la tienda.
+*   **Cálculo de Utilidad Neta (Net Profit):**
+    `Utilidad Neta = Ingresos Totales - Costos Totales (Insumos + Operativos)`
+    *Aplicación:* Utilizado para mostrar el "Valor Estimado Neto" de las cosechas activas y determinar márgenes en la interfaz del cliente.
+*   **Retorno de Inversión (ROI):**
+    `ROI = [(Ganancia de Cosecha - Costo de Siembra) / Costo de Siembra] * 100`
+    *Aplicación:* Permite a los productores evaluar la rentabilidad de sembrar ciertas semillas (ej. Cempasúchil en temporada) frente a otras hortalizas.
+*   **Punto de Equilibrio Financiero (PEF):**
+    `PEF = Costos Fijos / (Precio de Venta por Unidad - Costo Variable por Unidad)`
+    *Aplicación:* Permite al productor conocer exactamente cuántas unidades (kilos, macetas, manojos) necesita vender en la tienda para cubrir su inversión inicial y costos operativos, evitando pérdidas.
+*   **Cálculo de Merma Económica Proyectada (ME):**
+    `ME = (Volumen Esperado * Probabilidad de Pérdida) * Precio de Venta Estimado`
+    *Aplicación:* Integra la estadística probabilística con el análisis financiero para cuantificar monetariamente el riesgo por condiciones climáticas adversas o plagas en el panel de analíticas.
 
-    %% Frontend: Cliente
-    FormCliLogin[Formulario Login Cliente] ::: front
-    FormCliReg[Formulario Registro Cliente] ::: front
-    TiendaCli([vistas/Usuario/cliente_tienda.html]) ::: front
+### 2. Probabilidad y Estadística
+Mediante la integración de la API del clima (Open-Meteo) y el análisis de datos agrícolas, se pueden utilizar modelos probabilísticos para la predicción y mitigación de riesgos.
+*   **Teorema de Bayes (Probabilidad Condicional):**
+    `P(Éxito | Clima) = [P(Clima | Éxito) * P(Éxito)] / P(Clima)`
+    *Aplicación:* El *RaícesBot IA* y el sistema de analíticas evalúan la probabilidad de que una cosecha sea exitosa dado un pronóstico de lluvias atípicas, heladas o sequías.
+*   **Distribución Probabilística de Pérdidas:**
+    Uso de distribuciones para estimar la merma o pérdida de producto basada en el historial probabilístico del productor, afectando el stock proyectado.
 
-    %% Nodos Backend (Implementación requerida)
-    API_LoginProd{{BACK: POST /api/login/productor}} ::: back
-    API_RegProd{{BACK: POST /api/register/productor}} ::: back
-    API_LoginCli{{BACK: POST /api/login/cliente}} ::: back
-    API_RegCli{{BACK: POST /api/register/cliente}} ::: back
+### 3. Cálculo Integral
+Se emplea el cálculo continuo para modelos predictivos de acumulación, ya sea de recursos hídricos, estimación de crecimiento de plantas o análisis de ingresos continuos.
+*   **Acumulación de Precipitación y Riego:**
+    $P_{total} = \int_{0}^{T} p(t) dt$
+    *Donde:* $p(t)$ es la función de tasa de precipitación (mm/día) a lo largo del tiempo $t$.
+    *Aplicación:* Calcula el volumen total de agua recibida por una hectárea en Xochimilco durante el ciclo de siembra.
+*   **Volumen de Biomasa (Crecimiento del Cultivo):**
+    $V = \int_{t_0}^{t_f} r(t) dt$
+    *Donde:* $r(t)$ representa la tasa instantánea de crecimiento diario dependiente de nutrientes y el clima.
+    *Aplicación:* Ayuda a estimar las fechas ideales de cosecha en el sistema, prediciendo el punto de volumen óptimo antes del declive de calidad del producto fresco.
 
-    %% Nodos Database (Implementación requerida)
-    DB_Productores[(DBA: Tabla 'Productores')] ::: db
-    DB_Clientes[(DBA: Tabla 'Clientes')] ::: db
-
-    %% Flujo Principal
-    Inicio --> Portal
-    Portal -- "Soy Productor" --> FormProdLogin
-    Portal -- "Soy Productor (Nuevo)" --> FormProdReg
-    Portal -- "Soy Cliente" --> FormCliLogin
-    Portal -- "Soy Cliente (Nuevo)" --> FormCliReg
-
-    %% Flujo Productor con BACK y DBA
-    FormProdLogin -- "Submit Credenciales" --> API_LoginProd
-    FormProdReg -- "Submit Datos" --> API_RegProd
-    
-    API_LoginProd -. "Valida credenciales" .-> DB_Productores
-    API_RegProd -. "Inserta nuevo Productor" .-> DB_Productores
-
-    API_LoginProd -- "Éxito (Sesión/JWT)" --> DashProd
-    API_RegProd -- "Éxito (Redirección)" --> DashProd
-
-    %% Flujo Cliente con BACK y DBA
-    FormCliLogin -- "Submit Credenciales" --> API_LoginCli
-    FormCliReg -- "Submit Datos" --> API_RegCli
-
-    API_LoginCli -. "Valida credenciales" .-> DB_Clientes
-    API_RegCli -. "Inserta nuevo Cliente" .-> DB_Clientes
-
-    API_LoginCli -- "Éxito (Sesión/JWT)" --> TiendaCli
-    API_RegCli -- "Éxito (Redirección)" --> TiendaCli
+### 4. Modelos Agronómicos Especializados
+Para adaptar la plataforma a las particularidades agrícolas de la región (como la zona chinampera de Xochimilco), se incorporan modelos de estrés ambiental.
+*   **Índice de Estrés Salino (IES):**
+    `IES = (CE - CE_umbral) * b`
+    *Donde:* $CE$ es la Conductividad Eléctrica del suelo/agua observada, $CE_{umbral}$ es la tolerancia máxima del cultivo sin pérdida, y $b$ es la pendiente de reducción de rendimiento.
+    *Aplicación:* Dado que la calidad del agua varía, esta fórmula ayuda a pronosticar la reducción porcentual del volumen de cosechas sensibles y enviar alertas tempranas al Productor.

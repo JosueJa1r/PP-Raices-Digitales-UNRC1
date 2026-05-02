@@ -26,3 +26,72 @@ function showForm(role) {
                 document.getElementById('title-' + role).innerText = 'Ingreso ' + (role === 'productor' ? 'Productor' : 'Cliente');
             }
         }
+
+// --- Integración con Backend (Productor) ---
+
+// Manejo del Registro de Productor
+const formRegisterProductor = document.getElementById('register-productor');
+if (formRegisterProductor) {
+    formRegisterProductor.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formRegisterProductor);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('http://localhost:5000/api/register/productor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('¡Registro exitoso! Bienvenido ' + data.nombre);
+                // Guardar en localStorage si es necesario
+                localStorage.setItem('productor_id', result.id_productor);
+                localStorage.setItem('productor_nombre', data.nombre);
+                window.location.href = 'vistas/agricola/productor_dashboard.html';
+            } else {
+                alert('Error en registro: ' + (result.error || 'Intente de nuevo.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión con el servidor. Verifica que Flask esté corriendo.');
+        }
+    });
+}
+
+// Manejo del Login de Productor
+const formLoginProductor = document.getElementById('login-productor');
+if (formLoginProductor) {
+    formLoginProductor.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formLoginProductor);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('http://localhost:5000/api/login/productor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Guardar datos de sesión básica
+                localStorage.setItem('productor_id', result.user.Id_Productor);
+                localStorage.setItem('productor_nombre', result.user.Nombre);
+                window.location.href = 'vistas/agricola/productor_dashboard.html';
+            } else {
+                alert('Error en login: ' + (result.error || 'Credenciales inválidas.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión con el servidor. Verifica que Flask esté corriendo.');
+        }
+    });
+}

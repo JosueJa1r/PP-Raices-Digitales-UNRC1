@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <!-- Contenedor Formularios Productor -->
+    <!-- Contenedor Formularios Productor --->
     <div class="form-container" id="form-productor-container" style="display: none;">
         <button class="back-btn" onclick="goBack()">&#8592; Volver</button>
         <div class="auth-box">
@@ -46,10 +46,10 @@
             
             <!-- Login -->
             <!-- TODO BACK/DBA: Endpoint POST /login/productor. Validar credenciales en la base de datos (tabla Productores). Iniciar sesión. -->
-            <form onsubmit="event.preventDefault(); window.location.href='vistas/agricola/productor_dashboard.html';" id="login-productor">
+            <form id="login-productor">
                 <div class="input-group">
-                    <label>Nombre de Productor o Finca</label>
-                    <input type="text" name="nombre" required>
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="correo" required>
                 </div>
                 <div class="input-group">
                     <label>Contraseña</label>
@@ -61,10 +61,29 @@
 
             <!-- Registro -->
             <!-- TODO BACK/DBA: Endpoint POST /register/productor. Insertar datos en la base de datos (tabla Productores). Hash de contraseña. -->
-            <form onsubmit="event.preventDefault(); window.location.href='vistas/agricola/productor_dashboard.html';" id="register-productor" style="display:none;">
+            <form id="register-productor" style="display:none;">
                 <div class="input-group">
                     <label>Nombre de Productor o Finca</label>
                     <input type="text" name="nombre" required>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" name="correo" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Terreno (m²)</label>
+                        <input type="number" name="terreno" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Tipo de Filtros (Cultivo)</label>
+                    <select name="filtros" required style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: var(--text-main); font-size: 0.95rem; outline: none;">
+                        <option value="" disabled selected>Seleccione opción...</option>
+                        <option value="Hortalizas">Hortalizas</option>
+                        <option value="Flores">Flores y Ornato</option>
+                        <option value="Granos">Granos y Semillas</option>
+                    </select>
                 </div>
                 <div class="input-group">
                     <label>Crear Contraseña</label>

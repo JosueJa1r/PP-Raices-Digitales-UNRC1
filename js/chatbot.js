@@ -1,4 +1,9 @@
 const initChatbot = () => {
+    const isClient = window.location.pathname.includes('cliente');
+    const greetingMessage = isClient 
+        ? '¡Hola! Soy tu asistente inteligente. ¿En qué te puedo ayudar hoy? Prueba preguntarme sobre "productos", "envíos" o "recomendaciones".'
+        : '¡Hola, productor! Soy tu asistente inteligente. ¿En qué te puedo ayudar hoy? Prueba preguntarme sobre "clima", "ventas" o "consejo".';
+
     // Inyectar el HTML del Chatbot en el body
     const botHTML = `
         <div id="chatbot-container" class="chatbot-container chatbot-hidden">
@@ -13,7 +18,7 @@ const initChatbot = () => {
                 <button id="chatbot-close-btn" aria-label="Cerrar chat">&times;</button>
             </div>
             <div id="chatbot-messages" class="chatbot-messages">
-                <div class="bot-message">¡Hola, productor! Soy tu asistente inteligente. ¿En qué te puedo ayudar hoy? Prueba preguntarme sobre "clima", "ventas" o "consejo".</div>
+                <div class="bot-message">${greetingMessage}</div>
             </div>
             <div class="chatbot-input-area">
                 <input type="text" id="chatbot-input" placeholder="Escribe tu consulta...">
@@ -47,25 +52,6 @@ const initChatbot = () => {
         fab.style.transform = 'scale(1)';
     });
 
-    const getBotResponse = (text) => {
-        const lowerText = text.toLowerCase();
-        
-        if (lowerText.includes('clima') || lowerText.includes('lluvia')) {
-            return "Según los pronósticos de Open-Meteo para Xochimilco, estamos esperando clima variable. Te recomiendo revisar el widget superior en tu Dashboard. ¿Necesitas un consejo de riego?";
-        }
-        if (lowerText.includes('consejo') || lowerText.includes('riego')) {
-            return "Mi análisis sugiere que para las chinampas, el riego matutino reduce el riesgo de hongos por la humedad de los canales. Aplícalo especialmente en tus macetas de Cempasúchil.";
-        }
-        if (lowerText.includes('ventas') || lowerText.includes('sobreproduccion') || lowerText.includes('competencia')) {
-            return "Noté en el Explorador de Mercado que 4 productores de tu zona están cultivando Rábano. Podría haber sobreproducción el próximo mes. Te sugiero enfocar tus esfuerzos en plantas medicinales.";
-        }
-        if (lowerText.includes('gracias')) {
-            return "¡De nada! Estoy aquí 24/7 para ayudarte a mejorar el rendimiento de tu rancho.";
-        }
-        
-        return "Es una consulta interesante. Actualmente estoy analizando los datos históricos de tu chinampa. Por ahora, te sugiero mantener tu inventario de insumos actualizado para evitar desabastos.";
-    };
-
     const addMessage = (text, isUser) => {
         const msgDiv = document.createElement('div');
         msgDiv.className = isUser ? 'user-message' : 'bot-message';
@@ -74,7 +60,7 @@ const initChatbot = () => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
-    const handleSend = () => {
+    const handleSend = async () => {
         const text = inputField.value.trim();
         if (!text) return;
         
@@ -87,11 +73,35 @@ const initChatbot = () => {
         messagesDiv.appendChild(typingDiv);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-        setTimeout(() => {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
             messagesDiv.removeChild(typingDiv);
-            const respuesta = getBotResponse(text);
-            addMessage(respuesta, false);
-        }, 1500);
+            
+            if (response.ok) {
+                // Formatear la respuesta (reemplazar saltos de línea y formatear Markdown básico si es necesario)
+                let replyText = data.reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'bot-message';
+                msgDiv.innerHTML = replyText;
+                messagesDiv.appendChild(msgDiv);
+            } else {
+                addMessage(data.error || 'Hubo un error al procesar tu solicitud.', false);
+            }
+        } catch (error) {
+            console.error('Error al contactar al backend:', error);
+            messagesDiv.removeChild(typingDiv);
+            addMessage('Error de conexión. Asegúrate de que el servidor local (app.py) esté corriendo en el puerto 5000.', false);
+        }
+        
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
     sendBtn.addEventListener('click', handleSend);

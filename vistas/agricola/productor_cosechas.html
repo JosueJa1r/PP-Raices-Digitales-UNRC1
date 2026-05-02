@@ -12,6 +12,9 @@
         <!-- Top Navbar -->
         <header class="topbar">
             <div class="topbar-left">
+                <button class="mobile-menu-btn" onclick="toggleSidebar('left-sidebar')" aria-label="Menú principal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
                 <a href="../../index.html" class="logo" style="text-decoration: none; color: inherit;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
                     <span>Raíces Digitales | Productor Chinampero</span>
@@ -19,12 +22,20 @@
             </div>
             <div class="topbar-right">
                 <button class="icon-btn notification" aria-label="Notificaciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
-                <div class="user-profile">
+                <div class="user-profile" onclick="toggleDropdown('user-dropdown')">
                     <div class="avatar">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     </div>
-                    <span>Rancho El Sol</span>
+                    <span id="productor-name-display">Rancho El Sol</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    
+                    <!-- Menú Desplegable -->
+                    <div id="user-dropdown" class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Mi Perfil</a>
+                        <a href="#" class="dropdown-item">Ajustes del Terreno</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item logout" onclick="cerrarSesionProductor()">Cerrar Sesión</a>
+                    </div>
                 </div>
             </div>
         </header>
@@ -41,7 +52,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
                         EXPLORADOR DE MERCADO
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="productor_inventario.html" class="nav-item">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
                         INVENTARIO
                     </a>
@@ -81,7 +92,9 @@
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
+                                <!-- TODO BACK/DBA: Endpoint GET /productor/inventario_venta. Realizar query a la base de datos (tabla Productos_Venta) para este productor. Generar filas dinámicamente. -->
                                 <tbody>
+                                    <!-- INICIO BUCLE: for producto in productos -->
                                     <tr>
                                         <td>Macetas de Cempasúchil</td>
                                         <td>Flores de Ornato</td>
@@ -89,27 +102,7 @@
                                         <td>$45.00 MXN</td>
                                         <td><span style="color: var(--accent-green);">Publicado</span></td>
                                     </tr>
-                                    <tr>
-                                        <td>Lechuga Orejona (Manojo)</td>
-                                        <td>Verduras Frescas</td>
-                                        <td>45 Manojos</td>
-                                        <td>$25.00 MXN</td>
-                                        <td><span style="color: var(--accent-green);">Publicado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Rábanos Frescos</td>
-                                        <td>Verduras Frescas</td>
-                                        <td>0 Manojos</td>
-                                        <td>$15.00 MXN</td>
-                                        <td><span style="color: #ef4444;">Agotado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Nochebuenas (Tamaño Mediano)</td>
-                                        <td>Flores de Ornato</td>
-                                        <td>300 Unidades</td>
-                                        <td>$80.00 MXN</td>
-                                        <td><span style="color: var(--text-muted);">En Bodega</span></td>
-                                    </tr>
+                                    <!-- FIN BUCLE -->
                                 </tbody>
                             </table>
                         </div>
@@ -118,6 +111,7 @@
                         <aside class="settings-card" style="padding: 1.5rem;">
                             <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Publicar Nueva Cosecha</h3>
                             
+                            <!-- TODO BACK/DBA: Endpoint POST /productor/inventario_venta. Insertar nuevo producto en la base de datos y actualizar el estado a Publicado o En Bodega. -->
                             <form onsubmit="event.preventDefault(); mostrarAlerta('success', 'Cosecha Publicada', 'Tu producto ahora está visible para los clientes de Xochimilco.', 5000);" class="details-form">
                                 
                                 <div class="input-group">
@@ -170,5 +164,23 @@
     
     <script src="../../js/alertas.js"></script>
     <script src="../../js/chatbot.js"></script>
+    <script src="../../js/responsive.js"></script>
+    
+    <!-- Script para cargar datos del usuario desde localStorage -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nombreProductor = localStorage.getItem('productor_nombre');
+            if (nombreProductor) {
+                document.getElementById('productor-name-display').innerText = nombreProductor;
+            }
+        });
+
+        // Lógica de cerrar sesión
+        function cerrarSesionProductor() {
+            localStorage.removeItem('productor_nombre');
+            localStorage.removeItem('productor_id');
+            window.location.href = '../../index.html';
+        }
+    </script>
 </body>
 </html>
