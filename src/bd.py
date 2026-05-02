@@ -40,18 +40,18 @@ def registrar_productor(nombre, correo, password, hectareas, filtros):
         cursor = conexion.cursor(dictionary=True)
         
         # Verificar si el correo ya existe
-        cursor.execute("SELECT * FROM Productor WHERE Correo = %s", (correo,))
+        cursor.execute("SELECT * FROM productor WHERE Correo = %s", (correo,))
         if cursor.fetchone():
             return {"success": False, "error": "El correo ya está registrado", "status": 400}
             
         # Insertar Productor
-        sql_productor = "INSERT INTO Productor (Nombre, Correo, Contrasena) VALUES (%s, %s, %s)"
+        sql_productor = "INSERT INTO productor (Nombre, Correo, Contrasena) VALUES (%s, %s, %s)"
         cursor.execute(sql_productor, (nombre, correo, password))
         id_productor = cursor.lastrowid
         
         # Insertar Terreno
         if hectareas and filtros:
-            sql_terreno = "INSERT INTO Terreno (Id_Productor, Hectareas, Nombre_Filtro) VALUES (%s, %s, %s)"
+            sql_terreno = "INSERT INTO terreno (Id_Productor, Hectareas, Nombre_Filtro) VALUES (%s, %s, %s)"
             cursor.execute(sql_terreno, (id_productor, float(hectareas), filtros))
             
         conexion.commit()
@@ -74,7 +74,7 @@ def login_productor(correo, password):
         cursor = conexion.cursor(dictionary=True)
         
         # Validar credenciales
-        sql = "SELECT * FROM Productor WHERE Correo = %s AND Contrasena = %s"
+        sql = "SELECT * FROM productor WHERE Correo = %s AND Contrasena = %s"
         cursor.execute(sql, (correo, password))
         productor = cursor.fetchone()
         
