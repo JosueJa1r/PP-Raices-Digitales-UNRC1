@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from bd import registrar_productor, login_productor
-from ia.bot import generar_respuesta_bot
+from src.bd import registrar_productor, login_productor
+from src.ia.bot import generar_respuesta_bot
 
 # Cargar variables de entorno (API Keys)
 load_dotenv()
