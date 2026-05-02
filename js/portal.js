@@ -58,7 +58,7 @@ if (formRegisterProductor) {
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión con el servidor. Verifica que Flask esté corriendo.');
+            alert('Error al conectar con el servidor: ' + error.message + '. Asegúrate de haber configurado las variables de entorno en Vercel.');
         }
     });
 }
@@ -91,7 +91,7 @@ if (formLoginProductor) {
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error de conexión con el servidor. Verifica que Flask esté corriendo.');
+            alert('Error al conectar con el servidor: ' + error.message + '. Asegúrate de haber configurado las variables de entorno en Vercel.');
         }
     });
 }
