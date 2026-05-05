@@ -19,7 +19,7 @@ El módulo del panel de producción requiere modelos de contabilidad para el cá
 
 ### 2. Probabilidad y Estadística
 Mediante la integración de la API del clima (Open-Meteo) y el análisis de datos agrícolas, se pueden utilizar modelos probabilísticos para la predicción y mitigación de riesgos.
-*   **Teorema de Bayes (Probabilidad Condicional):**
+*   **Teorema de Bayes (Probabilidad Condicional):** VERIFICAR 
     `P(Éxito | Clima) = [P(Clima | Éxito) * P(Éxito)] / P(Clima)`
     *Aplicación:* El *RaícesBot IA* y el sistema de analíticas evalúan la probabilidad de que una cosecha sea exitosa dado un pronóstico de lluvias atípicas, heladas o sequías.
 *   **Distribución Probabilística de Pérdidas:**

@@ -83,31 +83,31 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                             </div>
                             <div class="kpi-content">
-                                <span class="kpi-label">Stock Crítico</span>
-                                <span class="kpi-value">Macetas (No. 4)</span>
-                                <span class="kpi-subtext">Quedan menos de 50 unidades</span>
+                                <span class="kpi-label">STOCK CRÍTICO</span>
+                                <span class="kpi-value" id="inv-kpi-critico">Cargando...</span>
+                                <span class="kpi-subtext" id="inv-kpi-critico-desc">Verificando niveles...</span>
                             </div>
                         </div>
 
-                        <div class="kpi-card" style="border-left-color: #f59e0b;">
+                        <div class="kpi-card opportunity" style="border-left: 4px solid #f59e0b;">
                             <div class="kpi-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             </div>
                             <div class="kpi-content">
-                                <span class="kpi-label">Atención Próxima</span>
-                                <span class="kpi-value">Semilla de Rábano</span>
-                                <span class="kpi-subtext">Caduca en 15 días</span>
+                                <span class="kpi-label">ATENCIÓN PRÓXIMA</span>
+                                <span class="kpi-value" id="inv-kpi-atencion">Cargando...</span>
+                                <span class="kpi-subtext">Revisar existencias</span>
                             </div>
                         </div>
 
-                        <div class="kpi-card opportunity">
+                        <div class="kpi-card">
                             <div class="kpi-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                             </div>
                             <div class="kpi-content">
-                                <span class="kpi-label">Estado General</span>
-                                <span class="kpi-value">Óptimo</span>
-                                <span class="kpi-subtext">Suficiente lodo de chinampa para la temporada</span>
+                                <span class="kpi-label">ESTADO GENERAL</span>
+                                <span class="kpi-value" id="inv-kpi-estado">Óptimo</span>
+                                <span class="kpi-subtext">Insumos suficientes</span>
                             </div>
                         </div>
                     </div>
@@ -124,7 +124,7 @@
                                         <th>Insumo / Semilla</th>
                                         <th>Categoría</th>
                                         <th>Cantidad</th>
-                                        <th>Caducidad / Estado</th>
+                                        <th>Merma Económica (Pérdida)</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
@@ -207,6 +207,7 @@
     <script src="../../js/alertas.js"></script>
     <script src="../../js/chatbot.js"></script>
     <script src="../../js/responsive.js"></script>
+    <script src="../../js/dashboard.js"></script>
     
     <!-- Script para cargar datos del usuario desde localStorage -->
     <script>

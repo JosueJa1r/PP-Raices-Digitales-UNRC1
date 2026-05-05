@@ -60,6 +60,10 @@ const initChatbot = () => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://127.0.0.1:5000'
+        : '';
+
     const handleSend = async () => {
         const text = inputField.value.trim();
         if (!text) return;
@@ -74,7 +78,7 @@ const initChatbot = () => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
         try {
-            const response = await fetch('/api/chat', {
+            const response = await fetch(`${API_BASE_URL}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

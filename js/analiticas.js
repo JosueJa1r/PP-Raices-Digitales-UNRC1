@@ -1,105 +1,100 @@
-// Configuración de colores globales para Chart.js
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.font.family = "'Inter', sans-serif";
-        const greenAccent = '#10b981';
-        const cyanAccent = '#06b6d4';
-        const blueAccent = '#3b82f6';
-        const redAccent = '#ef4444';
-        const gridColor = 'rgba(255, 255, 255, 0.05)';
+// Configuración de la URL de la API según el entorno
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5000'
+    : '';
 
-        // 1. Gráfica de Barras: Temporada vs Producto
-        const ctxTemporada = document.getElementById('chartTemporada').getContext('2d');
-        new Chart(ctxTemporada, {
-            type: 'bar',
-            data: {
-                labels: ['Maíz Blanco', 'Tomate Saladette', 'Aguacate Hass', 'Frijol Pinto', 'Chile Jalapeño'],
-                datasets: [
-                    {
-                        label: 'Primavera',
-                        data: [600, 150, 400, 50, 100],
-                        backgroundColor: cyanAccent,
-                    },
-                    {
-                        label: 'Verano',
-                        data: [500, 250, 400, 100, 150],
-                        backgroundColor: greenAccent,
-                    },
-                    {
-                        label: 'Otoño/Invierno',
-                        data: [150, 50, 0, 150, 50],
-                        backgroundColor: blueAccent,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: gridColor }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                },
-                plugins: {
-                    legend: { position: 'top' }
-                }
-            }
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    cargarAnaliticas();
+});
 
-        // 2. Gráfica de Pastel: Valor de Semilla
-        const ctxValor = document.getElementById('chartValor').getContext('2d');
-        new Chart(ctxValor, {
-            type: 'doughnut',
-            data: {
-                labels: ['Semilla Premium (Alta Inversión)', 'Semilla Estándar', 'Semilla Criolla/Baja Inversión'],
-                datasets: [{
-                    data: [35, 50, 15],
-                    backgroundColor: [cyanAccent, greenAccent, blueAccent],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
-        });
+async function cargarAnaliticas() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/analiticas/global`);
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Inyectar KPIs
+            document.getElementById('kpi-riesgo').innerText = data.kpis.riesgo;
+            document.getElementById('kpi-oportunidad').innerText = data.kpis.oportunidad;
+            document.getElementById('kpi-total').innerText = data.kpis.total_agricultores;
+            
+            renderizarGraficas(data);
+        }
+    } catch (error) {
+        console.error('Error al cargar analíticas:', error);
+    }
+}
 
-        // 3. Gráfica Barras Horizontales: Usuarios Agricultores
-        const ctxAgricultores = document.getElementById('chartAgricultores').getContext('2d');
-        new Chart(ctxAgricultores, {
-            type: 'bar',
-            data: {
-                labels: ['Productor A (Norte)', 'Finca Las Marías', 'Productor C', 'AgroTech', 'Rancho El Sol'],
-                datasets: [{
-                    label: 'Hectáreas Plantadas',
-                    data: [450, 320, 210, 180, 45.5],
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                    borderColor: blueAccent,
-                    borderWidth: 1
-                }]
+function renderizarGraficas(data) {
+    // 1. Gráfica de Volumen (Barras)
+    const ctxVolumen = document.getElementById('chartTemporada').getContext('2d');
+    new Chart(ctxVolumen, {
+        type: 'bar',
+        data: {
+            labels: data.volumen.map(v => v.Nombre_Semilla),
+            datasets: [{
+                label: 'Hectáreas Totales',
+                data: data.volumen.map(v => v.Total_Hectareas),
+                backgroundColor: 'rgba(74, 222, 128, 0.5)',
+                borderColor: '#4ade80',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#fff' } },
+                x: { ticks: { color: '#fff' } }
             },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        grid: { color: gridColor }
-                    },
-                    y: {
-                        grid: { display: false }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
+            plugins: { legend: { labels: { color: '#fff' } } }
+        }
+    });
+
+    // 2. Gráfica de Inversión (Doughnut)
+    const ctxInversion = document.getElementById('chartValor').getContext('2d');
+    new Chart(ctxInversion, {
+        type: 'doughnut',
+        data: {
+            labels: data.inversion.map(i => i.Nombre_Semilla),
+            datasets: [{
+                data: data.inversion.map(i => i.Total_Valor),
+                backgroundColor: [
+                    '#4ade80', '#22c55e', '#16a34a', '#15803d', '#14532d'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { color: '#fff' } } }
+        }
+    });
+
+    // 3. Gráfica de Top Productores (Horizontal Bar)
+    const ctxTop = document.getElementById('chartAgricultores').getContext('2d');
+    new Chart(ctxTop, {
+        type: 'bar',
+        data: {
+            labels: data.top_productores.map(p => p.Nombre),
+            datasets: [{
+                label: 'Hectáreas',
+                data: data.top_productores.map(p => p.Extension),
+                backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                borderColor: '#f59e0b',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#fff' } },
+                y: { ticks: { color: '#fff' } }
+            },
+            plugins: { legend: { labels: { color: '#fff' } } }
+        }
+    });
+}

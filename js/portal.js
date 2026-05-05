@@ -1,3 +1,8 @@
+// Configuración de la URL de la API según el entorno
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:5000'
+    : '';
+
 function showForm(role) {
             document.getElementById('selection-cards').style.display = 'none';
             document.querySelector('.portal-header p').innerText = role === 'productor' ? 'Acceso Seguro para Productores' : 'Acceso para Clientes';
@@ -39,7 +44,7 @@ if (formRegisterProductor) {
         const data = Object.fromEntries(formData.entries());
         
         try {
-            const response = await fetch('/api/register/productor', {
+            const response = await fetch(`${API_BASE_URL}/api/register/productor`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -73,7 +78,7 @@ if (formLoginProductor) {
         const data = Object.fromEntries(formData.entries());
         
         try {
-            const response = await fetch('/api/login/productor', {
+            const response = await fetch(`${API_BASE_URL}/api/login/productor`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
