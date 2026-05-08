@@ -72,24 +72,44 @@
                         <input type="email" name="correo" required>
                     </div>
                     <div class="input-group">
+                        <label>Teléfono</label>
+                        <input type="tel" name="telefono" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
                         <label>Terreno (m²)</label>
                         <input type="number" name="terreno" required>
                     </div>
+                    <div class="input-group">
+                        <label>Crear Contraseña</label>
+                        <input type="password" name="password" required>
+                    </div>
                 </div>
+                
                 <div class="input-group">
                     <label>Tipo de Filtros (Cultivo)</label>
-                    <select name="filtros" required style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: var(--text-main); font-size: 0.95rem; outline: none;">
+                    <select name="filtros" required>
                         <option value="" disabled selected>Seleccione opción...</option>
                         <option value="Hortalizas">Hortalizas</option>
                         <option value="Flores">Flores y Ornato</option>
                         <option value="Granos">Granos y Semillas</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label>Crear Contraseña</label>
-                    <input type="password" name="password" required>
+
+                <!-- Sección de Semillas Dinámicas -->
+                <div class="seeds-section">
+                    <label class="seeds-title">Semillas que posee actualmente</label>
+                    <div id="seeds-list">
+                        <!-- Filas de semillas se agregarán aquí -->
+                    </div>
+                    <button type="button" class="btn-add-seed" onclick="addSeedRow()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Agregar otra semilla
+                    </button>
                 </div>
-                <button type="submit" class="submit-btn" style="width:100%; margin-top:15px; background:var(--accent-green); color:#000;">Registrarme como Productor</button>
+
+                <button type="submit" class="submit-btn" style="width:100%; margin-top:20px; background:var(--accent-green); color:#000;">Registrarme como Productor</button>
                 <p class="toggle-text" onclick="toggleAuth('productor', 'login')">¿Ya tienes cuenta? Ingresa aquí</p>
             </form>
         </div>

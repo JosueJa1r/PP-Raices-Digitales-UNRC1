@@ -4,7 +4,9 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
     : '';
 
 document.addEventListener('DOMContentLoaded', () => {
-    cargarDatosDashboard();
+    if (window.location.pathname.includes('productor_dashboard.html')) {
+        cargarDatosDashboard();
+    }
 });
 
 async function cargarDatosDashboard() {
@@ -122,7 +124,7 @@ if (window.location.pathname.includes('productor_cosechas.html')) {
 async function cargarInventarioVenta() {
     const idProductor = localStorage.getItem('productor_id');
     try {
-        const response = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}`);
+        const response = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}&tipo=cosecha`);
         if (response.ok) {
             const productos = await response.json();
             renderizarInventarioVenta(productos);
@@ -139,10 +141,19 @@ function renderizarInventarioVenta(productos) {
     tbody.innerHTML = '';
     productos.forEach(p => {
         const tr = document.createElement('tr');
+        
+        let loteDisplay = p.Lote;
+        let unidadDisplay = 'Unidades';
+        const match = p.Lote.match(/\(([^)]+)\)$/);
+        if (match) {
+            unidadDisplay = match[1];
+            loteDisplay = p.Lote.replace(/\s*\([^)]+\)$/, '');
+        }
+
         tr.innerHTML = `
-            <td>${p.Lote}</td>
+            <td>${loteDisplay}</td>
             <td>General</td>
-            <td>${p.Cantidad} Unidades</td>
+            <td>${p.Cantidad} ${unidadDisplay}</td>
             <td>$${p.Precio_Actual} MXN</td>
             <td><span style="color: var(--accent-green);">Publicado</span></td>
         `;
@@ -207,13 +218,13 @@ if (window.location.pathname.includes('productor_inventario.html')) {
 async function cargarInventarioInsumos() {
     const idProductor = localStorage.getItem('productor_id');
     try {
-        const response = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}`);
+        const response = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}&tipo=insumo`);
         if (response.ok) {
             const data = await response.json();
             
             // Inyectar KPIs de inventario
             document.getElementById('inv-kpi-critico').innerText = data.stats.critico;
-            document.getElementById('inv-kpi-critico-desc').innerText = `Quedan solo ${data.stats.critico_cant} unidades`;
+            document.getElementById('inv-kpi-critico-desc').innerText = `Cantidad restante: ${data.stats.critico_cant}`;
             document.getElementById('inv-kpi-atencion').innerText = data.stats.atencion;
             document.getElementById('inv-kpi-estado').innerText = data.stats.estado;
 
@@ -242,10 +253,10 @@ function renderizarTablaInsumos(insumos) {
 
         tr.innerHTML = `
             <td>${ins.Lote}</td>
-            <td>General</td>
-            <td><span style="${isLow ? 'color: #ef4444; font-weight: bold;' : ''}">${ins.Cantidad} Unidades</span></td>
-            <td style="color: #f59e0b;">$${ins.merma_proyectada.toFixed(2)}</td>
-            <td><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button></td>
+            <td>${ins.Observaciones || 'General'}</td>
+            <td><span style="${isLow ? 'color: #ef4444; font-weight: bold;' : ''}">${ins.Cantidad}</span></td>
+            <td style="color: var(--accent-green);">Registrado</td>
+            <td><button class="icon-btn" onclick="eliminarInsumo(${ins.Id_Inventario})" title="Eliminar registro"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></td>
         `;
         tbody.appendChild(tr);
     });
@@ -260,16 +271,19 @@ function configurarFormularioInsumos() {
         e.preventDefault();
         
         const idProductor = localStorage.getItem('productor_id');
-        const nombre = form.querySelector('input[type="text"]').value;
-        const cantidad = form.querySelector('input[placeholder="Ej. 10"]').value;
-        const ph = form.querySelector('input[placeholder="Ej. 6.5"]').value;
+        const parcelaSelect = document.getElementById('tierra-parcela');
+        const parcela = parcelaSelect.options[parcelaSelect.selectedIndex].text;
+        const ph = document.getElementById('tierra-ph').value;
+        const p = document.getElementById('tierra-p').value;
+        const k = document.getElementById('tierra-k').value;
+        const humedad = document.getElementById('tierra-humedad').value;
 
         const data = {
             id_productor: idProductor,
-            lote: nombre,
-            cantidad: cantidad,
-            precio: 0, // Los insumos no suelen tener precio de venta aquí
-            observaciones: `pH Óptimo: ${ph}`
+            lote: `Registro Tierra: ${parcela}`,
+            cantidad: 1, // Se registra como 1 entrada de bitácora
+            precio: 0,
+            observaciones: `pH: ${ph} | P: ${p} | K: ${k} | Humedad: ${humedad}%`
         };
 
         try {
@@ -293,3 +307,27 @@ function configurarFormularioInsumos() {
         }
     });
 }
+
+window.eliminarInsumo = async function(id) {
+    if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
+    
+    const idProductor = localStorage.getItem('productor_id');
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id}?id_productor=${idProductor}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            if (typeof mostrarAlerta === 'function') {
+                mostrarAlerta('success', 'Eliminado', 'El registro se ha eliminado correctamente.');
+            } else {
+                alert('Registro eliminado.');
+            }
+            cargarInventarioInsumos();
+        } else {
+            alert('No se pudo eliminar el registro.');
+        }
+    } catch (error) {
+        console.error('Error al eliminar:', error);
+    }
+};

@@ -1,25 +1,67 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap');
 
 :root {
-    --bg-dark: #1e2532;
-    --bg-darker: #151b24;
-    --bg-card: rgba(30, 41, 59, 0.7);
-    --bg-card-hover: rgba(40, 53, 75, 0.8);
+    --bg-dark: #F9F6EE; /* Blanco Hueso */
+    --bg-darker: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f3f5;
     
-    --text-main: #f1f5f9;
-    --text-muted: #94a3b8;
+    --text-main: #000000; /* Letras Negras */
+    --text-muted: #000000; /* Letras Negras */
+    --title-primary: #1B4332; /* Títulos Verde Selva */
+    --title-secondary: #6C584C; /* Subtítulos Café Orgánico */
     
-    --accent-cyan: #06b6d4;
-    --accent-green: #10b981;
-    --accent-blue: #3b82f6;
+    --accent-cyan: #FFB703; /* Amarillo Calendula */
+    --accent-green: #1B4332; /* Verde Selva */
+    --accent-blue: #0096C7; /* Azul Trajinera */
+    --accent-rosa: #E4007C; /* Rosa Mexicano */
     
-    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color: #000000; /* Bordes Negros */
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+/* RADIO PILLS PARA UNIDADES DE MEDIDA */
+.medida-pill span {
+    display: block;
+    text-align: center;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    background: var(--bg-card);
+}
+
+.medida-pill input:checked + span {
+    background-color: var(--accent-green);
+    color: #ffffff;
+    border-color: var(--accent-green);
+    font-weight: 600;
+}
+
+.medida-pill:hover span {
+    background-color: rgba(27, 67, 50, 0.05);
+}
+
+/* --- OVERRIDES GLOBALES SOLICITADOS --- */
+h1, h2, h3, h4, h5, h6, .panel-title, .table-title, .card-header, .stat-value {
+    color: var(--title-primary);
+}
+
+.stat-label, .kpi-label, .hero-titles h2 {
+    color: var(--title-secondary);
+}
+
+/* Hacer los contornos de contenedores negros y mas anchos */
+.stat-card, .table-container, .role-card, .auth-box, .product-card, .detail-card, .chatbot-container, .right-panel, .left-sidebar, .topbar, .widget-clima {
+    border: 2px solid #000000 !important;
 }
 
 body {
@@ -202,7 +244,7 @@ body {
 
 .nav-item:hover {
     color: var(--text-main);
-    background-color: rgba(255,255,255,0.03);
+    background-color: rgba(0,0,0,0.05);
 }
 
 .nav-item.active {
@@ -219,7 +261,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at center, #263344 0%, var(--bg-dark) 100%);
+    background: radial-gradient(circle at center, #ffffff 0%, var(--bg-dark) 100%);
     overflow: hidden;
 }
 
@@ -237,13 +279,13 @@ body {
     max-height: 85%;
     max-width: 90%;
     object-fit: contain;
-    mix-blend-mode: screen;
+    mix-blend-mode: multiply;
     animation: treePulse 4s ease-in-out infinite alternate;
 }
 
 @keyframes treePulse {
-    0% { filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.3)); transform: scale(0.98); }
-    100% { filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.6)); transform: scale(1.02); }
+    0% { filter: drop-shadow(0 0 10px rgba(27, 67, 50, 0.2)); transform: scale(0.98); }
+    100% { filter: drop-shadow(0 0 30px rgba(45, 106, 79, 0.4)); transform: scale(1.02); }
 }
 
 .hero-titles {
@@ -283,12 +325,13 @@ body {
     border-radius: 12px;
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
-    max-width: 40%;
+    max-width: 80%;
+    width: 80%;
 }
 
 /* RIGHT PANEL */
 .right-panel {
-    width: 360px;
+    width: 450px;
     flex-shrink: 0;
     background-color: var(--bg-darker);
     padding: 24px;
@@ -449,13 +492,13 @@ input[type="number"] {
 /* --- ESTILOS DEL PORTAL --- */
 
         :root {
-            --bg-color: #0f172a;
-            --panel-bg: rgba(30, 41, 59, 0.7);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --accent-green: #10b981;
-            --accent-blue: #3b82f6;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-color: #F9F6EE;
+            --panel-bg: #ffffff;
+            --border-color: #000000;
+            --accent-green: #1B4332;
+            --accent-blue: #0096C7;
+            --text-main: #000000;
+            --text-muted: #000000;
         }
 
         
@@ -698,7 +741,8 @@ input[type="number"] {
 
 .kpi-card {
     flex: 1;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    background: var(--bg-card);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.5rem;
@@ -721,7 +765,7 @@ input[type="number"] {
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.05);
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -766,10 +810,12 @@ input[type="number"] {
 /* --- ESTILOS COMPARTIDOS DEL DASHBOARD --- */
 
         /* Estilos adicionales para tablas y paneles del dashboard */
-        .dashboard-content {
+        .dashboard-content, .analytics-content {
             padding: 2rem;
-            color: #fff;
+            color: var(--text-main);
             height: 100%;
+            width: 100%;
+            max-width: 1400px;
             overflow-y: auto;
         }
 
@@ -782,7 +828,7 @@ input[type="number"] {
 
         .dashboard-header h1 {
             font-size: 2rem;
-            background: linear-gradient(to right, var(--accent-green), #fff);
+            background: linear-gradient(to right, var(--accent-green), var(--accent-rosa));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -795,11 +841,11 @@ input[type="number"] {
         }
 
         .stat-card {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 1.5rem;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
@@ -813,23 +859,25 @@ input[type="number"] {
 
         .stat-label {
             font-size: 0.9rem;
-            color: #94a3b8;
+            color: var(--text-muted);
         }
 
         .table-container {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 1rem;
             margin-bottom: 2rem;
             overflow-x: auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .table-title {
             margin-bottom: 1rem;
             font-size: 1.2rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 0.5rem;
+            color: var(--text-main);
         }
 
         table {
@@ -840,11 +888,12 @@ input[type="number"] {
         th, td {
             padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
         }
 
         th {
-            color: #94a3b8;
+            color: var(--text-muted);
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -906,19 +955,17 @@ input[type="number"] {
 }
 
 .toast {
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: var(--text-main);
+    background: #ffffff;
+    color: #000000;
     padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     gap: 15px;
     min-width: 300px;
-    max-width: 400px;
-    border-left: 5px solid transparent;
+    max-width: 450px;
+    border: 3px solid #000000;
     transform: translateX(120%);
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -974,14 +1021,85 @@ input[type="number"] {
 }
 
 /* Tipos de Alertas */
-.toast-success { border-left-color: var(--accent-green); }
+.toast-success { border-color: var(--accent-green); }
 .toast-success .toast-icon { color: var(--accent-green); }
 
-.toast-error { border-left-color: #ef4444; }
-.toast-error .toast-icon { color: #ef4444; }
+.toast-error { border-color: #E4007C; background-color: #FFF5F5; } /* Rosa Mexicano + fondo suave */
+.toast-error .toast-icon { color: #E4007C; }
 
 .toast-warning { border-left-color: #f59e0b; }
 .toast-warning .toast-icon { color: #f59e0b; }
+
+/* --- INTERRUPTOR (SWITCH) --- */
+.setting-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.setting-toggle-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.setting-toggle-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #000000;
+}
+
+.setting-toggle-desc {
+    font-size: 0.8rem;
+    color: #6C584C; /* Café Orgánico */
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+    border: 2px solid #000000;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    border: 1px solid #000000;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-green);
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
 
 .toast-info { border-left-color: var(--accent-blue); }
 .toast-info .toast-icon { color: var(--accent-blue); }

@@ -32,7 +32,7 @@ def conexion_db():
         print(f"Error al conectar a MySQL: {e}")
         return None
 
-def registrar_productor(nombre, correo, password, hectareas, filtros):
+def registrar_productor(nombre, correo, password, hectareas, filtros, telefono=None, semillas=None):
     conexion = conexion_db()
     if not conexion:
         return {"success": False, "error": "Error de conexión a la BD", "status": 500}
@@ -47,20 +47,39 @@ def registrar_productor(nombre, correo, password, hectareas, filtros):
             
         # Insertar Productor
         password_hash = generate_password_hash(password)
-        sql_productor = "INSERT INTO productor (Nombre, Correo, Contrasena) VALUES (%s, %s, %s)"
-        cursor.execute(sql_productor, (nombre, correo, password_hash))
+        sql_productor = "INSERT INTO productor (Nombre, Correo, Contrasena, Telefono) VALUES (%s, %s, %s, %s)"
+        cursor.execute(sql_productor, (nombre, correo, password_hash, telefono))
         id_productor = cursor.lastrowid
         
         # Insertar Terreno
-        if hectareas and filtros:
+        if hectareas:
+            # Convertir m2 a hectáreas (1 ha = 10,000 m2)
+            hec = float(hectareas) / 10000
             sql_terreno = "INSERT INTO terreno (Id_Productor, Hectareas, Nombre_Filtro) VALUES (%s, %s, %s)"
-            cursor.execute(sql_terreno, (id_productor, float(hectareas), filtros))
+            cursor.execute(sql_terreno, (id_productor, hec, filtros or "General"))
             
+        # Insertar Semillas en Inventario si existen
+        if semillas and isinstance(semillas, list):
+            for semilla in semillas:
+                id_semilla = semilla.get('id_semilla')
+                cantidad = semilla.get('cantidad', 0)
+                
+                # Buscar nombre de la semilla para el lote
+                cursor.execute("SELECT Nombre_Semilla FROM semilla WHERE Id_Semilla = %s", (id_semilla,))
+                res_s = cursor.fetchone()
+                nombre_semilla = res_s['Nombre_Semilla'] if res_s else f"Semilla ID {id_semilla}"
+                
+                sql_inv = """
+                    INSERT INTO inventario (Id_Productor, Lote, Cantidad, Precio_Actual, Observaciones, Estado) 
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(sql_inv, (id_productor, f"Stock Inicial: {nombre_semilla}", float(cantidad), 0.0, "Cargado al registrarse", "En Bodega"))
+
         conexion.commit()
         return {"success": True, "id_productor": id_productor, "status": 201}
     except Error as e:
         print(f"Error en bd.registrar_productor: {e}")
-        return {"success": False, "error": "Error interno de base de datos", "status": 500}
+        return {"success": False, "error": f"Error interno de base de datos: {str(e)}", "status": 500}
     finally:
         if 'cursor' in locals():
             cursor.close()
@@ -171,7 +190,26 @@ def obtener_cosechas_productor(id_productor):
         if conexion.is_connected():
             conexion.close()
 
-def obtener_semillas(id_productor=None):
+def obtener_categorias():
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM categoria")
+        categorias = cursor.fetchall()
+        return {"success": True, "categorias": categorias, "status": 200}
+    except Error as e:
+        print(f"Error en bd.obtener_categorias: {e}")
+        return {"success": False, "error": "Error de base de datos", "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def obtener_semillas(id_productor=None, id_categoria=None):
     conexion = conexion_db()
     if not conexion:
         return {"success": False, "error": "Error de conexión", "status": 500}
@@ -186,6 +224,10 @@ def obtener_semillas(id_productor=None):
                 WHERE i.Id_Productor = %s AND i.Lote LIKE '%%Semilla%%'
             """
             cursor.execute(sql, (id_productor,))
+        elif id_categoria:
+            # Semillas por categoría
+            sql = "SELECT * FROM semilla WHERE Id_Categoria = %s"
+            cursor.execute(sql, (id_categoria,))
         else:
             # Catálogo general
             sql = """
@@ -247,15 +289,22 @@ def obtener_stats_productor(id_productor):
         if conexion.is_connected():
             conexion.close()
 
-def obtener_inventario_productor(id_productor):
+def obtener_inventario_productor(id_productor, tipo=None):
     conexion = conexion_db()
     if not conexion:
         return {"success": False, "error": "Error de conexión", "status": 500}
     
     try:
         cursor = conexion.cursor(dictionary=True)
-        # Traemos el inventario
-        sql = "SELECT * FROM inventario WHERE Id_Productor = %s"
+        # Filtramos según el tipo solicitado
+        if tipo == 'cosecha':
+            sql = "SELECT * FROM inventario WHERE Id_Productor = %s AND (Observaciones NOT LIKE '%pH%' AND Lote NOT LIKE 'Registro Tierra:%')"
+        elif tipo == 'insumo':
+            # Mostrar todo el inventario de la base de datos tal como el usuario lo solicita
+            sql = "SELECT * FROM inventario WHERE Id_Productor = %s"
+        else:
+            sql = "SELECT * FROM inventario WHERE Id_Productor = %s"
+            
         cursor.execute(sql, (id_productor,))
         productos = cursor.fetchall()
         return {"success": True, "productos": productos, "status": 200}
@@ -282,6 +331,29 @@ def registrar_producto_inventario(id_productor, lote, cantidad, precio, observac
         return {"success": True, "id_inventario": id_inventario, "status": 201}
     except Error as e:
         print(f"Error en bd.registrar_producto_inventario: {e}")
+        return {"success": False, "error": "Error de base de datos", "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def eliminar_producto_inventario(id_inventario, id_productor):
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor()
+        sql = "DELETE FROM inventario WHERE Id_Inventario = %s AND Id_Productor = %s"
+        cursor.execute(sql, (id_inventario, id_productor))
+        conexion.commit()
+        if cursor.rowcount > 0:
+            return {"success": True, "status": 200}
+        else:
+            return {"success": False, "error": "Registro no encontrado o sin permisos", "status": 404}
+    except Error as e:
+        print(f"Error en bd.eliminar_producto_inventario: {e}")
         return {"success": False, "error": "Error de base de datos", "status": 500}
     finally:
         if 'cursor' in locals():
@@ -363,6 +435,124 @@ def obtener_analiticas_globales():
         }
     except Error as e:
         print(f"Error en bd.obtener_analiticas_globales: {e}")
+        return {"success": False, "error": "Error de base de datos", "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def registrar_publicacion_cosecha(id_productor, lote, cantidad, precio, vender_directamente, id_cosecha=None):
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        
+        # Estado según el flujo: SI vender -> 'Publicado', NO -> 'En Bodega'
+        estado = "Publicado" if vender_directamente else "En Bodega"
+        precio_final = float(precio) if vender_directamente else 0.0
+        
+        sql = """
+            INSERT INTO inventario 
+            (Id_Productor, Id_Cosecha, Lote, Cantidad, Precio_Actual, Observaciones, Estado) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        obs = f"Registro automático desde formulario de cosecha. Estatus: {estado}"
+        
+        cursor.execute(sql, (id_productor, id_cosecha, lote, float(cantidad), precio_final, obs, estado))
+        id_inventario = cursor.lastrowid
+        
+        conexion.commit()
+        return {"success": True, "id_inventario": id_inventario, "estado": estado, "status": 201}
+    except Error as e:
+        print(f"Error en bd.registrar_publicacion_cosecha: {e}")
+        return {"success": False, "error": str(e), "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def obtener_catalogo_publicado(busqueda=None):
+    """Obtiene todos los productos publicados en la tienda, con nombre del productor."""
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        sql = """
+            SELECT 
+                i.Id_Inventario,
+                i.Lote,
+                i.Cantidad,
+                i.Precio_Actual,
+                i.Estado,
+                p.Nombre AS Nombre_Productor,
+                p.Id_Productor
+            FROM inventario i
+            JOIN productor p ON i.Id_Productor = p.Id_Productor
+            WHERE i.Estado = 'Publicado' AND i.Cantidad > 0
+        """
+        params = []
+        if busqueda:
+            sql += " AND i.Lote LIKE %s"
+            params.append(f"%{busqueda}%")
+        
+        sql += " ORDER BY i.Id_Inventario DESC"
+        cursor.execute(sql, params)
+        productos = cursor.fetchall()
+        return {"success": True, "productos": productos, "status": 200}
+    except Error as e:
+        print(f"Error en bd.obtener_catalogo_publicado: {e}")
+        return {"success": False, "error": "Error de base de datos", "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def descontar_stock_inventario(id_inventario, cantidad_compra):
+    """Descuenta stock de un producto tras una compra. Lo marca Agotado si llega a 0."""
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        
+        # Verificar stock actual
+        cursor.execute("SELECT Cantidad, Lote FROM inventario WHERE Id_Inventario = %s AND Estado = 'Publicado'", (id_inventario,))
+        producto = cursor.fetchone()
+        
+        if not producto:
+            return {"success": False, "error": "Producto no disponible o no publicado", "status": 404}
+        
+        nuevo_stock = float(producto['Cantidad']) - float(cantidad_compra)
+        
+        if nuevo_stock < 0:
+            return {"success": False, "error": f"Stock insuficiente. Disponible: {producto['Cantidad']}", "status": 400}
+        
+        # Actualizar stock; si llega a 0 -> Agotado
+        nuevo_estado = 'Agotado' if nuevo_stock == 0 else 'Publicado'
+        cursor.execute(
+            "UPDATE inventario SET Cantidad = %s, Estado = %s WHERE Id_Inventario = %s",
+            (nuevo_stock, nuevo_estado, id_inventario)
+        )
+        conexion.commit()
+        
+        return {
+            "success": True,
+            "nuevo_stock": nuevo_stock,
+            "estado": nuevo_estado,
+            "lote": producto['Lote'],
+            "status": 200
+        }
+    except Error as e:
+        print(f"Error en bd.descontar_stock_inventario: {e}")
         return {"success": False, "error": "Error de base de datos", "status": 500}
     finally:
         if 'cursor' in locals():

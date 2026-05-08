@@ -33,21 +33,21 @@ const initClima = () => {
             const consejo = darConsejo(current.temperature_2m, current.precipitation, climaInfo.texto);
 
             climaWidget.innerHTML = `
-                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000000; padding-bottom: 10px; margin-bottom: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="font-size: 2.5rem; line-height: 1;">${climaInfo.icono}</span>
                         <div>
-                            <h3 style="margin: 0; font-size: 1.8rem; color: #fff;">${current.temperature_2m}°C</h3>
-                            <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">Xochimilco, CDMX</p>
+                            <h3 style="margin: 0; font-size: 1.8rem; color: var(--title-primary);">${current.temperature_2m}°C</h3>
+                            <p style="margin: 0; font-size: 0.9rem; color: var(--title-secondary);">Xochimilco, CDMX</p>
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <p style="margin: 0; color: var(--accent-green); font-weight: 600;">${climaInfo.texto}</p>
-                        <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Humedad: ${current.relative_humidity_2m}%</p>
+                        <p style="margin: 0; color: var(--title-primary); font-weight: 600;">${climaInfo.texto}</p>
+                        <p style="margin: 0; font-size: 0.8rem; color: var(--title-secondary);">Humedad: ${current.relative_humidity_2m}%</p>
                     </div>
                 </div>
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid var(--accent-green);">
-                    <p style="margin: 0; font-size: 0.85rem; color: #fff;"><strong>Consejo Agrícola:</strong> ${consejo}</p>
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid var(--title-primary);">
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-main);"><strong>Consejo Agrícola:</strong> ${consejo}</p>
                 </div>
             `;
         })

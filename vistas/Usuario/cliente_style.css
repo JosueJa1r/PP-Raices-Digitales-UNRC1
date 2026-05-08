@@ -1,13 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg-main: #f8fafc;
+    --bg-main: #F9F6EE; /* Blanco Hueso */
     --bg-card: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --accent-primary: #10b981;
-    --accent-hover: #059669;
-    --border-color: #e2e8f0;
+    --text-primary: #000000; /* Letras Negras */
+    --text-secondary: #000000; /* Letras Negras */
+    --title-primary: #1B4332; /* Títulos Verde Selva */
+    --title-secondary: #6C584C; /* Subtítulos Café Orgánico */
+    --accent-primary: #1B4332; /* Verde Selva */
+    --accent-hover: #2D6A4F; /* Verde Chinampa */
+    --border-color: #000000; /* Bordes Negros */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -15,18 +17,9 @@
     --radius-lg: 20px;
 }
 
-/* Dark mode toggle support (optional, starting with clean light/organic feel for the store) */
+/* Dark mode toggle support disabled to force light organic theme */
 @media (prefers-color-scheme: dark) {
-    :root {
-        --bg-main: #0f172a;
-        --bg-card: #1e293b;
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
-        --border-color: #334155;
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-    }
+    /* Mantenemos el modo claro forzado */
 }
 
 * {
@@ -34,6 +27,20 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Outfit', sans-serif;
+}
+
+/* --- OVERRIDES GLOBALES SOLICITADOS --- */
+h1, h2, h3, h4, h5, h6, .product-title, .cart-item-info h4, .profile-user-info h4 {
+    color: var(--title-primary);
+}
+
+.product-category, .product-producer, .hero-content p, .role-card p, .profile-user-info p {
+    color: var(--title-secondary);
+}
+
+/* Hacer los contornos de contenedores negros y mas anchos */
+.product-card, .filters-sidebar, .right-sidebar, .cart-sidebar, .profile-sidebar, .hero-banner, .chatbot-container {
+    border: 2px solid #000000 !important;
 }
 
 body {
@@ -129,7 +136,7 @@ body {
     position: absolute;
     top: -8px;
     right: -8px;
-    background: var(--accent-primary);
+    background: #E4007C; /* Rosa Mexicano */
     color: white;
     font-size: 0.7rem;
     font-weight: 700;

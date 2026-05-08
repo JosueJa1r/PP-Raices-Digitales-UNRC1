@@ -1,15 +1,13 @@
 :root {
-    --bg-color: #F9F6EE;
+    --bg-color: #F8F9FA;        /* Blanco Humo */
     --panel-bg: #ffffff;
-    --border-color: #000000;
-    --accent-green: #1B4332;
-    --accent-blue: #0096C7;
-    --accent-rosa: #E4007C;
-    --accent-amarillo: #FFB703;
-    --text-main: #000000;
-    --text-muted: #000000;
-    --title-primary: #1B4332;
-    --title-secondary: #6C584C;
+    --border-color: rgba(45, 106, 79, 0.2); /* Verde Chinampa suave */
+    --accent-green: #1B4332;    /* Verde Selva */
+    --accent-blue: #0096C7;     /* Azul Trajinera */
+    --accent-rosa: #E4007C;     /* Rosa Mexicano */
+    --accent-amarillo: #FFB703; /* Amarillo Caléndula */
+    --text-main: #1B4332;       /* Verde Selva */
+    --text-muted: #6C584C;      /* Café Orgánico */
 }
 
 * {
@@ -17,20 +15,6 @@
     margin: 0;
     padding: 0;
     font-family: 'Inter', sans-serif;
-}
-
-/* --- OVERRIDES GLOBALES SOLICITADOS --- */
-h1, h2, h3, h4, h5, h6, .portal-header h1, .role-card h2 {
-    color: var(--title-primary);
-}
-
-.portal-header p, .role-card p {
-    color: var(--title-secondary);
-}
-
-/* Hacer los contornos de contenedores negros y mas anchos */
-.role-card, .auth-box, .chart-card, .kpi-card {
-    border: 2px solid #000000 !important;
 }
 
 body {
@@ -105,7 +89,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, transparent, rgba(27, 67, 50, 0.05), transparent);
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.05), transparent);
     transform: translateX(-100%);
     transition: transform 0.6s;
 }
@@ -114,16 +98,17 @@ body {
     transform: translateX(100%);
 }
 
-.role-card.productor:hover {
+.role-card:hover {
     transform: translateY(-10px);
-    border-color: var(--accent-green);
     box-shadow: 0 20px 40px rgba(27, 67, 50, 0.1);
+    border-color: var(--accent-green);
+}
+.role-card.productor:hover {
+    border-color: var(--accent-green);
 }
 
 .role-card.cliente:hover {
-    transform: translateY(-10px);
     border-color: var(--accent-blue);
-    box-shadow: 0 20px 40px rgba(0, 150, 199, 0.1);
 }
 
 .icon-wrapper {
@@ -290,7 +275,7 @@ body {
 
 .input-group input:focus {
     border-color: var(--accent-rosa);
-    box-shadow: 0 0 0 2px rgba(228, 0, 124, 0.2);
+    box-shadow: 0 0 0 2px rgba(228, 0, 124, 0.1);
 }
 
 #form-cliente-container .input-group input:focus {
@@ -350,7 +335,7 @@ body {
 /* --- FORM REFINEMENTS --- */
 .input-group select, .seed-row select {
     width: 100%;
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 10px 12px;
@@ -359,7 +344,7 @@ body {
     outline: none;
     transition: all 0.3s;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236C584C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 1.1rem;
@@ -372,8 +357,8 @@ body {
 }
 
 .input-group select option {
-    background: #ffffff;
-    color: var(--text-main);
+    background: #1e293b;
+    color: white;
 }
 
 /* Seeds Section */
@@ -397,10 +382,10 @@ body {
     display: flex;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.04);
     padding: 0.8rem;
     border-radius: 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     align-items: center;
     animation: slideInRow 0.3s ease-out;
@@ -412,9 +397,8 @@ body {
 }
 
 .seed-row:hover {
-    background: #f8f9fa;
-    border-color: var(--accent-green);
-    box-shadow: 0 4px 10px rgba(27, 67, 50, 0.05);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(16, 185, 129, 0.3);
 }
 
 .seed-row select {
@@ -427,11 +411,11 @@ body {
 .seed-row input {
     flex: 1;
     width: 70px;
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 8px;
-    color: var(--text-main);
+    color: white;
     font-size: 0.85rem;
     outline: none;
     transition: all 0.3s;
@@ -439,7 +423,7 @@ body {
 
 .seed-row input:focus {
     border-color: var(--accent-green);
-    background: #ffffff;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .btn-add-seed {

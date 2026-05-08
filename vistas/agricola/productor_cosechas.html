@@ -108,30 +108,75 @@
                         </div>
 
                         <!-- Columna Derecha: Formulario de Publicación -->
-                        <aside class="settings-card" style="padding: 1.5rem;">
+                        <aside class="detail-card" style="padding: 1.5rem; margin-top: 2rem;">
                             <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Publicar Nueva Cosecha</h3>
                             
-                            <!-- TODO BACK/DBA: Endpoint POST /productor/inventario_venta. Insertar nuevo producto en la base de datos y actualizar el estado a Publicado o En Bodega. -->
-                            <form onsubmit="event.preventDefault(); mostrarAlerta('success', 'Cosecha Publicada', 'Tu producto ahora está visible para los clientes de Xochimilco.', 5000);" class="details-form">
+                            <form id="form-publicar-cosecha" onsubmit="publicarCosecha(event)" class="details-form">
                                 
                                 <div class="input-group">
-                                    <label>Tipo de Producto</label>
-                                    <select required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none;">
-                                        <option value="">Selecciona tu cosecha...</option>
-                                        <option value="flores">Flores y Ornato (Ej. Cempasúchil)</option>
-                                        <option value="verduras">Verduras y Hortalizas (Ej. Lechuga)</option>
-                                        <option value="plantas">Plantas Medicinales</option>
+                                    <label>Tipo de Producto (Categoría)</label>
+                                    <select id="tipo-producto" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="cargarSemillas(this.value)">
+                                        <option value="">Cargando categorías...</option>
                                     </select>
                                 </div>
                                 
                                 <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Nombre Específico</label>
-                                    <input type="text" placeholder="Ej. Maceta de Nochebuena" required>
+                                    <label>Semilla / Producto Específico</label>
+                                    <select id="nombre-especifico" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="actualizarPrecioSemilla(this)">
+                                        <option value="">Selecciona una categoría primero...</option>
+                                    </select>
+                                    <input type="hidden" id="nombre-semilla-texto" value="">
                                 </div>
 
                                 <div class="input-group" style="margin-top: 1rem;">
                                     <label>Cantidad Disponible</label>
-                                    <input type="number" placeholder="Ej. 100" required>
+                                    <input type="number" id="cantidad-disponible" placeholder="Ej. 100" required>
+                                </div>
+
+                                <div class="input-group" style="margin-top: 0.8rem;">
+                                    <label>Unidad de Medida</label>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Kg" checked style="display: none;">
+                                            <span>Kg</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Libras" style="display: none;">
+                                            <span>Libras</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Unidades" style="display: none;">
+                                            <span>Unidades</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Cajas" style="display: none;">
+                                            <span>Cajas</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Manojos" style="display: none;">
+                                            <span>Manojos</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Tallos" style="display: none;">
+                                            <span>Tallos</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Esquejes" style="display: none;">
+                                            <span>Esquejes</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Costales" style="display: none;">
+                                            <span>Costales</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Bultos" style="display: none;">
+                                            <span>Bultos</span>
+                                        </label>
+                                        <label class="medida-pill">
+                                            <input type="radio" name="unidad-medida" value="Gramos" style="display: none;">
+                                            <span>Gramos</span>
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <div class="setting-toggle-row" style="margin-top: 1rem; padding: 10px 0;">
@@ -140,14 +185,14 @@
                                         <span class="setting-toggle-desc">Publicar directo en la Tienda</span>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" checked onchange="document.getElementById('precio-container').style.display = this.checked ? 'block' : 'none'">
+                                        <input type="checkbox" id="vender-directamente" checked onchange="document.getElementById('precio-container').style.display = this.checked ? 'block' : 'none'">
                                         <span class="slider"></span>
                                     </label>
                                 </div>
 
                                 <div class="input-group" id="precio-container" style="margin-top: 0.5rem;">
                                     <label>Precio al Público (MXN)</label>
-                                    <input type="number" step="0.50" placeholder="$ 0.00" required>
+                                    <input type="number" id="precio-publico" step="0.50" placeholder="$ 0.00" value="0.00">
                                 </div>
 
                                 <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.5rem;">
@@ -170,10 +215,171 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const nombreProductor = localStorage.getItem('productor_nombre');
+            const idProductor = localStorage.getItem('productor_id');
+            
             if (nombreProductor) {
                 document.getElementById('productor-name-display').innerText = nombreProductor;
             }
+
+            if (idProductor) {
+                cargarInventario(idProductor);
+            }
+            
+            // Cargar categorías al iniciar
+            cargarCategorias();
         });
+
+        async function cargarCategorias() {
+            try {
+                const response = await fetch('http://localhost:5000/api/categorias');
+                const categorias = await response.json();
+                
+                const selectCategoria = document.getElementById('tipo-producto');
+                selectCategoria.innerHTML = '<option value="">Selecciona una categoría...</option>';
+                
+                if (response.ok) {
+                    categorias.forEach(cat => {
+                        selectCategoria.innerHTML += `<option value="${cat.Id_Categoria}">${cat.Nombre_Categoria}</option>`;
+                    });
+                } else {
+                    selectCategoria.innerHTML = '<option value="">Error al cargar categorías</option>';
+                }
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+            }
+        }
+
+        async function cargarSemillas(idCategoria) {
+            const selectSemilla = document.getElementById('nombre-especifico');
+            
+            if (!idCategoria) {
+                selectSemilla.innerHTML = '<option value="">Selecciona una categoría primero...</option>';
+                document.getElementById('precio-publico').value = '0.00';
+                return;
+            }
+            
+            selectSemilla.innerHTML = '<option value="">Cargando semillas...</option>';
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/semillas_por_categoria?id_categoria=${idCategoria}`);
+                const semillas = await response.json();
+                
+                selectSemilla.innerHTML = '<option value="" data-precio="0">Selecciona la semilla...</option>';
+                
+                if (response.ok) {
+                    semillas.forEach(sem => {
+                        // Guardamos el precio en data-precio para usarlo luego
+                        selectSemilla.innerHTML += `<option value="${sem.Id_Semilla}" data-precio="${sem.Valor}" data-nombre="${sem.Nombre_Semilla}">${sem.Nombre_Semilla}</option>`;
+                    });
+                } else {
+                    selectSemilla.innerHTML = '<option value="">Error al cargar semillas</option>';
+                }
+            } catch (error) {
+                console.error('Error cargando semillas:', error);
+            }
+        }
+
+        function actualizarPrecioSemilla(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            let precio = selectedOption.getAttribute('data-precio');
+            const nombre = selectedOption.getAttribute('data-nombre') || '';
+            
+            // Validar que el precio sea un número válido
+            let precioNum = parseFloat(precio);
+            if (isNaN(precioNum)) precioNum = 0.00;
+            
+            document.getElementById('precio-publico').value = precioNum.toFixed(2);
+            document.getElementById('nombre-semilla-texto').value = nombre;
+        }
+
+        async function publicarCosecha(event) {
+            event.preventDefault();
+            
+            const idProductor = localStorage.getItem('productor_id');
+            if (!idProductor) {
+                mostrarAlerta('error', 'Sesión no válida', 'Por favor, inicia sesión nuevamente.');
+                return;
+            }
+
+            const loteText = document.getElementById('nombre-semilla-texto').value;
+            const unidad = document.querySelector('input[name="unidad-medida"]:checked').value;
+            
+            if (!loteText) {
+                mostrarAlerta('warning', 'Faltan datos', 'Por favor selecciona una semilla de la lista.');
+                return;
+            }
+
+            // Anexar la unidad de medida al nombre del lote para que sea visible en el inventario
+            const loteConMedida = `${loteText} (${unidad})`;
+
+            const data = {
+                id_productor: idProductor,
+                lote: loteConMedida,
+                cantidad: document.getElementById('cantidad-disponible').value,
+                vender_directamente: document.getElementById('vender-directamente').checked,
+                precio: document.getElementById('precio-publico').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/productor/publicar_cosecha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', result.message, 5000);
+                    document.getElementById('form-publicar-cosecha').reset();
+                    cargarInventario(idProductor); // Recargar la tabla
+                } else {
+                    mostrarAlerta('error', 'Error', result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de Conexión', 'No se pudo contactar con el servidor.');
+            }
+        }
+
+        async function cargarInventario(idProductor) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/productor/inventario?id_productor=${idProductor}&tipo=cosecha`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    const tbody = document.querySelector('table tbody');
+                    tbody.innerHTML = ''; // Limpiar tabla
+
+                    result.items.forEach(prod => {
+                        const tr = document.createElement('tr');
+                        // Mapeamos los datos según el estado
+                        const colorEstado = prod.Estado === 'Publicado' ? 'var(--accent-green)' : '#f39c12';
+                        
+                        // Extraer la unidad de medida si existe en el lote "Nombre (Unidad)"
+                        let loteDisplay = prod.Lote;
+                        let unidadDisplay = 'Unidades';
+                        
+                        const match = prod.Lote.match(/\(([^)]+)\)$/);
+                        if (match) {
+                            unidadDisplay = match[1];
+                            loteDisplay = prod.Lote.replace(/\s*\([^)]+\)$/, '');
+                        }
+
+                        tr.innerHTML = `
+                            <td>${loteDisplay}</td>
+                            <td>General</td>
+                            <td>${prod.Cantidad} ${unidadDisplay}</td>
+                            <td>$${prod.Precio_Actual} MXN</td>
+                            <td><span style="color: ${colorEstado};">${prod.Estado}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar inventario:', error);
+            }
+        }
 
         // Lógica de cerrar sesión
         function cerrarSesionProductor() {

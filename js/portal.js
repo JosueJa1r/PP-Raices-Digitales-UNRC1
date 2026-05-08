@@ -3,6 +3,70 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
     ? 'http://127.0.0.1:5000'
     : '';
 
+let globalCategories = [];
+
+async function loadCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/categorias`);
+        globalCategories = await response.json();
+    } catch (error) {
+        console.error('Error al cargar categorías:', error);
+    }
+}
+
+// Cargar categorías al inicio
+loadCategories();
+
+function addSeedRow() {
+    const list = document.getElementById('seeds-list');
+    const rowId = Date.now();
+    const row = document.createElement('div');
+    row.className = 'seed-row';
+    row.id = `row-${rowId}`;
+    
+    let categoryOptions = '<option value="" disabled selected>Categoría...</option>';
+    globalCategories.forEach(cat => {
+        categoryOptions += `<option value="${cat.Id_Categoria}">${cat.Nombre_Categoria}</option>`;
+    });
+
+    row.innerHTML = `
+        <select class="seed-category" onchange="updateSeedsList(${rowId}, this.value)" required>
+            ${categoryOptions}
+        </select>
+        <select class="seed-select" name="seed_id" required>
+            <option value="" disabled selected>Semilla...</option>
+        </select>
+        <input type="number" class="seed-qty" placeholder="Cant." required>
+        <button type="button" class="btn-remove-seed" onclick="removeSeedRow(${rowId})" title="Eliminar semilla">
+            &times;
+        </button>
+    `;
+    list.appendChild(row);
+}
+
+function removeSeedRow(id) {
+    document.getElementById(`row-${id}`).remove();
+}
+
+async function updateSeedsList(rowId, categoryId) {
+    const row = document.getElementById(`row-${rowId}`);
+    const seedSelect = row.querySelector('.seed-select');
+    seedSelect.innerHTML = '<option value="" disabled selected>Cargando...</option>';
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/semillas_por_categoria?id_categoria=${categoryId}`);
+        const seeds = await response.json();
+        
+        seedSelect.innerHTML = '<option value="" disabled selected>Seleccione semilla...</option>';
+        seeds.forEach(s => {
+            seedSelect.innerHTML += `<option value="${s.Id_Semilla}">${s.Nombre_Semilla}</option>`;
+        });
+    } catch (error) {
+        console.error('Error al cargar semillas:', error);
+        seedSelect.innerHTML = '<option value="" disabled selected>Error</option>';
+    }
+}
+
 function showForm(role) {
             document.getElementById('selection-cards').style.display = 'none';
             document.querySelector('.portal-header p').innerText = role === 'productor' ? 'Acceso Seguro para Productores' : 'Acceso para Clientes';
@@ -42,6 +106,18 @@ if (formRegisterProductor) {
         
         const formData = new FormData(formRegisterProductor);
         const data = Object.fromEntries(formData.entries());
+        
+        // Recolectar semillas dinámicas
+        const seeds = [];
+        const seedRows = document.querySelectorAll('.seed-row');
+        seedRows.forEach(row => {
+            const id_semilla = row.querySelector('.seed-select').value;
+            const cantidad = row.querySelector('.seed-qty').value;
+            if (id_semilla && cantidad) {
+                seeds.push({ id_semilla, cantidad });
+            }
+        });
+        data.semillas = seeds;
         
         try {
             const response = await fetch(`${API_BASE_URL}/api/register/productor`, {

@@ -73,7 +73,7 @@
                 
                 <div class="analytics-content" style="padding-top: 1rem;">
                     <div class="dashboard-header">
-                        <h1>Inventario de Insumos (Materia Prima)</h1>
+                        <h1>Bitácora de Suelos y Tierras</h1>
                     </div>
 
                     <!-- Alertas de Escasez (KPIs) -->
@@ -83,9 +83,9 @@
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                             </div>
                             <div class="kpi-content">
-                                <span class="kpi-label">STOCK CRÍTICO</span>
+                                <span class="kpi-label">ÚLTIMO REGISTRO</span>
                                 <span class="kpi-value" id="inv-kpi-critico">Cargando...</span>
-                                <span class="kpi-subtext" id="inv-kpi-critico-desc">Verificando niveles...</span>
+                                <span class="kpi-subtext" id="inv-kpi-critico-desc">Verificando métricas...</span>
                             </div>
                         </div>
 
@@ -96,7 +96,7 @@
                             <div class="kpi-content">
                                 <span class="kpi-label">ATENCIÓN PRÓXIMA</span>
                                 <span class="kpi-value" id="inv-kpi-atencion">Cargando...</span>
-                                <span class="kpi-subtext">Revisar existencias</span>
+                                <span class="kpi-subtext">Revisar métricas</span>
                             </div>
                         </div>
 
@@ -107,7 +107,7 @@
                             <div class="kpi-content">
                                 <span class="kpi-label">ESTADO GENERAL</span>
                                 <span class="kpi-value" id="inv-kpi-estado">Óptimo</span>
-                                <span class="kpi-subtext">Insumos suficientes</span>
+                                <span class="kpi-subtext">Condiciones estables</span>
                             </div>
                         </div>
                     </div>
@@ -117,14 +117,14 @@
                         
                         <!-- Columna Izquierda: Tabla de Insumos -->
                         <div class="table-container" style="margin-top: 0;">
-                            <h3 class="table-title">Mis Insumos Disponibles</h3>
+                            <h3 class="table-title">Registros Históricos</h3>
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Insumo / Semilla</th>
-                                        <th>Categoría</th>
-                                        <th>Cantidad</th>
-                                        <th>Merma Económica (Pérdida)</th>
+                                        <th>Parcela / Área</th>
+                                        <th>Métricas (pH, P, K, Humedad)</th>
+                                        <th>Registros</th>
+                                        <th>Estado</th>
                                         <th>Acción</th>
                                     </tr>
                                 </thead>
@@ -163,37 +163,42 @@
 
                         <!-- Columna Derecha: Formulario de Registro -->
                         <aside class="settings-card" style="padding: 1.5rem;">
-                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Registrar Nuevo Insumo</h3>
+                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Registro Semanal de la Tierra</h3>
                             
-                            <form onsubmit="event.preventDefault(); mostrarAlerta('success', 'Insumo Registrado', 'El insumo se ha guardado exitosamente en tu inventario.', 5000);" class="details-form">
+                            <form class="details-form">
                                 
                                 <div class="input-group">
-                                    <label>Categoría</label>
-                                    <select required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none;">
+                                    <label>Área o Parcela</label>
+                                    <select id="tierra-parcela" required style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; border-radius: 6px; outline: none;">
                                         <option value="">Selecciona...</option>
-                                        <option value="semilla">Semillas crudas</option>
-                                        <option value="tierra">Tierra y Abonos</option>
-                                        <option value="herramienta">Macetas y Herramientas</option>
+                                        <option value="Chinampa Principal">Chinampa Principal</option>
+                                        <option value="Semillero">Semillero</option>
+                                        <option value="Terreno Secundario">Terreno Secundario</option>
                                     </select>
                                 </div>
                                 
                                 <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Nombre del Insumo</label>
-                                    <input type="text" placeholder="Ej. Bulto de Composta" required>
+                                    <label>Nivel de pH (Acidez/Alcalinidad)</label>
+                                    <input type="number" id="tierra-ph" step="0.1" placeholder="Ej. 6.5" required>
                                 </div>
 
                                 <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Cantidad Inicial</label>
-                                    <input type="number" placeholder="Ej. 10" required>
+                                    <label>Fósforo (P) - mg/kg</label>
+                                    <input type="number" id="tierra-p" step="0.1" placeholder="Ej. 15.0" required>
                                 </div>
 
                                 <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Nivel de pH óptimo (Tierra/Semilla)</label>
-                                    <input type="number" step="0.1" placeholder="Ej. 6.5">
+                                    <label>Potasio (K) - mg/kg</label>
+                                    <input type="number" id="tierra-k" step="0.1" placeholder="Ej. 120.0" required>
+                                </div>
+
+                                <div class="input-group" style="margin-top: 1rem;">
+                                    <label>Humedad del Suelo (%)</label>
+                                    <input type="number" id="tierra-humedad" step="1" placeholder="Ej. 60" required>
                                 </div>
 
                                 <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.5rem;">
-                                    Guardar en Inventario
+                                    Guardar Registro
                                 </button>
                             </form>
                         </aside>
