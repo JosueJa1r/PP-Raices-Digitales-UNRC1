@@ -38,6 +38,13 @@ async function cargarDatosDashboard() {
             const semillas = await responseSemillas.json();
             renderizarSemillas(semillas);
         }
+
+        // 4. Cargar Monitoreos Estudiantiles
+        const responseMonitoreos = await fetch(`${API_BASE_URL}/api/productor/monitoreos?id_productor=${idProductor}`);
+        if (responseMonitoreos.ok) {
+            const monitoreos = await responseMonitoreos.json();
+            renderizarMonitoreosEstudiantes(monitoreos);
+        }
         
     } catch (error) {
         console.error('Error al cargar datos del dashboard:', error);
@@ -106,6 +113,34 @@ function renderizarSemillas(semillas) {
     });
 }
 
+function renderizarMonitoreosEstudiantes(monitoreos) {
+    const table = document.getElementById('table-monitoreo-estudiantes');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (monitoreos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No hay reportes de estudiantes registrados para tu chinampa.</td></tr>';
+        return;
+    }
+
+    monitoreos.forEach(mon => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${mon.Fecha}</td>
+            <td><strong>${mon.Nombre_Estudiante}</strong></td>
+            <td><span style="background: rgba(255,159,67,0.15); color: #ff9f43; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${mon.PH}</span></td>
+            <td>${mon.Salinidad}</td>
+            <td>${mon.Humedad}%</td>
+            <td>${mon.Temperatura}°C</td>
+            <td title="${mon.Observaciones}" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${mon.Observaciones}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
 function formatearFecha(fechaStr) {
     if (!fechaStr) return 'N/A';
     const date = new Date(fechaStr);
@@ -141,25 +176,58 @@ function renderizarInventarioVenta(productos) {
     tbody.innerHTML = '';
     productos.forEach(p => {
         const tr = document.createElement('tr');
-        
-        let loteDisplay = p.Lote;
-        let unidadDisplay = 'Unidades';
-        const match = p.Lote.match(/\(([^)]+)\)$/);
-        if (match) {
-            unidadDisplay = match[1];
-            loteDisplay = p.Lote.replace(/\s*\([^)]+\)$/, '');
-        }
-
+        const unidadDisplay = p.Unidad_Medida || 'Kg';
+        const estadoReal = p.Estado || (p.Observaciones && p.Observaciones.includes('Agotado') ? 'Agotado' : 'Publicado');
+        const color = estadoReal === 'Publicado' ? 'var(--accent-green)' : (estadoReal === 'Agotado' ? '#ef4444' : '#f59e0b');
         tr.innerHTML = `
-            <td>${loteDisplay}</td>
+            <td>${p.Lote}</td>
             <td>General</td>
             <td>${p.Cantidad} ${unidadDisplay}</td>
             <td>$${p.Precio_Actual} MXN</td>
-            <td><span style="color: var(--accent-green);">Publicado</span></td>
+            <td><span style="color: ${color};">${estadoReal}</span></td>
+            <td>
+                <button class="icon-btn" onclick="toggleEstadoProducto(${p.Id_Inventario}, '${estadoReal}')" title="Cambiar Estado">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
 }
+
+window.toggleEstadoProducto = async function(id_inventario, estadoActual) {
+    let nuevoEstado = '';
+    if (estadoActual === 'Publicado') {
+        nuevoEstado = 'En Bodega';
+    } else if (estadoActual === 'En Bodega') {
+        nuevoEstado = 'En Oferta';
+    } else {
+        nuevoEstado = 'Publicado';
+    }
+
+    if (!confirm(`¿Cambiar el estado del producto a "${nuevoEstado}"?`)) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}/estado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: nuevoEstado })
+        });
+        
+        if (response.ok) {
+            if (typeof mostrarAlerta === 'function') {
+                mostrarAlerta('success', 'Estado Actualizado', `El producto ahora está: ${nuevoEstado}`);
+            } else {
+                alert(`Producto marcado como ${nuevoEstado}`);
+            }
+            cargarInventarioVenta(); // Recargar la tabla
+        } else {
+            alert('No se pudo actualizar el estado.');
+        }
+    } catch (error) {
+        console.error('Error al cambiar estado:', error);
+    }
+};
 
 function configurarFormularioInventario() {
     const form = document.querySelector('.details-form');
@@ -276,6 +344,7 @@ function configurarFormularioInsumos() {
         const ph = document.getElementById('tierra-ph').value;
         const p = document.getElementById('tierra-p').value;
         const k = document.getElementById('tierra-k').value;
+        const ce = document.getElementById('tierra-ce').value;
         const humedad = document.getElementById('tierra-humedad').value;
 
         const data = {
@@ -283,10 +352,26 @@ function configurarFormularioInsumos() {
             lote: `Registro Tierra: ${parcela}`,
             cantidad: 1, // Se registra como 1 entrada de bitácora
             precio: 0,
-            observaciones: `pH: ${ph} | P: ${p} | K: ${k} | Humedad: ${humedad}%`
+            observaciones: `pH: ${ph} | CE: ${ce} dS/m | P: ${p} | K: ${k} | Hum: ${humedad}%`
         };
 
         try {
+            // Calcular IES
+            let ies = 0;
+            try {
+                const iesRes = await fetch(`${API_BASE_URL}/api/calculos/estres`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ce_obs: parseFloat(ce), ce_umbral: 1.7, factor: 0.12 })
+                });
+                if (iesRes.ok) {
+                    const iesData = await iesRes.json();
+                    ies = iesData.resultado;
+                }
+            } catch (error) {
+                console.warn('No se pudo calcular el IES', error);
+            }
+
             const response = await fetch(`${API_BASE_URL}/api/productor/inventario`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -296,6 +381,11 @@ function configurarFormularioInsumos() {
             if (response.ok) {
                 if (typeof mostrarAlerta === 'function') {
                     mostrarAlerta('success', 'Insumo Guardado', 'El insumo se ha registrado correctamente.');
+                    if (ies > 50) {
+                        setTimeout(() => {
+                            mostrarAlerta('warning', '¡Peligro Crítico de Estrés Salino!', `El IES alcanzó ${ies.toFixed(1)}%. Se requiere un lavado de suelo urgente. Riesgo grave para la producción.`, 10000);
+                        }, 1000);
+                    }
                 }
                 form.reset();
                 cargarInventarioInsumos();

@@ -44,8 +44,8 @@
                     
                     <!-- Menú Desplegable -->
                     <div id="user-dropdown" class="dropdown-menu">
-                        <a href="#" class="dropdown-item">Mi Perfil</a>
-                        <a href="#" class="dropdown-item">Ajustes del Terreno</a>
+                        <a href="productor_ajustes.html" class="dropdown-item">Mi Perfil</a>
+                        <a href="productor_ajustes.html#perfil-hectareas" class="dropdown-item">Ajustes del Terreno</a>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item logout" onclick="cerrarSesionProductor()">Cerrar Sesión</a>
                     </div>
@@ -65,13 +65,9 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
                         EXPLORADOR DE MERCADO
                     </a>
-                    <a href="productor_inventario.html" class="nav-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                        INVENTARIO
-                    </a>
                     <a href="productor_cosechas.html" class="nav-item">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                        COSECHAS
+                        INVENTARIO DE COSECHAS
                     </a>
                     <a href="productor_ajustes.html" class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -131,7 +127,7 @@
                         <!-- Barras: Volúmen por Producto y Temporada -->
                         <div class="chart-card full-width">
                             <div class="chart-title">
-                                <span>Volumen de Plantación (Hectáreas) por Producto y Temporada</span>
+                                <span>Semillas Más Plantadas (Hectáreas)</span>
                                 <select style="background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border-color); padding: 5px; border-radius: 5px; outline: none;">
                                     <option>Año Actual (2026)</option>
                                     <option>Año Pasado (2025)</option>
@@ -145,7 +141,7 @@
                         <!-- Pastel: Valor de Semilla -->
                         <div class="chart-card">
                             <div class="chart-title">
-                                <span>Inversión por Valor de Semilla</span>
+                                <span>Valor Ganado por Cultivo (Ingresos Proyectados)</span>
                             </div>
                             <div class="chart-container" style="height: 250px;">
                                 <canvas id="chartValor"></canvas>
@@ -155,7 +151,7 @@
                         <!-- Barras horizontales: Productores -->
                         <div class="chart-card">
                             <div class="chart-title">
-                                <span>Top Usuarios por Extensión Plantada</span>
+                                <span>Top Productores: Extensión (m²) y Ganancia ($)</span>
                             </div>
                             <div class="chart-container" style="height: 250px;">
                                 <canvas id="chartAgricultores"></canvas>
@@ -171,7 +167,6 @@
                                 <tr>
                                     <th>Producto (Semilla)</th>
                                     <th>Categoría</th>
-                                    <th>Temporada Mayoritaria</th>
                                     <th>Hectáreas en Red</th>
                                     <th>Valor Prom. Semilla</th>
                                 </tr>
@@ -180,14 +175,12 @@
                                 <tr>
                                     <td>Maíz Blanco</td>
                                     <td>Granos</td>
-                                    <td>Primavera/Verano</td>
                                     <td>1,250 ha</td>
                                     <td>$5,200 MXN / Lote</td>
                                 </tr>
                                 <tr>
                                     <td>Tomate Saladette</td>
                                     <td>Hortalizas</td>
-                                    <td>Verano</td>
                                     <td>450 ha</td>
                                     <td>$850 MXN / Lote</td>
                                 </tr>

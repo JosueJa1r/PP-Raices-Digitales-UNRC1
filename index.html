@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raíces Digitales | Portal de Acceso</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/index.css?v=2">
 </head>
 <body>
 
@@ -35,6 +35,16 @@
             <h2>Soy Cliente</h2>
             <p>Explora y adquiere los mejores productos agrícolas directamente desde nuestros productores.</p>
             <span class="btn btn-cliente">Ingresar / Registrarse</span>
+        </div>
+
+        <!-- Tarjeta Estudiante -->
+        <div class="role-card estudiante" onclick="showForm('estudiante')">
+            <div class="icon-wrapper" style="background-color: #ff9f43; color: #fff;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+            </div>
+            <h2>Soy Estudiante</h2>
+            <p>Registra monitoreos semanales de pH, salinidad y otras variables de las chinampas de Xochimilco.</p>
+            <span class="btn btn-estudiante" style="background-color: #ff9f43; color: #000; font-weight: 600;">Ingresar / Registrarse</span>
         </div>
     </div>
 
@@ -88,24 +98,26 @@
                 </div>
                 
                 <div class="input-group">
-                    <label>Tipo de Filtros (Cultivo)</label>
+                    <label>Filtros para Regularizar el Agua</label>
                     <select name="filtros" required>
                         <option value="" disabled selected>Seleccione opción...</option>
-                        <option value="Hortalizas">Hortalizas</option>
-                        <option value="Flores">Flores y Ornato</option>
-                        <option value="Granos">Granos y Semillas</option>
+                        <option value="Ahuejote">Ahuejote</option>
+                        <option value="Ahuehuete">Ahuehuete</option>
+                        <option value="Sauce llorón">Sauce llorón</option>
+                        <option value="Fresnos">Fresnos</option>
+                        <option value="Ninguno">Ninguno / Sin regulador biológico</option>
                     </select>
                 </div>
 
-                <!-- Sección de Semillas Dinámicas -->
+                <!-- Sección de Cosechas Dinámicas para Venta -->
                 <div class="seeds-section">
-                    <label class="seeds-title">Semillas que posee actualmente</label>
+                    <label class="seeds-title">Cosecha para vender directamente</label>
                     <div id="seeds-list">
-                        <!-- Filas de semillas se agregarán aquí -->
+                        <!-- Filas de cosechas se agregarán aquí -->
                     </div>
                     <button type="button" class="btn-add-seed" onclick="addSeedRow()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Agregar otra semilla
+                        Agregar otra cosecha
                     </button>
                 </div>
 
@@ -166,6 +178,47 @@
             </form>
         </div>
     </div>
-    <script src="js/portal.js"></script>
+
+    <!-- Contenedor Formularios Estudiante --->
+    <div class="form-container" id="form-estudiante-container" style="display: none;">
+        <button class="back-btn" onclick="goBack()">&#8592; Volver</button>
+        <div class="auth-box">
+            <h2 id="title-estudiante">Ingreso Estudiante</h2>
+            
+            <!-- Login -->
+            <form id="login-estudiante">
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="correo" required>
+                </div>
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn" style="width:100%; margin-top:15px; background:#ff9f43; color:#000; font-weight: 600;">Ingresar al Panel</button>
+                <p class="toggle-text" onclick="toggleAuth('estudiante', 'register')">¿No estás registrado? Crea tu cuenta</p>
+            </form>
+
+            <!-- Registro -->
+            <form id="register-estudiante" style="display:none;">
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" name="nombre" required>
+                </div>
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" name="correo" required>
+                </div>
+                <div class="input-group">
+                    <label>Crear Contraseña</label>
+                    <input type="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="submit-btn" style="width:100%; margin-top:20px; background:#ff9f43; color:#000; font-weight: 600;">Registrarme como Estudiante</button>
+                <p class="toggle-text" onclick="toggleAuth('estudiante', 'login')">¿Ya tienes cuenta? Ingresa aquí</p>
+            </form>
+        </div>
+    </div>
+    <script src="js/portal.js?v=2"></script>
 </body>
 </html>

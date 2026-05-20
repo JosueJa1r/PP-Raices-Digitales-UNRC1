@@ -36,8 +36,16 @@ function addSeedRow() {
         <select class="seed-select" name="seed_id" required>
             <option value="" disabled selected>Semilla...</option>
         </select>
-        <input type="number" class="seed-qty" placeholder="Cant." required>
-        <button type="button" class="btn-remove-seed" onclick="removeSeedRow(${rowId})" title="Eliminar semilla">
+        <input type="number" class="seed-qty" placeholder="Cant." required style="width: 80px;">
+        <select class="seed-unit" required style="width: 100px;">
+            <option value="" disabled selected>Unidad...</option>
+            <option value="Kg">Kg</option>
+            <option value="Manojo">Manojo</option>
+            <option value="Pieza">Pieza</option>
+            <option value="Gramo">Gramo</option>
+            <option value="Caja">Caja</option>
+        </select>
+        <button type="button" class="btn-remove-seed" onclick="removeSeedRow(${rowId})" title="Eliminar cosecha">
             &times;
         </button>
     `;
@@ -68,33 +76,42 @@ async function updateSeedsList(rowId, categoryId) {
 }
 
 function showForm(role) {
-            document.getElementById('selection-cards').style.display = 'none';
-            document.querySelector('.portal-header p').innerText = role === 'productor' ? 'Acceso Seguro para Productores' : 'Acceso para Clientes';
-            document.getElementById('form-' + role + '-container').style.display = 'block';
-        }
-        
-        function goBack() {
-            document.getElementById('form-productor-container').style.display = 'none';
-            document.getElementById('form-cliente-container').style.display = 'none';
-            document.getElementById('selection-cards').style.display = 'flex';
-            document.querySelector('.portal-header p').innerText = 'Selecciona tu perfil para continuar';
-            
-            // Reset to login forms
-            toggleAuth('productor', 'login');
-            toggleAuth('cliente', 'login');
-        }
-        
-        function toggleAuth(role, action) {
-            if (action === 'register') {
-                document.getElementById('login-' + role).style.display = 'none';
-                document.getElementById('register-' + role).style.display = 'block';
-                document.getElementById('title-' + role).innerText = 'Registro ' + (role === 'productor' ? 'Productor' : 'Cliente');
-            } else {
-                document.getElementById('register-' + role).style.display = 'none';
-                document.getElementById('login-' + role).style.display = 'block';
-                document.getElementById('title-' + role).innerText = 'Ingreso ' + (role === 'productor' ? 'Productor' : 'Cliente');
-            }
-        }
+    document.getElementById('selection-cards').style.display = 'none';
+    let label = 'Acceso para Clientes';
+    if (role === 'productor') {
+        label = 'Acceso Seguro para Productores';
+    } else if (role === 'estudiante') {
+        label = 'Acceso para Estudiantes de Apoyo';
+    }
+    document.querySelector('.portal-header p').innerText = label;
+    document.getElementById('form-' + role + '-container').style.display = 'block';
+}
+
+function goBack() {
+    document.getElementById('form-productor-container').style.display = 'none';
+    document.getElementById('form-cliente-container').style.display = 'none';
+    document.getElementById('form-estudiante-container').style.display = 'none';
+    document.getElementById('selection-cards').style.display = 'flex';
+    document.querySelector('.portal-header p').innerText = 'Selecciona tu perfil para continuar';
+    
+    // Reset to login forms
+    toggleAuth('productor', 'login');
+    toggleAuth('cliente', 'login');
+    toggleAuth('estudiante', 'login');
+}
+
+function toggleAuth(role, action) {
+    let labelRole = role === 'productor' ? 'Productor' : (role === 'cliente' ? 'Cliente' : 'Estudiante');
+    if (action === 'register') {
+        document.getElementById('login-' + role).style.display = 'none';
+        document.getElementById('register-' + role).style.display = 'block';
+        document.getElementById('title-' + role).innerText = 'Registro ' + labelRole;
+    } else {
+        document.getElementById('register-' + role).style.display = 'none';
+        document.getElementById('login-' + role).style.display = 'block';
+        document.getElementById('title-' + role).innerText = 'Ingreso ' + labelRole;
+    }
+}
 
 // --- Integración con Backend (Productor) ---
 
@@ -113,8 +130,9 @@ if (formRegisterProductor) {
         seedRows.forEach(row => {
             const id_semilla = row.querySelector('.seed-select').value;
             const cantidad = row.querySelector('.seed-qty').value;
+            const unidad = row.querySelector('.seed-unit').value;
             if (id_semilla && cantidad) {
-                seeds.push({ id_semilla, cantidad });
+                seeds.push({ id_semilla, cantidad, unidad });
             }
         });
         data.semillas = seeds;
@@ -173,6 +191,73 @@ if (formLoginProductor) {
         } catch (error) {
             console.error('Error:', error);
             alert('Error al conectar con el servidor: ' + error.message + '. Asegúrate de haber configurado las variables de entorno en Vercel.');
+        }
+    });
+}
+
+// --- Integración con Backend (Estudiante) ---
+
+// Manejo del Registro de Estudiante
+const formRegisterEstudiante = document.getElementById('register-estudiante');
+if (formRegisterEstudiante) {
+    formRegisterEstudiante.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formRegisterEstudiante);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/register/estudiante`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('¡Registro exitoso! Bienvenido ' + data.nombre);
+                localStorage.setItem('estudiante_id', result.id_estudiante);
+                localStorage.setItem('estudiante_nombre', data.nombre);
+                window.location.href = 'vistas/Usuario/estudiante_dashboard.html';
+            } else {
+                alert('Error en registro: ' + (result.error || 'Intente de nuevo.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con el servidor: ' + error.message);
+        }
+    });
+}
+
+// Manejo del Login de Estudiante
+const formLoginEstudiante = document.getElementById('login-estudiante');
+if (formLoginEstudiante) {
+    formLoginEstudiante.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formLoginEstudiante);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/login/estudiante`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                localStorage.setItem('estudiante_id', result.user.Id_Estudiante);
+                localStorage.setItem('estudiante_nombre', result.user.Nombre);
+                window.location.href = 'vistas/Usuario/estudiante_dashboard.html';
+            } else {
+                alert('Error en login: ' + (result.error || 'Credenciales inválidas.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con el servidor: ' + error.message);
         }
     });
 }

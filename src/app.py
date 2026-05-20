@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario
+from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor
 from src.ia.bot import generar_respuesta_bot
 from src.contabiliad import calcular_roi, calcular_punto_equilibrio, calcular_utilidad_neta
 from src.agronomia import indice_estres_salino
@@ -22,8 +22,9 @@ def chat_bot_route():
     try:
         data = request.get_json()
         user_message = data.get('message', '')
+        id_productor = data.get('id_productor')
         
-        reply = generar_respuesta_bot(user_message)
+        reply = generar_respuesta_bot(user_message, id_productor)
         return jsonify({"reply": reply})
         
     except Exception as e:
@@ -251,10 +252,11 @@ def post_inventario_productor_route():
         id_productor = data.get('id_productor')
         lote = data.get('lote')
         cantidad = data.get('cantidad')
+        unidad = data.get('unidad_medida', 'Kg')
         precio = data.get('precio')
         observaciones = data.get('observaciones', '')
         
-        result = registrar_producto_inventario(id_productor, lote, cantidad, precio, observaciones)
+        result = registrar_producto_inventario(id_productor, lote, cantidad, precio, observaciones, unidad)
         if result['success']:
             return jsonify({"message": "Producto registrado en inventario", "id": result['id_inventario']}), result['status']
         else:
@@ -263,16 +265,35 @@ def post_inventario_productor_route():
         print("Error en ruta registrar inventario:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
+@app.route('/api/productor/inventario/<int:id_inventario>/estado', methods=['PUT'])
+def put_estado_inventario_route(id_inventario):
+    try:
+        from src.bd import actualizar_estado_inventario
+        data = request.get_json()
+        nuevo_estado = data.get('estado')
+        if not nuevo_estado:
+            return jsonify({"error": "Estado requerido"}), 400
+        result = actualizar_estado_inventario(id_inventario, nuevo_estado)
+        if result['success']:
+            return jsonify({"message": "Estado actualizado exitosamente"}), 200
+        else:
+            return jsonify({"error": result['error']}), 500
+    except Exception as e:
+        print("Error en ruta estado inventario:", e)
+        return jsonify({"error": "Error interno"}), 500
+
 @app.route('/api/analiticas/global', methods=['GET'])
 def get_analiticas_global_route():
     try:
         result = obtener_analiticas_globales()
         if result['success']:
+            print(f"DEBUG: Enviando analíticas. Volumen: {len(result['data']['volumen'])} items, KPIs: {result['data']['kpis']}")
             return jsonify(result['data']), result['status']
         else:
+            print(f"DEBUG: Error en obtención de analíticas: {result['error']}")
             return jsonify({"error": result['error']}), result['status']
     except Exception as e:
-        print("Error en ruta obtener analiticas:", e)
+        print("Error CRÍTICO en ruta obtener analiticas:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
 # --- RUTAS DE MODELOS MATEMÁTICOS ---
@@ -305,12 +326,13 @@ def post_publicar_cosecha_route():
         precio = data.get('precio', 0)
         vender_directo = data.get('vender_directamente', False)
         id_cosecha = data.get('id_cosecha') # Opcional
+        unidad = data.get('unidad_medida', 'Kg')
         
         if not id_productor or not lote or not cantidad:
             return jsonify({"error": "Faltan campos obligatorios (productor, nombre o cantidad)"}), 400
 
         result = registrar_publicacion_cosecha(
-            id_productor, lote, cantidad, precio, vender_directo, id_cosecha
+            id_productor, lote, cantidad, precio, vender_directo, id_cosecha, unidad
         )
         
         if result['success']:
@@ -364,8 +386,160 @@ def post_comprar_producto_route():
         print("Error en ruta comprar:", e)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
 
+@app.route('/api/productor/perfil', methods=['GET'])
+def get_perfil_productor_route():
+    try:
+        id_productor = request.args.get('id_productor')
+        if not id_productor:
+            return jsonify({"error": "ID de productor requerido"}), 400
+            
+        result = obtener_perfil_productor(id_productor)
+        if result['success']:
+            return jsonify(result['perfil']), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta obtener perfil:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/perfil', methods=['POST'])
+def post_perfil_productor_route():
+    try:
+        data = request.get_json()
+        id_productor = data.get('id_productor')
+        if not id_productor:
+            return jsonify({"error": "ID de productor requerido"}), 400
+            
+        result = actualizar_perfil_productor(id_productor, data)
+        if result['success']:
+            return jsonify({"message": "Perfil actualizado correctamente"}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta actualizar perfil:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/eliminar_cuenta', methods=['DELETE'])
+def delete_cuenta_productor_route():
+    try:
+        id_productor = request.args.get('id_productor')
+        if not id_productor:
+            return jsonify({"error": "ID de productor requerido"}), 400
+            
+        result = eliminar_cuenta_productor(id_productor)
+        if result['success']:
+            return jsonify({"message": "Cuenta eliminada correctamente"}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta eliminar cuenta:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/register/estudiante', methods=['POST'])
+def register_estudiante_route():
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        correo = data.get('correo')
+        password = data.get('password')
+        
+        result = registrar_estudiante(nombre, correo, password)
+        
+        if result['success']:
+            return jsonify({"message": "Registro de estudiante exitoso", "id_estudiante": result['id_estudiante']}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+            
+    except Exception as e:
+        print("Error en ruta registro estudiante:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/login/estudiante', methods=['POST'])
+def login_estudiante_route():
+    try:
+        data = request.get_json()
+        correo = data.get('correo')
+        password = data.get('password')
+        
+        result = login_estudiante(correo, password)
+        
+        if result['success']:
+            return jsonify({"message": "Login de estudiante exitoso", "user": result['user']}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+            
+    except Exception as e:
+        print("Error en ruta login estudiante:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productores', methods=['GET'])
+def get_productores_route():
+    try:
+        result = obtener_productores()
+        if result['success']:
+            return jsonify(result['productores']), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta obtener productores:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/monitoreo', methods=['POST'])
+def post_monitoreo_route():
+    try:
+        data = request.get_json()
+        id_estudiante = data.get('id_estudiante')
+        id_productor = data.get('id_productor')
+        ph = data.get('ph')
+        salinidad = data.get('salinidad')
+        humedad = data.get('humedad')
+        temperatura = data.get('temperatura')
+        observaciones = data.get('observaciones', '')
+        
+        if not id_estudiante or not id_productor:
+            return jsonify({"error": "ID de estudiante y productor son requeridos"}), 400
+            
+        result = registrar_monitoreo(id_estudiante, id_productor, ph, salinidad, humedad, temperatura, observaciones)
+        if result['success']:
+            return jsonify({"message": "Monitoreo registrado exitosamente", "id_monitoreo": result['id_monitoreo']}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta registrar monitoreo:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/estudiante/monitoreos', methods=['GET'])
+def get_monitoreos_estudiante_route():
+    try:
+        id_estudiante = request.args.get('id_estudiante')
+        if not id_estudiante:
+            return jsonify({"error": "ID de estudiante requerido"}), 400
+            
+        result = obtener_monitoreos_estudiante(id_estudiante)
+        if result['success']:
+            return jsonify(result['monitoreos']), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta obtener monitoreos estudiante:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/monitoreos', methods=['GET'])
+def get_monitoreos_productor_route():
+    try:
+        id_productor = request.args.get('id_productor')
+        if not id_productor:
+            return jsonify({"error": "ID de productor requerido"}), 400
+            
+        result = obtener_monitoreos_productor(id_productor)
+        if result['success']:
+            return jsonify(result['monitoreos']), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta obtener monitoreos productor:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
 if __name__ == '__main__':
     # Inicia el servidor local en el puerto 5000
     app.run(debug=True, host='0.0.0.0', port=5000)
-
-

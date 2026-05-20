@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíces Digitales | Panel de Monitoreo Estudiantil</title>
+    <!-- Importamos el estilo general del proyecto -->
+    <link rel="stylesheet" href="../../style.css">
+    <style>
+        /* Estilos específicos premium para el dashboard de estudiante */
+        :root {
+            --student-orange: #ff9f43;
+            --student-orange-hover: #ffb067;
+        }
+
+        .student-theme {
+            border-top: 4px solid var(--student-orange);
+        }
+
+        .btn-submit-student {
+            background-color: var(--student-orange);
+            color: #000;
+            font-weight: 600;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit-student:hover {
+            background-color: var(--student-orange-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-card {
+            background: var(--bg-card, #ffffff);
+            border: 2px solid #000000 !important;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 4px 4px 0px #000000;
+        }
+
+        .form-card h2 {
+            font-size: 1.5rem;
+            color: var(--title-primary, #1B4332);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-card h2 svg {
+            color: var(--student-orange);
+        }
+
+        .input-wrapper-student {
+            margin-bottom: 15px;
+        }
+
+        .input-wrapper-student label {
+            display: block;
+            font-size: 0.9rem;
+            color: #000000;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .input-wrapper-student input, 
+        .input-wrapper-student select, 
+        .input-wrapper-student textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 6px;
+            color: #000000;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper-student input::placeholder, 
+        .input-wrapper-student textarea::placeholder {
+            color: #718096;
+            opacity: 1;
+        }
+
+        .input-wrapper-student input:focus, 
+        .input-wrapper-student select:focus, 
+        .input-wrapper-student textarea:focus {
+            outline: none;
+            border-color: var(--student-orange);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(255, 159, 67, 0.25);
+        }
+
+        .badge-student {
+            background: rgba(255, 159, 67, 0.15);
+            color: var(--student-orange);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Top Navbar -->
+        <header class="topbar student-theme">
+            <div class="topbar-left">
+                <a href="../../index.html" class="logo" style="text-decoration: none; color: inherit;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon" style="color: var(--student-orange);"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+                    <span>Raíces Digitales | Apoyo Social</span>
+                </a>
+            </div>
+            <div class="topbar-right">
+                <div class="user-profile">
+                    <div class="avatar" style="background-color: var(--student-orange);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <span id="student-name-display">Cargando...</span>
+                    <button class="icon-btn" onclick="cerrarSesionEstudiante()" title="Cerrar Sesión" style="margin-left: 15px; color: var(--text-muted);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout" style="grid-template-columns: 1fr;">
+            <!-- Main Content (Centered) -->
+            <main class="center-content" style="max-width: 1200px; margin: 0 auto; padding: 20px; width: 100%;">
+                <img src="../../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg" onerror="this.src='../../IMG/Fondo de Pagina.png'">
+                
+                <div class="dashboard-content">
+                    <div class="dashboard-header">
+                        <h1>Monitoreo Semanal de Chinampas</h1>
+                        <p style="color: var(--text-muted);">Bienvenido al portal de monitoreo escolar de Xochimilco. Registra tus mediciones semanales a continuación.</p>
+                    </div>
+
+                    <!-- Grid de Formularios e Información -->
+                    <div class="form-grid-2">
+                        <!-- Formulario de Registro -->
+                        <div class="form-card">
+                            <h2>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                Nueva Medición Semanal
+                            </h2>
+                            <form id="form-registrar-monitoreo">
+                                <div class="input-wrapper-student">
+                                    <label>Productor / Chinampa Asignada</label>
+                                    <select id="select-productor" name="id_productor" required>
+                                        <option value="" disabled selected>Seleccione productor...</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div class="input-wrapper-student">
+                                        <label>Potencial de Hidrógeno (pH)</label>
+                                        <input type="number" step="0.01" min="0" max="14" name="ph" placeholder="Ej: 6.8" required>
+                                    </div>
+                                    <div class="input-wrapper-student">
+                                        <label>Salinidad (dS/m)</label>
+                                        <input type="number" step="0.01" min="0" name="salinidad" placeholder="Ej: 1.2" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div class="input-wrapper-student">
+                                        <label>Humedad del Suelo (%)</label>
+                                        <input type="number" step="0.1" min="0" max="100" name="humedad" placeholder="Ej: 65.4" required>
+                                    </div>
+                                    <div class="input-wrapper-student">
+                                        <label>Temperatura Ambiente (°C)</label>
+                                        <input type="number" step="0.1" name="temperatura" placeholder="Ej: 22.5" required>
+                                    </div>
+                                </div>
+
+                                <div class="input-wrapper-student">
+                                    <label>Observaciones y Variables Afectantes</label>
+                                    <textarea name="observaciones" rows="4" placeholder="Escribe observaciones adicionales (plagas, color del agua, basura, sequía, etc.)..." required></textarea>
+                                </div>
+
+                                <div style="text-align: right; margin-top: 20px;">
+                                    <button type="submit" class="btn-submit-student">Guardar Registro</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Información y Consejos de Monitoreo -->
+                        <div class="form-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h2>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                    Guía de Calidad Ambiental
+                                </h2>
+                                <p style="margin-bottom: 15px; font-size: 0.95rem; line-height: 1.6;">
+                                    El monitoreo ambiental de las chinampas ayuda a conservar el ecosistema ancestral de Xochimilco. Asegúrate de calibrar tus herramientas antes de reportar.
+                                </p>
+                                <ul style="list-style-type: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                                    <li style="margin-bottom: 10px;">🧪 <strong style="color: #ff9f43;">pH Ideal:</strong> El suelo de las chinampas debe mantenerse preferentemente entre <strong>6.0 y 7.5</strong>. Fuera de esto, se altera la absorción de nutrientes.</li>
+                                    <li style="margin-bottom: 10px;">📉 <strong style="color: #ff9f43;">Salinidad:</strong> Niveles superiores a <strong>2.0 dS/m</strong> pueden causar estrés salino en cultivos sensibles como la lechuga.</li>
+                                    <li style="margin-bottom: 10px;">💧 <strong style="color: #ff9f43;">Humedad:</strong> Un suelo saludable mantiene de <strong>50% a 70%</strong> de humedad.</li>
+                                </ul>
+                            </div>
+                            <div style="background: rgba(255, 159, 67, 0.05); border: 1px dashed rgba(255, 159, 67, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                                <h4 style="color: var(--student-orange); margin-bottom: 5px;">¿Encontraste anomalías?</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                    Registra en "Observaciones" cualquier residuo inusual en los canales, descarga de aguas grises o presencia de fauna invasora (como carpa o tilapia).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial de Mediciones -->
+                    <div class="table-container">
+                        <h3 class="table-title">Mis Registros de Monitoreo Semanal</h3>
+                        <table id="table-monitoreos">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Productor / Chinampa</th>
+                                    <th>pH</th>
+                                    <th>Salinidad (dS/m)</th>
+                                    <th>Humedad</th>
+                                    <th>Temperatura</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-monitoreos">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">No has registrado mediciones aún.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts de la plataforma -->
+    <script src="../../js/estudiante.js"></script>
+</body>
+</html>

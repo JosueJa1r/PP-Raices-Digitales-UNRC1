@@ -5,7 +5,7 @@
     --bg-navbar: #1B4332;      /* Verde Selva */
     --bg-sidebar: #ffffff;
     --bg-card: #ffffff;
-    --bg-card-hover: #f1f3f5;
+    --bg-card-hover: #444a50;
     
     --text-main: #1B4332;      /* Verde Selva para texto principal */
     --text-muted: #6C584C;     /* Café Orgánico */

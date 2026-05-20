@@ -1,38 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raíces Digitales | Ajustes</title>
     <link rel="stylesheet" href="../../style.css">
 </head>
+
 <body>
     <div class="app-container">
-        
+
         <!-- Top Navbar -->
         <header class="topbar">
             <div class="topbar-left">
                 <button class="mobile-menu-btn" onclick="toggleSidebar('left-sidebar')" aria-label="Menú principal">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
                 </button>
                 <a href="../../index.html" class="logo" style="text-decoration: none; color: inherit;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" class="logo-icon">
+                        <path d="M12 22v-6" />
+                        <path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z" />
+                        <path d="M8 12h8" />
+                        <path d="M9 7h6" />
+                    </svg>
                     <span>Raíces Digitales | Productor</span>
                 </a>
             </div>
             <div class="topbar-right">
-                <button class="icon-btn notification" aria-label="Notificaciones"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+                <button class="icon-btn notification" aria-label="Notificaciones"><svg width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg></button>
                 <div class="user-profile" onclick="toggleDropdown('user-dropdown')">
                     <div class="avatar">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
                     </div>
                     <span id="productor-name-display">Rancho El Sol</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+
                     <!-- Menú Desplegable -->
                     <div id="user-dropdown" class="dropdown-menu">
-                        <a href="#" class="dropdown-item">Mi Perfil</a>
-                        <a href="#" class="dropdown-item">Ajustes del Terreno</a>
+                        <a href="productor_ajustes.html" class="dropdown-item">Mi Perfil</a>
+                        <a href="productor_ajustes.html#perfil-hectareas" class="dropdown-item">Ajustes del Terreno</a>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item logout" onclick="cerrarSesionProductor()">Cerrar Sesión</a>
                     </div>
@@ -45,23 +67,41 @@
             <aside class="left-sidebar">
                 <nav class="side-nav">
                     <a href="productor_dashboard.html" class="nav-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
                         MI RESUMEN
                     </a>
                     <a href="productor_analiticas.html" class="nav-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        </svg>
                         EXPLORADOR DE MERCADO
                     </a>
-                    <a href="productor_inventario.html" class="nav-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                        INVENTARIO
-                    </a>
                     <a href="productor_cosechas.html" class="nav-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                        COSECHAS
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                        INVENTARIO DE COSECHAS
                     </a>
-                    <a href="productor_ajustes.html" class="nav-item active" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <a href="productor_ajustes.html" class="nav-item active"
+                        style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
                         AJUSTES
                     </a>
                 </nav>
@@ -69,39 +109,66 @@
 
             <!-- Main Central Content -->
             <main class="center-content">
-                <img src="../../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg" onerror="this.src='../../IMG/Fondo de Pagina.png'">
-                
+                <img src="../../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg"
+                    onerror="this.src='../../IMG/Fondo de Pagina.png'">
+
                 <div class="analytics-content" style="padding-top: 1rem;">
                     <div class="dashboard-header">
                         <h1>Configuración de Cuenta</h1>
                     </div>
 
-                    <form class="settings-grid" onsubmit="event.preventDefault(); mostrarAlerta('success', 'Cambios Guardados', 'Tu configuración ha sido actualizada correctamente.');">
-                        
+                    <form id="settings-form" class="settings-grid">
+
                         <!-- Perfil Público -->
                         <div class="settings-card">
                             <h3>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
                                 Perfil Público
                             </h3>
                             <div class="input-row">
                                 <div class="input-group">
                                     <label>Nombre del Rancho/Finca</label>
-                                    <input type="text" value="Rancho El Sol" required>
+                                    <input type="text" id="perfil-nombre" placeholder="Cargando..." required>
                                 </div>
                                 <div class="input-group">
-                                    <label>Región/Localidad</label>
-                                    <input type="text" value="Jalisco, México" required>
+                                    <label>Chinampa (m²)</label>
+                                    <input type="number" id="perfil-hectareas" step="1" placeholder="Ej. 500"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Tipo de Suelo Dominante</label>
+                                    <select id="perfil-suelo" required>
+                                        <option value="Chinampa Arcillosa">Chinampa Arcillosa</option>
+                                        <option value="Suelo Franco">Suelo Franco</option>
+                                        <option value="Suelo Limoso">Suelo Limoso</option>
+                                        <option value="Turba">Turba</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Filtro de Agua Utilizado</label>
+                                    <select id="perfil-filtro" required>
+                                        <option value="Ahuejote">Ahuejote</option>
+                                        <option value="Ahuehuete">Ahuehuete</option>
+                                        <option value="Sauce llorón">Sauce llorón</option>
+                                        <option value="Fresnos">Fresnos</option>
+                                        <option value="Ninguno">Ninguno / Sin regulador biológico</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="input-row">
                                 <div class="input-group">
                                     <label>Teléfono de Contacto</label>
-                                    <input type="tel" value="+52 33 1234 5678">
+                                    <input type="tel" id="perfil-telefono" placeholder="Cargando...">
                                 </div>
                                 <div class="input-group">
                                     <label>Correo Electrónico (Público)</label>
-                                    <input type="email" value="contacto@ranchoelsol.com" required>
+                                    <input type="email" id="perfil-correo" placeholder="Cargando..." required>
                                 </div>
                             </div>
                         </div>
@@ -109,21 +176,30 @@
                         <!-- Configuración de la Tienda -->
                         <div class="settings-card">
                             <h3>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
                                 Tienda y Pagos
                             </h3>
                             <div class="input-group">
                                 <label>Cuenta CLABE para Depósitos</label>
-                                <input type="text" placeholder="Ej. 012345678901234567" value="012345678901234567">
+                                <input type="text" id="perfil-clabe" placeholder="Ej. 012345678901234567">
                             </div>
-                            
+
                             <div class="setting-toggle-row" style="margin-top: 1.5rem;">
+                                <div class="setting-toggle-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                                </div>
                                 <div class="setting-toggle-info">
                                     <span class="setting-toggle-title">Ofrecer Envío Nacional</span>
-                                    <span class="setting-toggle-desc">Permitir envíos a todo el país. Si se desactiva, solo se permitirá Recolección Local.</span>
+                                    <span class="setting-toggle-desc">Permitir envíos a todo el país. Si se desactiva,
+                                        solo se permitirá Recolección Local.</span>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" id="perfil-envio">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -132,26 +208,38 @@
                         <!-- Notificaciones Inteligentes -->
                         <div class="settings-card">
                             <h3>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
                                 Alertas y Notificaciones
                             </h3>
                             <div class="setting-toggle-row">
+                                <div class="setting-toggle-icon" style="color: var(--accent-pink);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                                </div>
                                 <div class="setting-toggle-info">
                                     <span class="setting-toggle-title">Alertas de Saturación de Mercado</span>
-                                    <span class="setting-toggle-desc">Recibir aviso cuando un cultivo esté en riesgo de sobreproducción.</span>
+                                    <span class="setting-toggle-desc">Recibir aviso cuando un cultivo esté en riesgo de
+                                        sobreproducción.</span>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" id="perfil-saturacion">
                                     <span class="slider"></span>
                                 </label>
                             </div>
                             <div class="setting-toggle-row">
+                                <div class="setting-toggle-icon" style="color: var(--accent-blue);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                </div>
                                 <div class="setting-toggle-info">
                                     <span class="setting-toggle-title">Avisos de Nueva Compra</span>
-                                    <span class="setting-toggle-desc">Recibir una notificación emergente cuando un cliente realice un pedido.</span>
+                                    <span class="setting-toggle-desc">Recibir una notificación emergente cuando un
+                                        cliente realice un pedido.</span>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" checked>
+                                    <input type="checkbox" id="perfil-aviso-compra">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -160,20 +248,26 @@
                         <!-- Seguridad -->
                         <div class="settings-card" style="border-left: 4px solid #ef4444;">
                             <h3>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
                                 Seguridad
                             </h3>
                             <div class="input-row">
                                 <div class="input-group">
                                     <label>Nueva Contraseña</label>
-                                    <input type="password" placeholder="••••••••">
+                                    <input type="password" id="perfil-pass" placeholder="••••••••">
                                 </div>
                                 <div class="input-group">
                                     <label>Confirmar Contraseña</label>
-                                    <input type="password" placeholder="••••••••">
+                                    <input type="password" id="perfil-pass-confirm" placeholder="••••••••">
                                 </div>
                             </div>
-                            <button type="button" class="submit-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; margin-top: 10px;" onclick="mostrarAlerta('warning', 'Acción Peligrosa', '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.')">
+                            <button type="button" class="submit-btn"
+                                style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; margin-top: 10px;"
+                                onclick="confirmarEliminarCuenta()">
                                 Eliminar mi Cuenta
                             </button>
                         </div>
@@ -190,19 +284,128 @@
             </main>
         </div>
     </div>
-    
+
     <script src="../../js/alertas.js"></script>
     <script src="../../js/chatbot.js"></script>
     <script src="../../js/responsive.js"></script>
-    
+
     <!-- Script para cargar datos del usuario desde localStorage -->
     <script>
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://127.0.0.1:5000'
+            : '';
+
         document.addEventListener('DOMContentLoaded', () => {
             const nombreProductor = localStorage.getItem('productor_nombre');
+            const idProductor = localStorage.getItem('productor_id');
+
             if (nombreProductor) {
                 document.getElementById('productor-name-display').innerText = nombreProductor;
             }
+
+            if (idProductor) {
+                cargarDatosPerfil(idProductor);
+            }
+
+            // Manejo del envío del formulario
+            document.getElementById('settings-form').addEventListener('submit', guardarConfiguracion);
         });
+
+        async function cargarDatosPerfil(idProductor) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/perfil?id_productor=${idProductor}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('perfil-nombre').value = data.Nombre || '';
+                    document.getElementById('perfil-correo').value = data.Correo || '';
+                    document.getElementById('perfil-telefono').value = data.Telefono || '';
+                    document.getElementById('perfil-hectareas').value = data.Hectareas || 0;
+                    if (data.Tipo_Suelo) {
+                        document.getElementById('perfil-suelo').value = data.Tipo_Suelo;
+                    }
+                    if (data.Filtro_Agua) {
+                        document.getElementById('perfil-filtro').value = data.Filtro_Agua;
+                    }
+                    document.getElementById('perfil-clabe').value = data.Clabe || '';
+                    document.getElementById('perfil-envio').checked = !!data.Envio_Nacional;
+                    document.getElementById('perfil-saturacion').checked = !!data.Alerta_Saturacion;
+                    document.getElementById('perfil-aviso-compra').checked = !!data.Aviso_Compra;
+                } else {
+                    mostrarAlerta('error', 'Error', 'No se pudieron cargar los datos del perfil.');
+                }
+            } catch (error) {
+                console.error('Error al cargar perfil:', error);
+            }
+        }
+
+        async function guardarConfiguracion(e) {
+            e.preventDefault();
+            const idProductor = localStorage.getItem('productor_id');
+            const pass = document.getElementById('perfil-pass').value;
+            const confirmPass = document.getElementById('perfil-pass-confirm').value;
+
+            if (pass && pass !== confirmPass) {
+                mostrarAlerta('error', 'Error', 'Las contraseñas no coinciden.');
+                return;
+            }
+
+            const data = {
+                id_productor: idProductor,
+                Nombre: document.getElementById('perfil-nombre').value,
+                Correo: document.getElementById('perfil-correo').value,
+                Telefono: document.getElementById('perfil-telefono').value,
+                Hectareas: document.getElementById('perfil-hectareas').value,
+                Tipo_Suelo: document.getElementById('perfil-suelo').value,
+                Filtro_Agua: document.getElementById('perfil-filtro').value,
+                Clabe: document.getElementById('perfil-clabe').value,
+                Envio_Nacional: document.getElementById('perfil-envio').checked,
+                Alerta_Saturacion: document.getElementById('perfil-saturacion').checked,
+                Aviso_Compra: document.getElementById('perfil-aviso-compra').checked,
+                password: pass || null
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/perfil`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', 'Configuración actualizada correctamente.');
+                    localStorage.setItem('productor_nombre', data.Nombre);
+                    document.getElementById('productor-name-display').innerText = data.Nombre;
+                    document.getElementById('perfil-pass').value = '';
+                    document.getElementById('perfil-pass-confirm').value = '';
+                } else {
+                    const error = await response.json();
+                    mostrarAlerta('error', 'Error', error.error || 'No se pudo actualizar el perfil.');
+                }
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo conectar con el servidor.');
+            }
+        }
+
+        async function confirmarEliminarCuenta() {
+            if (confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible y se perderán todos tus datos.')) {
+                const id_productor = localStorage.getItem('productor_id');
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/productor/eliminar_cuenta?id_productor=${id_productor}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        alert('Cuenta eliminada correctamente.');
+                        cerrarSesionProductor();
+                    } else {
+                        alert('Error al eliminar la cuenta.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        }
 
         // Lógica de cerrar sesión
         function cerrarSesionProductor() {
@@ -212,4 +415,5 @@
         }
     </script>
 </body>
+
 </html>

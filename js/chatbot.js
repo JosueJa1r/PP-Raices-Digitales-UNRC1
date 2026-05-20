@@ -78,12 +78,21 @@ const initChatbot = () => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
         try {
+            // Recopilar contexto si es productor
+            const payload = { message: text };
+            if (!isClient) {
+                const idProductor = localStorage.getItem('productor_id');
+                if (idProductor) {
+                    payload.id_productor = parseInt(idProductor);
+                }
+            }
+
             const response = await fetch(`${API_BASE_URL}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();

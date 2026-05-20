@@ -137,6 +137,16 @@
         </div>
     </aside>
 
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="success-modal-overlay">
+        <div class="success-modal">
+            <div class="success-icon">✓</div>
+            <h2>¡Compra Exitosa!</h2>
+            <p id="success-modal-message">Tu pedido ha sido procesado correctamente. ¡Gracias por apoyar el comercio local de Xochimilco!</p>
+            <button class="btn-primary" onclick="closeSuccessModal()">Continuar Comprando</button>
+        </div>
+    </div>
+
     <script src="../../js/alertas.js"></script>
     <script src="../../js/responsive.js"></script>
     <style>
@@ -150,6 +160,10 @@
     </style>
     <script>
         // ─── State ───────────────────────────────────────────────
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://127.0.0.1:5000'
+            : '';
+        
         let allProducts = [];
         let cart = {};   // { id_inventario: { product, qty } }
         let searchTimer = null;
@@ -168,8 +182,8 @@
             showState('loading');
             try {
                 const url = q
-                    ? `http://localhost:5000/api/catalogo?q=${encodeURIComponent(q)}`
-                    : 'http://localhost:5000/api/catalogo';
+                    ? `${API_BASE_URL}/api/catalogo?q=${encodeURIComponent(q)}`
+                    : `${API_BASE_URL}/api/catalogo`;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Server error');
                 allProducts = await res.json();
@@ -209,17 +223,22 @@
                 card.className = 'product-card';
                 card.id = `card-${prod.Id_Inventario}`;
                 card.style.animationDelay = `${i * 0.05}s`;
+                
+                // Imagen aleatoria según tipo (simulado)
+                const imgPath = i % 2 === 0 ? '../../IMG/hortalizas.png' : '../../IMG/flores.png';
+
                 card.innerHTML = `
                     <div class="product-image-container">
                         <span class="product-badge" style="background:var(--accent-green);">Cosecha</span>
-                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#1B4332" stroke-width="1.5" opacity="0.5">
+                        <img src="${imgPath}" alt="${loteClean}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#1B4332" stroke-width="1.5" opacity="0.5" style="display:none;">
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                         </svg>
                     </div>
                     <div class="product-info">
-                        <span class="product-category">👨‍🌾 ${prod.Nombre_Productor}</span>
+                        <span class="product-category">👨‍🌾 Productor: ${prod.Nombre_Productor}</span>
                         <h3 class="product-title">${loteClean}</h3>
-                        <p style="font-size:0.8rem;color:#777;margin:4px 0;">Stock: ${prod.Cantidad} ${unidad}</p>
+                        <p style="font-size:0.8rem;color:#777;margin:4px 0;">📦 Stock: ${prod.Cantidad} ${unidad}</p>
                         <div class="product-footer">
                             <span class="product-price">$${precio.toFixed(2)} MXN</span>
                             ${precio > 0
@@ -251,6 +270,12 @@
                 cart[id] = { id, nombre, precio, stockMax, qty: 1 };
             }
             renderCarrito();
+            
+            // Animación del badge
+            const badge = document.getElementById('cart-badge');
+            badge.classList.add('pulse');
+            setTimeout(() => badge.classList.remove('pulse'), 300);
+
             mostrarAlerta('success', '¡Añadido!', `${nombre} está en tu carrito.`, 2500);
         }
 
@@ -327,7 +352,7 @@
             for (const id of keys) {
                 const item = cart[id];
                 try {
-                    const res = await fetch('http://localhost:5000/api/cliente/comprar', {
+                    const res = await fetch(`${API_BASE_URL}/api/cliente/comprar`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id_inventario: parseInt(id), cantidad: item.qty })
@@ -348,7 +373,9 @@
             await cargarCatalogo(document.getElementById('search-input').value);
 
             if (exitosos.length) {
-                mostrarAlerta('success', '¡Compra exitosa! 🎉', `Se procesaron ${exitosos.length} producto(s). ¡Gracias por apoyar a nuestros productores!`, 6000);
+                // Mostrar modal en lugar de alerta simple
+                document.getElementById('success-modal-message').innerText = `Se han procesado ${exitosos.length} producto(s) correctamente. Tu apoyo ayuda a preservar las chinampas de Xochimilco.`;
+                document.getElementById('success-modal-overlay').classList.add('show');
             }
             if (errores.length) {
                 mostrarAlerta('error', 'Algunos artículos fallaron', errores.join('\n'));
@@ -387,6 +414,10 @@
             localStorage.removeItem('cliente_nombre');
             localStorage.removeItem('cliente_correo');
             localStorage.removeItem('cliente_id');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal-overlay').classList.remove('show');
         }
     </script>
 </body>
