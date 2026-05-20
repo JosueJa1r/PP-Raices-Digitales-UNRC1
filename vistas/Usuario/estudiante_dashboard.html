@@ -170,31 +170,37 @@
                                     </select>
                                 </div>
 
+                                <div class="input-wrapper-student" style="margin-bottom: 15px;">
+                                    <button type="button" onclick="autocompletarClimaFormulario()" class="btn-submit-student" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; border: 2px solid #000; box-shadow: 2px 2px 0px #000; background-color: #2ec4b6; color: #000;">
+                                        ⚡ Autocompletar Clima (Open-Meteo)
+                                    </button>
+                                </div>
+
                                 <div class="form-grid-2">
                                     <div class="input-wrapper-student">
                                         <label>Potencial de Hidrógeno (pH)</label>
-                                        <input type="number" step="0.01" min="0" max="14" name="ph" placeholder="Ej: 6.8" required>
+                                        <input type="number" step="0.01" min="0" max="14" name="ph" id="form-ph" placeholder="Ej: 6.8" required>
                                     </div>
                                     <div class="input-wrapper-student">
                                         <label>Salinidad (dS/m)</label>
-                                        <input type="number" step="0.01" min="0" name="salinidad" placeholder="Ej: 1.2" required>
+                                        <input type="number" step="0.01" min="0" name="salinidad" id="form-salinidad" placeholder="Ej: 1.2" required>
                                     </div>
                                 </div>
 
                                 <div class="form-grid-2">
                                     <div class="input-wrapper-student">
                                         <label>Humedad del Suelo (%)</label>
-                                        <input type="number" step="0.1" min="0" max="100" name="humedad" placeholder="Ej: 65.4" required>
+                                        <input type="number" step="0.1" min="0" max="100" name="humedad" id="form-humedad" placeholder="Ej: 65.4" required>
                                     </div>
                                     <div class="input-wrapper-student">
                                         <label>Temperatura Ambiente (°C)</label>
-                                        <input type="number" step="0.1" name="temperatura" placeholder="Ej: 22.5" required>
+                                        <input type="number" step="0.1" name="temperatura" id="form-temperatura" placeholder="Ej: 22.5" required>
                                     </div>
                                 </div>
 
                                 <div class="input-wrapper-student">
                                     <label>Observaciones y Variables Afectantes</label>
-                                    <textarea name="observaciones" rows="4" placeholder="Escribe observaciones adicionales (plagas, color del agua, basura, sequía, etc.)..." required></textarea>
+                                    <textarea name="observaciones" id="form-observaciones" rows="4" placeholder="Escribe observaciones adicionales (plagas, color del agua, basura, sequía, etc.)...." required></textarea>
                                 </div>
 
                                 <div style="text-align: right; margin-top: 20px;">
@@ -249,6 +255,90 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Sección de Modelos Científicos y Matemáticos -->
+                    <div class="dashboard-header" style="margin-top: 40px; margin-bottom: 20px;">
+                        <h2>Modelos Científicos y Matemáticos</h2>
+                        <p style="color: var(--text-muted);">Simulaciones ecológicas e integrales climáticas para el apoyo técnico agrícola.</p>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <!-- Tarjeta 1: Cálculo Integral con Open-Meteo -->
+                        <div class="form-card">
+                            <h2>
+                                💧 Volumen de Agua Acumulado (Cálculo Integral)
+                            </h2>
+                            <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--text-muted);">
+                                Aproxima la integral definida del volumen de lluvia por metro cuadrado: ∫ R(t) dt usando sumas de Riemann con datos en tiempo real de la API de Open-Meteo para Xochimilco.
+                            </p>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <button type="button" onclick="obtenerLluviaRealOpenMeteo()" class="btn-submit-student" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; border: 2px solid #000; box-shadow: 2px 2px 0px #000;">
+                                    ☁️ Obtener Precipitaciones Reales (Open-Meteo)
+                                </button>
+                            </div>
+
+                            <div class="input-wrapper-student">
+                                <label>Tasas de Lluvia por Día (mm/día, separados por comas)</label>
+                                <input type="text" id="integral-tasas" value="5.2, 0, 1.1, 10.5, 3.2, 0, 4.0" required>
+                            </div>
+
+                            <div style="text-align: right; margin-top: 15px; margin-bottom: 15px;">
+                                <button type="button" onclick="calcularIntegralLluvia()" class="btn-submit-student" style="border: 2px solid #000; box-shadow: 2px 2px 0px #000;">Calcular Integral</button>
+                            </div>
+
+                            <div id="integral-resultado" style="font-size: 1.1rem; font-weight: 700; color: var(--student-orange); margin-bottom: 15px;">
+                                Resultado: -
+                            </div>
+
+                            <!-- Gráfico de Sumas de Riemann -->
+                            <div style="background: #f7fafc; border: 2px solid #000; border-radius: 8px; padding: 15px; height: 130px; display: flex; align-items: flex-end; justify-content: space-around; min-width: 100%;" id="riemann-container">
+                                <!-- Barras Riemann dinámicas -->
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta 2: Probabilidad Bayesiana -->
+                        <div class="form-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <h2>
+                                    📊 Probabilidad Bayesiana de Éxito de Cultivo
+                                </h2>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--text-muted);">
+                                    Calcula la probabilidad condicional de cosechar con éxito dado un clima favorable: P(Éxito | Clima) = [P(Clima | Éxito) * P(Éxito)] / P(Clima).
+                                </p>
+                                
+                                <div class="form-grid-2" style="gap: 10px;">
+                                    <div class="input-wrapper-student">
+                                        <label>P(Éxito Histórico)</label>
+                                        <input type="number" id="bayes-pa" value="0.75" step="0.05" min="0" max="1" required>
+                                    </div>
+                                    <div class="input-wrapper-student">
+                                        <label>P(Clima Favorable | Éxito)</label>
+                                        <input type="number" id="bayes-pba" value="0.85" step="0.05" min="0" max="1" required>
+                                    </div>
+                                </div>
+                                <div class="input-wrapper-student" style="margin-top: 10px;">
+                                    <label>P(Clima Favorable General)</label>
+                                    <input type="number" id="bayes-pb" value="0.80" step="0.05" min="0.01" max="1" required>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style="text-align: right; margin-top: 15px; margin-bottom: 15px;">
+                                    <button type="button" onclick="calcularProbabilidadBayesiana()" class="btn-submit-student" style="width: 100%; border: 2px solid #000; box-shadow: 2px 2px 0px #000;">
+                                        Simular Probabilidad Bayesiana
+                                    </button>
+                                </div>
+
+                                <div id="bayes-resultado" style="font-size: 1.1rem; font-weight: 700; color: var(--student-orange); margin-bottom: 10px;">
+                                    Resultado: -
+                                </div>
+                                <div style="background: #e2e8f0; border: 2px solid #000; border-radius: 6px; height: 16px; overflow: hidden; position: relative;">
+                                    <div id="bayes-bar" style="background: var(--student-orange); width: 0%; height: 100%; transition: width 0.4s ease-out;"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>

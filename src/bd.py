@@ -577,15 +577,19 @@ def registrar_publicacion_cosecha(id_productor, lote, cantidad, precio, vender_d
         if conexion.is_connected():
             conexion.close()
 
-def actualizar_estado_inventario(id_inventario, estado):
+def actualizar_estado_inventario(id_inventario, estado, precio=None):
     conexion = conexion_db()
     if not conexion:
         return {"success": False, "error": "Error de conexión"}
     
     try:
         cursor = conexion.cursor()
-        sql = "UPDATE inventario SET Estado = %s WHERE Id_Inventario = %s"
-        cursor.execute(sql, (estado, id_inventario))
+        if precio is not None:
+            sql = "UPDATE inventario SET Estado = %s, Precio_Actual = %s WHERE Id_Inventario = %s"
+            cursor.execute(sql, (estado, float(precio), id_inventario))
+        else:
+            sql = "UPDATE inventario SET Estado = %s WHERE Id_Inventario = %s"
+            cursor.execute(sql, (estado, id_inventario))
         conexion.commit()
         return {"success": True}
     except Exception as e:
@@ -610,6 +614,7 @@ def obtener_catalogo_publicado(busqueda=None):
                 i.Id_Inventario,
                 i.Lote,
                 i.Cantidad,
+                i.Unidad_Medida,
                 i.Precio_Actual,
                 i.Estado,
                 p.Nombre AS Nombre_Productor,
@@ -636,7 +641,7 @@ def obtener_catalogo_publicado(busqueda=None):
         if conexion.is_connected():
             conexion.close()
 
-def descontar_stock_inventario(id_inventario, cantidad_compra):
+def descontar_stock_inventario(id_inventario, cantidad_compra, id_cliente=None):
     """Descuenta stock de un producto tras una compra. Lo marca Agotado si llega a 0."""
     conexion = conexion_db()
     if not conexion:
@@ -645,8 +650,8 @@ def descontar_stock_inventario(id_inventario, cantidad_compra):
     try:
         cursor = conexion.cursor(dictionary=True)
         
-        # Verificar stock actual
-        cursor.execute("SELECT Cantidad, Lote FROM inventario WHERE Id_Inventario = %s AND Estado = 'Publicado'", (id_inventario,))
+        # Verificar stock actual y precio
+        cursor.execute("SELECT Cantidad, Lote, Precio_Actual, Id_Productor FROM inventario WHERE Id_Inventario = %s AND Estado = 'Publicado'", (id_inventario,))
         producto = cursor.fetchone()
         
         if not producto:
@@ -663,6 +668,40 @@ def descontar_stock_inventario(id_inventario, cantidad_compra):
             "UPDATE inventario SET Cantidad = %s, Estado = %s WHERE Id_Inventario = %s",
             (nuevo_stock, nuevo_estado, id_inventario)
         )
+        
+        # Registrar en la tabla venta y detalle_venta si es posible
+        try:
+            if not id_cliente:
+                # Buscar un cliente por defecto si no se pasa ID
+                cursor.execute("SELECT Id_Cliente FROM cliente LIMIT 1")
+                row = cursor.fetchone()
+                if row:
+                    id_cliente = row['Id_Cliente']
+                else:
+                    # Crear cliente general de respaldo si no hay ninguno
+                    cursor.execute(
+                        "INSERT INTO cliente (Nombre, Correo, Contrasena, Telefono, Localidad) VALUES (%s, %s, %s, %s, %s)",
+                        ("Cliente General", "general@unrc.edu.mx", "pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1", "5500000000", "Xochimilco")
+                    )
+                    id_cliente = cursor.lastrowid
+            
+            precio_unitario = float(producto['Precio_Actual'])
+            total_venta = float(cantidad_compra) * precio_unitario
+            
+            cursor.execute(
+                "INSERT INTO venta (Id_Cliente, Total, Metodo_Pago, Estatus) VALUES (%s, %s, 'Efectivo', 'Completada')",
+                (id_cliente, total_venta)
+            )
+            id_venta = cursor.lastrowid
+            
+            cursor.execute(
+                "INSERT INTO detalle_venta (Id_Venta, Id_Inventario, Cantidad, Precio_Unitario) VALUES (%s, %s, %s, %s)",
+                (id_venta, id_inventario, cantidad_compra, precio_unitario)
+            )
+        except Exception as e_venta:
+            print(f"Error al registrar venta/detalle_venta: {e_venta}")
+            # Continuamos aunque falle la inserción secundaria para no romper la compra
+            
         conexion.commit()
         
         return {
@@ -911,6 +950,65 @@ def obtener_monitoreos_productor(id_productor):
         return {"success": True, "monitoreos": monitoreos, "status": 200}
     except Error as e:
         print(f"Error en bd.obtener_monitoreos_productor: {e}")
+        return {"success": False, "error": "Error de base de datos", "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def obtener_notificaciones_productor(id_productor):
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        # 1. Obtener monitoreos de los estudiantes
+        sql_monitoreos = """
+            SELECT m.Fecha, e.Nombre AS Nombre_Estudiante, 'monitoreo' AS Tipo, m.PH, m.Salinidad, m.Humedad, m.Temperatura, m.Observaciones, NULL AS Producto, NULL AS Cantidad, NULL AS Total
+            FROM monitoreo_chinampa m
+            JOIN estudiante e ON m.Id_Estudiante = e.Id_Estudiante
+            WHERE m.Id_Productor = %s
+        """
+        cursor.execute(sql_monitoreos, (id_productor,))
+        list_mon = cursor.fetchall()
+        
+        # 2. Obtener compras (ventas) asociadas a los productos del productor
+        sql_compras = """
+            SELECT v.Fecha_Venta AS Fecha, c.Nombre AS Nombre_Cliente, 'compra' AS Tipo, NULL AS PH, NULL AS Salinidad, NULL AS Humedad, NULL AS Temperatura, NULL AS Observaciones, i.Lote AS Producto, dv.Cantidad, (dv.Cantidad * dv.Precio_Unitario) AS Total
+            FROM detalle_venta dv
+            JOIN venta v ON dv.Id_Venta = v.Id_Venta
+            JOIN cliente c ON v.Id_Cliente = c.Id_Cliente
+            JOIN inventario i ON dv.Id_Inventario = i.Id_Inventario
+            WHERE i.Id_Productor = %s
+        """
+        cursor.execute(sql_compras, (id_productor,))
+        list_comp = cursor.fetchall()
+        
+        # Combinar ambas listas
+        todas = []
+        for item in list_mon:
+            if item.get('Fecha'):
+                item['Fecha'] = item['Fecha'].strftime('%Y-%m-%d %H:%M:%S')
+            for col in ['PH', 'Salinidad', 'Humedad', 'Temperatura']:
+                if item.get(col) is not None:
+                    item[col] = float(item[col])
+            todas.append(item)
+            
+        for item in list_comp:
+            if item.get('Fecha'):
+                item['Fecha'] = item['Fecha'].strftime('%Y-%m-%d %H:%M:%S')
+            for col in ['Cantidad', 'Total']:
+                if item.get(col) is not None:
+                    item[col] = float(item[col])
+            todas.append(item)
+            
+        # Ordenar por fecha descendente
+        todas = sorted(todas, key=lambda x: x['Fecha'], reverse=True)
+        
+        return {"success": True, "notificaciones": todas, "status": 200}
+    except Error as e:
+        print(f"Error en bd.obtener_notificaciones_productor: {e}")
         return {"success": False, "error": "Error de base de datos", "status": 500}
     finally:
         if 'cursor' in locals():

@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor
+from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor, obtener_notificaciones_productor
 from src.ia.bot import generar_respuesta_bot
 from src.contabiliad import calcular_roi, calcular_punto_equilibrio, calcular_utilidad_neta
 from src.agronomia import indice_estres_salino
@@ -271,9 +271,10 @@ def put_estado_inventario_route(id_inventario):
         from src.bd import actualizar_estado_inventario
         data = request.get_json()
         nuevo_estado = data.get('estado')
+        precio = data.get('precio')  # Opcional si se quiere poner precio al publicar
         if not nuevo_estado:
             return jsonify({"error": "Estado requerido"}), 400
-        result = actualizar_estado_inventario(id_inventario, nuevo_estado)
+        result = actualizar_estado_inventario(id_inventario, nuevo_estado, precio)
         if result['success']:
             return jsonify({"message": "Estado actualizado exitosamente"}), 200
         else:
@@ -315,6 +316,17 @@ def post_calculo_bayes():
     data = request.get_json()
     res = probabilidad_bayesiana(float(data['p_clima_exito']), float(data['p_exito']), float(data['p_clima']))
     return jsonify({"resultado": res * 100, "unidad": "% de probabilidad"})
+
+@app.route('/api/calculos/integral', methods=['POST'])
+def post_calculo_integral():
+    try:
+        data = request.get_json()
+        tasas = data.get('tasas', [])
+        tasas_float = [float(x) for x in tasas]
+        res = integral_acumulacion_precipitacion(tasas_float)
+        return jsonify({"resultado": res, "unidad": "L/m² (mm acumulados)"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/api/productor/publicar_cosecha', methods=['POST'])
 def post_publicar_cosecha_route():
@@ -369,11 +381,19 @@ def post_comprar_producto_route():
         data = request.get_json()
         id_inventario = data.get('id_inventario')
         cantidad = data.get('cantidad', 1)
-        
         if not id_inventario:
             return jsonify({"error": "id_inventario requerido"}), 400
+            
+        # Validación: compra mínima de 2 kilos/unidades
+        try:
+            cant_val = float(cantidad)
+            if cant_val < 2.0:
+                return jsonify({"error": "La compra mínima es de 2 kilos/unidades."}), 400
+        except (ValueError, TypeError):
+            return jsonify({"error": "Cantidad no válida"}), 400
         
-        result = descontar_stock_inventario(id_inventario, cantidad)
+        id_cliente = data.get('id_cliente')
+        result = descontar_stock_inventario(id_inventario, cantidad, id_cliente)
         if result['success']:
             return jsonify({
                 "message": f"Compra exitosa: {result['lote']}",
@@ -538,6 +558,22 @@ def get_monitoreos_productor_route():
             return jsonify({"error": result['error']}), result['status']
     except Exception as e:
         print("Error en ruta obtener monitoreos productor:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/notificaciones', methods=['GET'])
+def get_notificaciones_productor_route():
+    try:
+        id_productor = request.args.get('id_productor')
+        if not id_productor:
+            return jsonify({"error": "ID de productor requerido"}), 400
+            
+        result = obtener_notificaciones_productor(id_productor)
+        if result['success']:
+            return jsonify(result['notificaciones']), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta obtener notificaciones:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
 if __name__ == '__main__':

@@ -1575,3 +1575,42 @@ input:checked + .slider:before {
     }
 }
 
+/* Botones de acción para el Inventario de Cosechas (Poner a la venta / Guardar en bodega) */
+.btn-action-harvest {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.btn-action-harvest.publish {
+    background-color: var(--accent-green);
+    color: #1b4332;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.btn-action-harvest.publish:hover {
+    background-color: #2d6a4f;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(45, 106, 79, 0.2);
+}
+.btn-action-harvest.depublish {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+.btn-action-harvest.depublish:hover {
+    background-color: #ffeeba;
+    color: #533f03;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(133, 100, 4, 0.1);
+}
+
+

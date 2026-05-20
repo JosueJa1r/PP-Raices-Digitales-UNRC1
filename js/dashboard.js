@@ -25,21 +25,21 @@ async function cargarDatosDashboard() {
             renderizarStats(stats);
         }
 
-        // 2. Cargar Cosechas
-        const responseCosechas = await fetch(`${API_BASE_URL}/api/productor/cosechas?id_productor=${idProductor}`);
-        if (responseCosechas.ok) {
-            const cosechas = await responseCosechas.json();
-            renderizarCosechas(cosechas);
+        // 2. Cargar Notificaciones Recientes
+        const responseNotifs = await fetch(`${API_BASE_URL}/api/productor/notificaciones?id_productor=${idProductor}`);
+        if (responseNotifs.ok) {
+            const notificaciones = await responseNotifs.json();
+            renderizarNotificaciones(notificaciones);
         }
 
-        // 3. Cargar Semillas (Inventario Personal del Agricultor)
-        const responseSemillas = await fetch(`${API_BASE_URL}/api/semillas?id_productor=${idProductor}`);
-        if (responseSemillas.ok) {
-            const semillas = await responseSemillas.json();
-            renderizarSemillas(semillas);
+        // 3. Cargar Inventario de Cosechas
+        const responseInventario = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}`);
+        if (responseInventario.ok) {
+            const data = await responseInventario.json();
+            renderizarInventarioCosechas(data.items || []);
         }
 
-        // 4. Cargar Monitoreos Estudiantiles
+        // 4. Cargar Monitoreos Estudiantiles (para la alerta y tabla inferior)
         const responseMonitoreos = await fetch(`${API_BASE_URL}/api/productor/monitoreos?id_productor=${idProductor}`);
         if (responseMonitoreos.ok) {
             const monitoreos = await responseMonitoreos.json();
@@ -60,76 +60,138 @@ function renderizarStats(stats) {
     }
 }
 
-function renderizarCosechas(cosechas) {
-    const tbody = document.querySelector('.table-container table tbody');
+function renderizarNotificaciones(notificaciones) {
+    const tbody = document.querySelector('#table-notificaciones tbody');
     if (!tbody) return;
 
-    // Limpiar tabla
     tbody.innerHTML = '';
 
-    if (cosechas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay cosechas registradas.</td></tr>';
+    if (notificaciones.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted);">No hay notificaciones recientes.</td></tr>';
         return;
     }
 
-    cosechas.forEach(cos => {
+    notificaciones.forEach(notif => {
         const tr = document.createElement('tr');
+        
+        let badgeTipo = '';
+        let detalle = '';
+        
+        if (notif.Tipo === 'monitoreo') {
+            badgeTipo = '<span class="status-badge status-active" style="background-color: var(--accent-orange); color: #fff;">Monitoreo</span>';
+            detalle = `El estudiante <strong>${notif.Nombre_Estudiante}</strong> registró un monitoreo: pH <strong>${notif.PH}</strong>, Salinidad <strong>${notif.Salinidad} dS/m</strong>, Humedad <strong>${notif.Humedad}%</strong>, Temp. <strong>${notif.Temperatura}°C</strong>.`;
+        } else if (notif.Tipo === 'compra') {
+            badgeTipo = '<span class="status-badge status-active" style="background-color: var(--accent-green); color: #fff;">Compra</span>';
+            detalle = `El cliente <strong>${notif.Nombre_Cliente}</strong> compró <strong>${notif.Cantidad} kg</strong> de <strong>${notif.Producto}</strong>. Total: <strong style="color: var(--accent-green); font-weight: bold;">$${notif.Total.toFixed(2)} MXN</strong>.`;
+        }
+        
         tr.innerHTML = `
-            <td>${cos.Id_Cosecha || 'N/A'}</td>
-            <td>${cos.Temporada || 'General'}</td>
-            <td><span class="status-badge status-${cos.Estado === 'Activa' ? 'active' : 'finished'}">${cos.Estado || 'Desconocido'}</span></td>
-            <td>${formatearFecha(cos.Fecha_Inicio)}</td>
-            <td>${formatearFecha(cos.Fecha_Fin)}</td>
-            <td style="color: var(--accent-green); font-weight: bold;">+${cos.roi_calculado}%</td>
+            <td style="white-space: nowrap;">${formatearFechaHora(notif.Fecha)}</td>
+            <td>${badgeTipo}</td>
+            <td style="text-align: left;">${detalle}</td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-function renderizarSemillas(semillas) {
-    const tables = document.querySelectorAll('.table-container table');
-    if (tables.length < 2) return;
-    
-    const tbody = tables[1].querySelector('tbody');
+function renderizarInventarioCosechas(items) {
+    const tbody = document.querySelector('#table-inventario-cosechas tbody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    if (semillas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No tienes semillas en tu inventario.</td></tr>';
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No hay cosechas en el inventario.</td></tr>';
         return;
     }
 
-    semillas.forEach((sem, index) => {
+    items.forEach(item => {
         const tr = document.createElement('tr');
+        
+        let badgeEstado = '';
+        if (item.Estado === 'Publicado') {
+            badgeEstado = '<span class="status-badge status-active">Publicado</span>';
+        } else if (item.Estado === 'En Bodega') {
+            badgeEstado = '<span class="status-badge status-finished" style="background-color: #6c757d;">En Bodega</span>';
+        } else if (item.Estado === 'Agotado') {
+            badgeEstado = '<span class="status-badge status-finished" style="background-color: #dc3545;">Agotado</span>';
+        } else {
+            badgeEstado = `<span class="status-badge status-finished">${item.Estado}</span>`;
+        }
+        
         tr.innerHTML = `
-            <td>SEM-${(index + 1).toString().padStart(3, '0')}</td>
-            <td>${sem.Nombre_Semilla}</td>
-            <td>${sem.Nombre_Categoria || 'Semillas'}</td>
-            <td>N/A</td>
-            <td>${sem.Cantidad || 0} Unidades</td>
+            <td><strong>${item.Lote}</strong></td>
+            <td>${item.Cantidad}</td>
+            <td>${item.Unidad_Medida || 'Kg'}</td>
+            <td style="color: var(--accent-green); font-weight: bold;">$${item.Precio_Actual.toFixed(2)} MXN</td>
+            <td>${badgeEstado}</td>
         `;
         tbody.appendChild(tr);
+    });
+}
+
+function formatearFechaHora(fechaStr) {
+    if (!fechaStr) return 'N/A';
+    const date = new Date(fechaStr);
+    if (isNaN(date.getTime())) return fechaStr;
+    return date.toLocaleString('es-MX', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     });
 }
 
 function renderizarMonitoreosEstudiantes(monitoreos) {
     const table = document.getElementById('table-monitoreo-estudiantes');
+    const alertaBox = document.getElementById('alerta-monitoreo-reciente');
+    
+    // Configurar banner de alerta si existe en el DOM
+    if (alertaBox) {
+        if (monitoreos && monitoreos.length > 0) {
+            const ultimoMon = monitoreos[0];
+            // Formatear fecha
+            let fechaFormato = ultimoMon.Fecha;
+            try {
+                const d = new Date(ultimoMon.Fecha);
+                if (!isNaN(d.getTime())) {
+                    fechaFormato = d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+                }
+            } catch(e) {}
+
+            const desc = `El estudiante <strong>${ultimoMon.Nombre_Estudiante}</strong> registró una medición el <strong>${fechaFormato}</strong>: pH <strong>${ultimoMon.PH}</strong>, Salinidad <strong>${ultimoMon.Salinidad} dS/m</strong>, Humedad <strong>${ultimoMon.Humedad}%</strong> y Temp. <strong>${ultimoMon.Temperatura}°C</strong>.`;
+            document.getElementById('alerta-monitoreo-detalles').innerHTML = desc;
+            alertaBox.style.display = 'flex';
+        } else {
+            alertaBox.style.display = 'none';
+        }
+    }
+
     if (!table) return;
     const tbody = table.querySelector('tbody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    if (monitoreos.length === 0) {
+    if (!monitoreos || monitoreos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color: var(--text-muted);">No hay reportes de estudiantes registrados para tu chinampa.</td></tr>';
         return;
     }
 
     monitoreos.forEach(mon => {
+        // Formatear la fecha para la tabla
+        let fechaCelda = mon.Fecha;
+        try {
+            const d = new Date(mon.Fecha);
+            if (!isNaN(d.getTime())) {
+                fechaCelda = d.toLocaleDateString('es-MX') + ' ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+            }
+        } catch(e) {}
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${mon.Fecha}</td>
+            <td>${fechaCelda}</td>
             <td><strong>${mon.Nombre_Estudiante}</strong></td>
             <td><span style="background: rgba(255,159,67,0.15); color: #ff9f43; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${mon.PH}</span></td>
             <td>${mon.Salinidad}</td>
@@ -167,29 +229,32 @@ async function cargarInventarioVenta() {
     } catch (error) {
         console.error('Error al cargar inventario:', error);
     }
-}
-
-function renderizarInventarioVenta(productos) {
+}function renderizarInventarioVenta(productos) {
     const tbody = document.querySelector('.table-container table tbody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    productos.forEach(p => {
+    
+    // Si productos.items existe, usamos eso, si no productos directamente
+    const items = productos.items || productos;
+    
+    items.forEach(p => {
         const tr = document.createElement('tr');
         const unidadDisplay = p.Unidad_Medida || 'Kg';
-        const estadoReal = p.Estado || (p.Observaciones && p.Observaciones.includes('Agotado') ? 'Agotado' : 'Publicado');
-        const color = estadoReal === 'Publicado' ? 'var(--accent-green)' : (estadoReal === 'Agotado' ? '#ef4444' : '#f59e0b');
+        const isPublicado = p.Estado === 'Publicado';
+        const color = isPublicado ? 'var(--accent-green)' : '#f59e0b';
+        
+        const actionBtn = isPublicado 
+            ? `<button class="btn-action-harvest depublish" onclick="toggleEstadoProducto(${p.Id_Inventario}, '${p.Estado}')">Guardar en Bodega</button>`
+            : `<button class="btn-action-harvest publish" onclick="toggleEstadoProducto(${p.Id_Inventario}, '${p.Estado}')">Poner a la Venta</button>`;
+
         tr.innerHTML = `
             <td>${p.Lote}</td>
             <td>General</td>
             <td>${p.Cantidad} ${unidadDisplay}</td>
             <td>$${p.Precio_Actual} MXN</td>
-            <td><span style="color: ${color};">${estadoReal}</span></td>
-            <td>
-                <button class="icon-btn" onclick="toggleEstadoProducto(${p.Id_Inventario}, '${estadoReal}')" title="Cambiar Estado">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                </button>
-            </td>
+            <td><span style="color: ${color}; font-weight: 600;">${p.Estado}</span></td>
+            <td>${actionBtn}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -197,28 +262,38 @@ function renderizarInventarioVenta(productos) {
 
 window.toggleEstadoProducto = async function(id_inventario, estadoActual) {
     let nuevoEstado = '';
+    let precio = null;
+    
     if (estadoActual === 'Publicado') {
         nuevoEstado = 'En Bodega';
-    } else if (estadoActual === 'En Bodega') {
-        nuevoEstado = 'En Oferta';
+        if (!confirm('¿Seguro que deseas quitar este producto de la tienda y guardarlo en bodega?')) return;
     } else {
         nuevoEstado = 'Publicado';
+        const inputPrecio = prompt('Ingresa el precio por unidad (MXN) para poner este producto a la venta:', '10.00');
+        if (inputPrecio === null) return; // Cancelado
+        precio = parseFloat(inputPrecio);
+        if (isNaN(precio) || precio <= 0) {
+            if (typeof mostrarAlerta === 'function') {
+                mostrarAlerta('warning', 'Precio inválido', 'El precio debe ser un número mayor a 0.');
+            } else {
+                alert('Precio inválido. Debe ser un número mayor a 0.');
+            }
+            return;
+        }
     }
-
-    if (!confirm(`¿Cambiar el estado del producto a "${nuevoEstado}"?`)) return;
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}/estado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estado: nuevoEstado })
+            body: JSON.stringify({ estado: nuevoEstado, precio: precio })
         });
         
         if (response.ok) {
             if (typeof mostrarAlerta === 'function') {
-                mostrarAlerta('success', 'Estado Actualizado', `El producto ahora está: ${nuevoEstado}`);
+                mostrarAlerta('success', 'Éxito', `El producto ahora está: ${nuevoEstado}`);
             } else {
-                alert(`Producto marcado como ${nuevoEstado}`);
+                alert(`El producto ahora está: ${nuevoEstado}`);
             }
             cargarInventarioVenta(); // Recargar la tabla
         } else {
@@ -228,7 +303,6 @@ window.toggleEstadoProducto = async function(id_inventario, estadoActual) {
         console.error('Error al cambiar estado:', error);
     }
 };
-
 function configurarFormularioInventario() {
     const form = document.querySelector('.details-form');
     if (!form) return;

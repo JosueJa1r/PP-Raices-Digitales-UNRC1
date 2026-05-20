@@ -378,21 +378,65 @@
 
                     result.items.forEach(prod => {
                         const tr = document.createElement('tr');
-                        const colorEstado = prod.Estado === 'Publicado' ? 'var(--accent-green)' : '#f39c12';
+                        const isPublicado = prod.Estado === 'Publicado';
+                        const colorEstado = isPublicado ? 'var(--accent-green)' : '#f59e0b';
                         const unidadDisplay = prod.Unidad_Medida || 'Kg';
+
+                        const actionBtn = isPublicado 
+                            ? `<button class="btn-action-harvest depublish" onclick="toggleEstadoProducto(${prod.Id_Inventario}, '${prod.Estado}')">Guardar en Bodega</button>`
+                            : `<button class="btn-action-harvest publish" onclick="toggleEstadoProducto(${prod.Id_Inventario}, '${prod.Estado}')">Poner a la Venta</button>`;
 
                         tr.innerHTML = `
                             <td>${prod.Lote}</td>
                             <td>General</td>
                             <td>${prod.Cantidad} ${unidadDisplay}</td>
                             <td>$${prod.Precio_Actual} MXN</td>
-                            <td><span style="color: ${colorEstado};">${prod.Estado}</span></td>
+                            <td><span style="color: ${colorEstado}; font-weight: 600;">${prod.Estado}</span></td>
+                            <td>${actionBtn}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
             } catch (error) {
                 console.error('Error al cargar inventario:', error);
+            }
+        }
+
+        async function toggleEstadoProducto(id_inventario, estadoActual) {
+            let nuevoEstado = '';
+            let precio = null;
+            
+            if (estadoActual === 'Publicado') {
+                nuevoEstado = 'En Bodega';
+                if (!confirm('¿Seguro que deseas quitar este producto de la tienda y guardarlo en bodega?')) return;
+            } else {
+                nuevoEstado = 'Publicado';
+                const inputPrecio = prompt('Ingresa el precio por unidad (MXN) para poner este producto a la venta:', '10.00');
+                if (inputPrecio === null) return; // Cancelado
+                precio = parseFloat(inputPrecio);
+                if (isNaN(precio) || precio <= 0) {
+                    mostrarAlerta('warning', 'Precio inválido', 'El precio debe ser un número mayor a 0.');
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado, precio: precio })
+                });
+
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', `El producto ahora está: ${nuevoEstado}`);
+                    const idProductor = localStorage.getItem('productor_id');
+                    if (idProductor) cargarInventario(idProductor);
+                } else {
+                    mostrarAlerta('error', 'Error', 'No se pudo actualizar el estado del producto.');
+                }
+            } catch (error) {
+                console.error('Error al cambiar estado:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo comunicar con el servidor.');
             }
         }
 

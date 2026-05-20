@@ -77,6 +77,15 @@
                         <p style="color: var(--text-muted);">Cargando clima para Xochimilco...</p>
                     </div>
 
+                    <!-- Alerta de Monitoreo Estudiantil Reciente -->
+                    <div id="alerta-monitoreo-reciente" style="display: none; background: rgba(255, 159, 67, 0.1); border: 2px solid #ff9f43; border-radius: 12px; padding: 16px; margin-bottom: 20px; align-items: center; gap: 15px; box-shadow: 4px 4px 0px #000; color: #333333;">
+                        <span style="font-size: 1.8rem; animation: pulse 2s infinite;">📢</span>
+                        <div style="flex: 1;">
+                            <h4 style="margin: 0; color: #d35400; font-size: 1.1rem; font-weight: bold;">¡Monitoreo Semanal Registrado!</h4>
+                            <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #555555;" id="alerta-monitoreo-detalles">Cargando detalles del monitoreo...</p>
+                        </div>
+                    </div>
+
                     <!-- Stats Grid -->
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -93,60 +102,42 @@
                         </div>
                     </div>
 
-                    <!-- Cosechas Table -->
+                    <!-- Notificaciones Table -->
                     <div class="table-container">
-                        <h3 class="table-title">Mis Cosechas Recientes</h3>
-                        <!-- TODO BACK/DBA: Endpoint GET /productor/cosechas. Query a la base de datos (tabla Cosechas). -->
-                        <table>
+                        <h3 class="table-title">Notificaciones Recientes</h3>
+                        <table id="table-notificaciones">
                             <thead>
                                 <tr>
-                                    <th>ID Cosecha</th>
-                                    <th>Temporada</th>
-                                    <th>Estatus</th>
-                                    <th>Inicio</th>
-                                    <th>Fin</th>
-                                    <th>ROI Estimado</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Detalle</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- INICIO BUCLE: for cosecha in cosechas_recientes -->
                                 <tr>
-                                    <td>COS-2024-01</td>
-                                    <td>Primavera</td>
-                                    <td><span class="status-badge status-active">Activa</span></td>
-                                    <td>01/03/2024</td>
-                                    <td>15/06/2024</td>
-                                    <td>$45,000 MXN</td>
+                                    <td colspan="3" style="text-align:center; color: var(--text-muted);">Cargando notificaciones...</td>
                                 </tr>
-                                <!-- FIN BUCLE -->
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Semillas/Inventario Table -->
+                    <!-- Inventario de Cosechas Table -->
                     <div class="table-container">
-                        <h3 class="table-title">Inventario de Semillas</h3>
-                        <!-- TODO BACK/DBA: Endpoint GET /productor/inventario_semillas. Query a la base de datos (tabla Inventario). -->
-                        <table>
+                        <h3 class="table-title">Inventario de Cosechas</h3>
+                        <table id="table-inventario-cosechas">
                             <thead>
                                 <tr>
-                                    <th>ID Semilla</th>
-                                    <th>Nombre</th>
-                                    <th>Categoría</th>
-                                    <th>Caducidad</th>
-                                    <th>Valor</th>
+                                    <th>Lote / Cosecha</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- INICIO BUCLE: for semilla in inventario_semillas -->
                                 <tr>
-                                    <td>SEM-TOM-01</td>
-                                    <td>Tomate Saladette</td>
-                                    <td>Hortalizas</td>
-                                    <td>12/2025</td>
-                                    <td>$450 MXN</td>
+                                    <td colspan="5" style="text-align:center; color: var(--text-muted);">Cargando inventario de cosechas...</td>
                                 </tr>
-                                <!-- FIN BUCLE -->
                             </tbody>
                         </table>
                     </div>
