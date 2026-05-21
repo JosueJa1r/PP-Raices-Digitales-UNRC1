@@ -52,9 +52,9 @@ def registrar_productor(nombre, correo, password, hectareas, filtros, telefono=N
         id_productor = cursor.lastrowid
         
         # Insertar Terreno
-        if hectareas:
-            sql_terreno = "INSERT INTO terreno (Id_Productor) VALUES (%s)"
-            cursor.execute(sql_terreno, (id_productor,))
+        m2 = float(hectareas) if hectareas else 0.0
+        sql_terreno = "INSERT INTO terreno (Id_Productor, Metros_Cuadrados) VALUES (%s, %s)"
+        cursor.execute(sql_terreno, (id_productor, m2))
             
         # Insertar Semillas en Inventario si existen
         if semillas and isinstance(semillas, list):
@@ -257,9 +257,9 @@ def obtener_stats_productor(id_productor):
         cursor = conexion.cursor(dictionary=True)
         
         # 1. Terreno Total
-        cursor.execute("SELECT COUNT(*) as total_terrenos FROM terreno WHERE Id_Productor = %s", (id_productor,))
+        cursor.execute("SELECT SUM(Metros_Cuadrados) as total_m2 FROM terreno WHERE Id_Productor = %s", (id_productor,))
         res_terreno = cursor.fetchone()
-        terreno = (res_terreno['total_terrenos'] * 200.0) if res_terreno and res_terreno['total_terrenos'] else 200.0
+        terreno = res_terreno['total_m2'] if res_terreno and res_terreno['total_m2'] is not None else 0.0
         
         # 2. Cosechas Activas
         cursor.execute("SELECT COUNT(*) as activas FROM cosecha WHERE Id_Productor = %s AND Estatus = 'Activa'", (id_productor,))
@@ -461,14 +461,15 @@ def obtener_analiticas_globales():
             prod_inv = cursor.fetchall()
             
             ganancia_total = 0.0
-            m2_total = 0.0
-            
             for item in prod_inv:
                 qty = item['Cantidad'] if item['Cantidad'] is not None else 0.0
                 price = item['Precio_Actual'] if item['Precio_Actual'] is not None else 0.0
-                
                 ganancia_total += qty * price
-                m2_total += qty * 10000.0
+                
+            # Fetch actual terrain size in square meters
+            cursor.execute("SELECT SUM(Metros_Cuadrados) as total_m2 FROM terreno WHERE Id_Productor = %s", (id_prod,))
+            res_terreno = cursor.fetchone()
+            m2_total = res_terreno['total_m2'] if res_terreno and res_terreno['total_m2'] is not None else 0.0
                 
             producer_list.append({
                 'Nombre': prod['Nombre'],
@@ -732,7 +733,9 @@ def obtener_perfil_productor(id_productor):
         perfil = cursor.fetchone()
         
         if perfil:
-            perfil['Hectareas'] = 10.0
+            cursor.execute("SELECT SUM(Metros_Cuadrados) as total_m2 FROM terreno WHERE Id_Productor = %s", (id_productor,))
+            res_terreno = cursor.fetchone()
+            perfil['Hectareas'] = res_terreno['total_m2'] if res_terreno and res_terreno['total_m2'] is not None else 0.0
             perfil.update({"Clabe": "", "Envio_Nacional": 1, "Alerta_Saturacion": 1, "Aviso_Compra": 1})
             return {"success": True, "perfil": perfil, "status": 200}
         else:
@@ -766,6 +769,17 @@ def actualizar_perfil_productor(id_productor, data):
             data.get('Filtro_Agua'), 
             id_productor
         ))
+
+        # Actualizar terreno en metros cuadrados (recibido bajo la clave legacy 'Hectareas')
+        hectareas_val = data.get('Hectareas')
+        m2 = float(hectareas_val) if hectareas_val else 0.0
+        
+        cursor.execute("SELECT Id_Terreno FROM terreno WHERE Id_Productor = %s LIMIT 1", (id_productor,))
+        terreno_row = cursor.fetchone()
+        if terreno_row:
+            cursor.execute("UPDATE terreno SET Metros_Cuadrados = %s WHERE Id_Terreno = %s", (m2, terreno_row[0]))
+        else:
+            cursor.execute("INSERT INTO terreno (Id_Productor, Metros_Cuadrados) VALUES (%s, %s)", (id_productor, m2))
 
         # 3. Actualizar contraseña si se requiere
         if data.get('password'):

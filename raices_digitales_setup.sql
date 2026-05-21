@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS terreno (
     Id_Terreno INT AUTO_INCREMENT PRIMARY KEY,
     Id_Productor INT NOT NULL,
     Id_Estudiante INT,
+    Metros_Cuadrados FLOAT DEFAULT 0.0,
     FOREIGN KEY (Id_Productor) REFERENCES productor(Id_Productor) ON DELETE CASCADE,
     FOREIGN KEY (Id_Estudiante) REFERENCES estudiante(Id_Estudiante) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -184,12 +185,12 @@ INSERT INTO estudiante (Nombre, Correo, Contrasena) VALUES
 ('Carlos Gomez Perez', 'carlos.g@urc.mx', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1');
 
 -- E. Terrenos iniciales
-INSERT INTO terreno (Id_Productor, Id_Estudiante) VALUES 
-(1, 1),
-(1, 2),
-(2, 2),
-(3, 1),
-(5, 2);
+INSERT INTO terreno (Id_Productor, Id_Estudiante, Metros_Cuadrados) VALUES 
+(1, 1, 500.0),
+(1, 2, 250.0),
+(2, 2, 600.0),
+(3, 1, 350.0),
+(5, 2, 800.0);
 
 -- F. Cosechas registradas (algunas en proceso y otras listas para inventario)
 INSERT INTO cosecha (Id_Productor, Id_Terreno, Id_Semilla, Temporada, Estatus, Fecha_Inicio, Fecha_Fin, Valor_Neto) VALUES 
