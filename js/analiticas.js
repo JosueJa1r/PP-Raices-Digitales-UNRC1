@@ -36,8 +36,8 @@ async function cargarAnaliticas() {
 }
 
 function renderizarGraficas(data) {
-    const textColor = '#fff'; // White text to match the beautiful dark/green glassmorphism background
-    const gridColor = 'rgba(255,255,255,0.08)';
+    const textColor = '#000000'; // Black text to be fully visible on white cards
+    const gridColor = 'rgba(0, 0, 0, 0.08)'; // Soft dark lines for grids
 
     // 1. Gráfica de Volumen (Semillas Más Plantadas)
     const ctxVolumen = document.getElementById('chartTemporada').getContext('2d');
@@ -68,7 +68,7 @@ function renderizarGraficas(data) {
                     beginAtZero: true, 
                     grid: { color: gridColor }, 
                     ticks: { color: textColor },
-                    title: { display: true, text: 'Hectáreas (ha)', color: textColor }
+                    title: { display: true, text: 'Cantidad', color: textColor }
                 },
                 x: { 
                     grid: { display: false }, 
@@ -80,7 +80,7 @@ function renderizarGraficas(data) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return ` Cantidad: ${context.raw} ha`;
+                            return ` Cantidad: ${context.raw}`;
                         }
                     }
                 }
@@ -98,7 +98,7 @@ function renderizarGraficas(data) {
                 data: data.inversion.length > 0 ? data.inversion.map(i => i.Total_Valor) : [0],
                 backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899'],
                 borderWidth: 2,
-                borderColor: '#1e293b'
+                borderColor: '#ffffff'
             }]
         },
         options: {

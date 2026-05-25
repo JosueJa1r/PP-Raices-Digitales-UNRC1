@@ -177,7 +177,13 @@ def obtener_cosechas_productor(id_productor):
     
     try:
         cursor = conexion.cursor(dictionary=True)
-        sql = "SELECT * FROM cosecha WHERE Id_Productor = %s"
+        sql = """
+            SELECT c.*, s.Nombre_Semilla, s.Valor AS Valor_Semilla, t.Metros_Cuadrados
+            FROM cosecha c
+            LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
+            LEFT JOIN terreno t ON c.Id_Terreno = t.Id_Terreno
+            WHERE c.Id_Productor = %s
+        """
         cursor.execute(sql, (id_productor,))
         cosechas = cursor.fetchall()
         return {"success": True, "cosechas": cosechas, "status": 200}
@@ -298,12 +304,45 @@ def obtener_inventario_productor(id_productor, tipo=None):
         cursor = conexion.cursor(dictionary=True)
         # Filtramos según el tipo solicitado
         if tipo == 'cosecha':
-            sql = "SELECT * FROM inventario WHERE Id_Productor = %s AND (Observaciones NOT LIKE '%pH%' AND Lote NOT LIKE 'Registro Tierra:%')"
-        elif tipo == 'insumo':
-            # Mostrar todo el inventario de la base de datos tal como el usuario lo solicita
-            sql = "SELECT * FROM inventario WHERE Id_Productor = %s"
+            sql = """
+                SELECT 
+                    i.*,
+                    p.Nombre AS Nombre_Productor,
+                    s.Nombre_Semilla,
+                    s.Valor AS Valor_Semilla,
+                    c.Valor_Neto,
+                    t.Metros_Cuadrados,
+                    cat.Nombre_Categoria,
+                    COALESCE((SELECT SUM(dv.Cantidad) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Cantidad_Vendida,
+                    COALESCE((SELECT SUM(dv.Cantidad * dv.Precio_Unitario) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Total_Vendido_Monto
+                FROM inventario i
+                INNER JOIN productor p ON i.Id_Productor = p.Id_Productor
+                LEFT JOIN cosecha c ON i.Id_Cosecha = c.Id_Cosecha
+                LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
+                LEFT JOIN categoria cat ON s.Id_Categoria = cat.Id_Categoria
+                LEFT JOIN terreno t ON c.Id_Terreno = t.Id_Terreno
+                WHERE i.Id_Productor = %s AND (i.Observaciones NOT LIKE '%pH%' AND i.Lote NOT LIKE 'Registro Tierra:%')
+            """
         else:
-            sql = "SELECT * FROM inventario WHERE Id_Productor = %s"
+            sql = """
+                SELECT 
+                    i.*,
+                    p.Nombre AS Nombre_Productor,
+                    s.Nombre_Semilla,
+                    s.Valor AS Valor_Semilla,
+                    c.Valor_Neto,
+                    t.Metros_Cuadrados,
+                    cat.Nombre_Categoria,
+                    COALESCE((SELECT SUM(dv.Cantidad) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Cantidad_Vendida,
+                    COALESCE((SELECT SUM(dv.Cantidad * dv.Precio_Unitario) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Total_Vendido_Monto
+                FROM inventario i
+                INNER JOIN productor p ON i.Id_Productor = p.Id_Productor
+                LEFT JOIN cosecha c ON i.Id_Cosecha = c.Id_Cosecha
+                LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
+                LEFT JOIN categoria cat ON s.Id_Categoria = cat.Id_Categoria
+                LEFT JOIN terreno t ON c.Id_Terreno = t.Id_Terreno
+                WHERE i.Id_Productor = %s
+            """
             
         cursor.execute(sql, (id_productor,))
         productos = cursor.fetchall()
@@ -442,15 +481,7 @@ def obtener_analiticas_globales():
         volumen = list(seed_stats.values())
         volumen.sort(key=lambda x: x['Total_Hectareas'], reverse=True)
         
-        # 2. Inversion (using the same seed stats, mapped to the legacy key Total_Valor for the frontend charts)
-        inversion = []
-        for v in volumen:
-            inversion.append({
-                'Nombre_Semilla': v['Nombre_Semilla'],
-                'Total_Valor': v['Valor_Ganado']
-            })
-            
-        # 3. Top Productores by Metros Cuadrados & Ganancia
+        # 2. Top Productores by Metros Cuadrados & Ganancia (Calculado antes de la inversión para reuso)
         cursor.execute("SELECT Id_Productor, Nombre FROM productor")
         productores = cursor.fetchall()
         
@@ -477,7 +508,22 @@ def obtener_analiticas_globales():
                 'Ganancia': round(ganancia_total, 2)
             })
             
-        # Sort by Ganancia descending and limit to top 5
+        # 3. Inversion (mapeado para mostrar el Valor Ganado por Usuario Agricultor)
+        inversion = []
+        for prod in producer_list:
+            if prod['Ganancia'] > 0:
+                inversion.append({
+                    'Nombre_Semilla': prod['Nombre'],
+                    'Total_Valor': prod['Ganancia']
+                })
+        # Si no hay productores con ganancia, dejamos un marcador para evitar gráficos vacíos rotos
+        if not inversion:
+            inversion.append({
+                'Nombre_Semilla': 'Sin datos de ganancias',
+                'Total_Valor': 0.0
+            })
+            
+        # Ordenar productores por Ganancia descendente y limitar a los top 5
         producer_list.sort(key=lambda x: x['Ganancia'], reverse=True)
         top_productores = producer_list[:5]
         
@@ -544,13 +590,96 @@ def obtener_analiticas_globales():
         if conexion.is_connected():
             conexion.close()
 
-def registrar_publicacion_cosecha(id_productor, lote, cantidad, precio, vender_directamente, id_cosecha=None, unidad_medida='Kg'):
+def registrar_publicacion_cosecha(id_productor, lote, cantidad, precio, vender_directamente, id_cosecha=None, unidad_medida='Kg', id_semilla=None):
     conexion = conexion_db()
     if not conexion:
         return {"success": False, "error": "Error de conexión", "status": 500}
     
     try:
         cursor = conexion.cursor(dictionary=True)
+        
+        # Si no viene id_cosecha, intentamos crear una automáticamente
+        if not id_cosecha:
+            # 1. Buscar la semilla
+            seed = None
+            if id_semilla:
+                cursor.execute("SELECT * FROM semilla WHERE Id_Semilla = %s", (id_semilla,))
+                seed = cursor.fetchone()
+            if not seed and lote:
+                cursor.execute("SELECT * FROM semilla WHERE Nombre_Semilla = %s", (lote,))
+                seed = cursor.fetchone()
+            if not seed and lote:
+                cursor.execute("SELECT * FROM semilla WHERE Nombre_Semilla LIKE %s LIMIT 1", (f"%{lote}%",))
+                seed = cursor.fetchone()
+                
+            if seed:
+                id_semilla_val = seed['Id_Semilla']
+                temporada = seed['Temporada'] or 'Primavera-Verano'
+                tiempo_prod = seed['Tiempo_Produccion'] or 90
+                
+                # 2. Buscar/crear terreno del productor
+                cursor.execute("SELECT * FROM terreno WHERE Id_Productor = %s LIMIT 1", (id_productor,))
+                terrain = cursor.fetchone()
+                if not terrain:
+                    cursor.execute("INSERT INTO terreno (Id_Productor, Metros_Cuadrados) VALUES (%s, %s)", (id_productor, 500.0))
+                    conexion.commit()
+                    cursor.execute("SELECT * FROM terreno WHERE Id_Productor = %s LIMIT 1", (id_productor,))
+                    terrain = cursor.fetchone()
+                
+                id_terreno = terrain['Id_Terreno']
+                
+                # 3. Calcular Valor_Neto estimado para la cosecha con conversión de unidades
+                precio_unitario = float(precio) if (precio and float(precio) > 0) else float(seed['Valor'])
+                
+                id_cat = seed.get('Id_Categoria')
+                # Determinar si la semilla es por peso o por pieza/conteo
+                # Categorías por peso: 1 (Frutas), 4 (Granos), 5 (Tubérculos)
+                es_peso = True
+                if id_cat in [2, 3]: # Hortaliza de hoja, Ornamental / Flor
+                    es_peso = False
+                    
+                cant_val = float(cantidad)
+                uni = (unidad_medida or 'Kg').lower().strip()
+                
+                # Conversión a la unidad base de venta/precio
+                if es_peso:
+                    # La unidad de precio base es el Kg
+                    if uni in ['kg', 'kilo', 'kilogramo', 'kilogramos']:
+                        factor = 1.0
+                    elif uni in ['gramos', 'gramo', 'gr', 'g']:
+                        factor = 0.001
+                    elif uni in ['libras', 'libra', 'lb', 'lbs']:
+                        factor = 0.453592
+                    elif uni in ['costales', 'costal']:
+                        factor = 55.0
+                    elif uni in ['bultos', 'bulto']:
+                        factor = 50.0
+                    else:
+                        factor = 1.0
+                else:
+                    # La unidad de precio base es la pieza/manojo/unidad individual
+                    if uni in ['unidades', 'unidad', 'pieza', 'piezas', 'manojos', 'manojo', 'tallos', 'tallo', 'esquejes', 'esqueje']:
+                        factor = 1.0
+                    elif uni in ['cajas', 'caja']:
+                        factor = 20.0
+                    elif uni in ['kg', 'kilo', 'kilogramo', 'kilogramos']:
+                        factor = 10.0
+                    else:
+                        factor = 1.0
+                        
+                cantidad_base = cant_val * factor
+                valor_neto = cantidad_base * precio_unitario
+                
+                # 4. Insertar la cosecha
+                import datetime
+                fecha_fin = datetime.date.today()
+                fecha_inicio = fecha_fin - datetime.timedelta(days=int(tiempo_prod))
+                
+                cursor.execute("""
+                    INSERT INTO cosecha (Id_Productor, Id_Terreno, Id_Semilla, Temporada, Estatus, Fecha_Inicio, Fecha_Fin, Valor_Neto)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (id_productor, id_terreno, id_semilla_val, temporada, 'Terminada', fecha_inicio, fecha_fin, valor_neto))
+                id_cosecha = cursor.lastrowid
         
         # Estado según el flujo: SI vender -> 'Publicado', NO -> 'En Bodega'
         estado = "Publicado" if vender_directamente else "En Bodega"
@@ -728,7 +857,7 @@ def obtener_perfil_productor(id_productor):
     
     try:
         cursor = conexion.cursor(dictionary=True)
-        sql = "SELECT Nombre, Correo, Telefono, Tipo_Suelo, Filtro_Agua FROM productor WHERE Id_Productor = %s"
+        sql = "SELECT Nombre, Correo, Telefono, Filtro_Agua FROM productor WHERE Id_Productor = %s"
         cursor.execute(sql, (id_productor,))
         perfil = cursor.fetchone()
         
@@ -758,14 +887,13 @@ def actualizar_perfil_productor(id_productor, data):
         cursor = conexion.cursor()
         sql = """
             UPDATE productor 
-            SET Nombre = %s, Correo = %s, Telefono = %s, Tipo_Suelo = %s, Filtro_Agua = %s
+            SET Nombre = %s, Correo = %s, Telefono = %s, Filtro_Agua = %s
             WHERE Id_Productor = %s
         """
         cursor.execute(sql, (
             data.get('Nombre'), 
             data.get('Correo'), 
             data.get('Telefono'), 
-            data.get('Tipo_Suelo'), 
             data.get('Filtro_Agua'), 
             id_productor
         ))

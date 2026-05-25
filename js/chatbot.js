@@ -11,8 +11,10 @@ const initChatbot = () => {
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div class="bot-avatar">🤖</div>
                     <div>
-                        <h4 style="margin: 0; color: #fff;">RaícesBot IA</h4>
-                        <span style="font-size: 0.75rem; color: var(--accent-green);">En línea</span>
+                        <h4 style="margin: 0; color: #fff; font-weight: 600;">RaícesBot IA</h4>
+                        <span style="font-size: 0.75rem; color: var(--accent-green); display: flex; align-items: center; gap: 6px;">
+                            <span class="online-dot"></span>En línea
+                        </span>
                     </div>
                 </div>
                 <button id="chatbot-close-btn" aria-label="Cerrar chat">&times;</button>

@@ -10,7 +10,7 @@
         /* Estilos menores específicos de analíticas si se requieren */
         .analytics-content {
             padding: 2rem;
-            color: #fff;
+            color: var(--text-main);
             height: 100%;
             width: 100%;
             overflow-y: auto;
@@ -128,7 +128,7 @@
                         <div class="chart-card full-width">
                             <div class="chart-title">
                                 <span>Semillas Más Plantadas (Volumen)</span>
-                                <select style="background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border-color); padding: 5px; border-radius: 5px; outline: none;">
+                                <select style="background: #ffffff; color: #000000; border: 2px solid #000000; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; outline: none;">
                                     <option>Año Actual (2026)</option>
                                     <option>Año Pasado (2025)</option>
                                 </select>
@@ -138,10 +138,10 @@
                             </div>
                         </div>
 
-                        <!-- Pastel: Valor de Semilla -->
+                        <!-- Pastel: Valor Ganado por Usuario Agricultor -->
                         <div class="chart-card">
                             <div class="chart-title">
-                                <span>Valor Ganado por Cultivo (Ingresos Proyectados)</span>
+                                <span>Valor Ganado por Usuario Agricultor</span>
                             </div>
                             <div class="chart-container" style="height: 250px;">
                                 <canvas id="chartValor"></canvas>

@@ -37,7 +37,7 @@ PP-Raices-Digitales-UNRC/
 │   ├── app.py                  # Controlador Central (Rutas Flask)
 │   ├── bd.py                   # Gestión de Base de Datos y Seguridad
 │   ├── agronomia.py            # Algoritmos de Diagnóstico de Suelo
-│   ├── contabiliad.py          # Análisis Financiero y ROI
+│   ├── contabilidad.py         # Análisis Financiero y ROI
 │   ├── probabilidad.py         # Cálculo de Riesgos Bayesianos
 │   └── integral.py             # Cálculos de Acumulación Hídrica
 ├── vistas/                     # CAPA DE PRESENTACIÓN (Interfaces HTML)
@@ -94,6 +94,51 @@ PP-Raices-Digitales-UNRC/
 1.  **Resiliencia Hídrica:** Alerta sobre variaciones de salinidad y pH críticas para la producción local.
 2.  **Sustentabilidad Económica:** Fomenta precios justos mediante la eliminación de intermediarios.
 3.  **Digitalización del Campo:** Moderniza la gestión de las chinampas tradicionales para las nuevas generaciones.
+
+---
+
+## Viabilidad Económica, Costos de Nube y Retorno de Inversión (Payback)
+
+Para asegurar la sostenibilidad del proyecto **Raíces Digitales**, se estructuró una justificación de costos operativos y un modelo de recuperación de la inversión inicial (payback period) adaptado a la economía de los chinamperos de Xochimilco.
+
+### 1. Costo de Arranque (Inversión Única)
+El desarrollo y despliegue del sistema tiene un costo estimado inicial de **$120,000.00 MXN** (incluye diseño de interfaz UI/UX, arquitectura de software, base de datos MySQL, integración de APIs y programación del chatbot de IA).
+
+### 2. Costos de Operación Mensual (Infraestructura y Soporte)
+Mantener la plataforma en línea para una base estimada de **200 a 1,000 productores activos** requiere los siguientes servicios:
+
+| Concepto / Servicio | Proveedor Sugerido | Costo Estimado (Mensual) |
+| :--- | :--- | :--- |
+| **Base de Datos (MySQL)** | Aiven Cloud / AWS RDS | $320.00 MXN ($19 USD) |
+| **Servidor Backend (Flask)** | Render / AWS Lightsail | $250.00 MXN ($15 USD) |
+| **Hosting Frontend** | Vercel (Plan Hobby / Pro) | $340.00 MXN ($20 USD) |
+| **API Asistente IA** | Gemini API (Pago por Uso) | $200.00 MXN ($10 USD) |
+| **Dominio y SSL (`.mx`)** | Registro anual prorrateado | $50.00 MXN ($2.5 USD) |
+| **Soporte y Administración Técnico** | Freelancer / Part-Time | $2,000.00 MXN |
+| **TOTAL OPERATIVO MENSUAL** | **Todos los servicios** | **$3,160.00 MXN** |
+
+> [!NOTE]
+> Este costo mensual de **$3,160.00 MXN** cubre a **toda la comunidad de Xochimilco**. A mayor volumen de productores, el costo individual se vuelve insignificante (ej. $15.80 MXN al mes por productor si hay 200 registrados; $3.16 MXN si hay 1,000).
+
+### 3. Modelos de Recuperación de Inversión (Payback Period)
+Se proponen dos vías realistas y no invasivas para financiar los servidores y recuperar los **$120,000.00 MXN** de arranque:
+
+#### Modelo A: Suscripción Simbólica Mensual
+* Se cobra una cuota de **$25.00 MXN mensuales** a cada productor por utilizar el asistente inteligente y el inventario.
+* Con **500 productores activos**:
+  * Ingreso mensual: $12,500.00 MXN
+  * Costo operativo: -$3,160.00 MXN
+  * Beneficio neto mensual: **$9,340.00 MXN**
+  * **Tiempo de Recuperación (Payback):** **13 meses** (~1 año y 1 mes).
+
+#### Modelo B: Comisión por Venta en la Tienda (2%)
+* Se elimina por completo la suscripción mensual. La plataforma cobra una comisión justa del **2%** en cada transacción realizada en la tienda de comercio local (muy por debajo del 15% de aplicaciones comerciales).
+* Asumiendo que **200 productores** venden un promedio mensual de $3,000.00 MXN de hortalizas cada uno:
+  * Volumen transaccionado: $600,000.00 MXN / mes
+  * Comisión del 2%: $12,000.00 MXN / mes
+  * Costo operativo: -$3,160.00 MXN
+  * Beneficio neto mensual: **$8,840.00 MXN**
+  * **Tiempo de Recuperación (Payback):** **14 meses** (~1 año y 2 meses).
 
 ---
 

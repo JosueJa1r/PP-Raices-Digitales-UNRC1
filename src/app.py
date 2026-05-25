@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor, obtener_notificaciones_productor
 from src.ia.bot import generar_respuesta_bot
-from src.contabiliad import calcular_roi, calcular_punto_equilibrio, calcular_utilidad_neta
+from src.contabilidad import calcular_roi, calcular_punto_equilibrio, calcular_utilidad_neta, calcular_costo_siembra_realista
 from src.agronomia import indice_estres_salino
 from src.probabilidad import probabilidad_bayesiana
 from src.integral import integral_acumulacion_precipitacion
@@ -123,11 +123,14 @@ def get_cosechas_productor_route():
         if result['success']:
             # Aplicar modelos matemáticos a cada cosecha antes de enviarla
             for cos in result['cosechas']:
-                # Simulamos un costo base (ej. 70% del valor neto) para calcular el ROI
-                # TODO: Usar costo real de la BD cuando esté disponible
-                valor_neto = cos.get('Valor_Neto', 0)
-                costo_simulado = valor_neto * 0.7 
-                cos['roi_calculado'] = calcular_roi(valor_neto, costo_simulado)
+                valor_neto = cos.get('Valor_Neto') or 0.0
+                precio_costal = cos.get('Valor_Semilla') or 0.0
+                area_m2 = cos.get('Metros_Cuadrados') or 0.0
+                
+                # Calcular costo de siembra real con las fórmulas de contabilidad
+                costo_real = calcular_costo_siembra_realista(precio_costal, area_m2)
+                cos['costo_calculado'] = costo_real
+                cos['roi_calculado'] = calcular_roi(valor_neto, costo_real) if valor_neto > 0 else 0.0
                 
             return jsonify(result['cosechas']), result['status']
         else:
@@ -208,6 +211,15 @@ def get_inventario_productor_route():
                 prob_perdida = 0.15
                 precio_actual = prod.get('Precio_Actual', 0)
                 prod['merma_proyectada'] = (prod['Cantidad'] * prob_perdida) * precio_actual
+                
+                # Calcular costo de siembra real y ROI esperado con las fórmulas de contabilidad
+                valor_neto = prod.get('Valor_Neto') or 0.0
+                precio_costal = prod.get('Valor_Semilla') or 0.0
+                area_m2 = prod.get('Metros_Cuadrados') or 0.0
+                
+                costo_real = calcular_costo_siembra_realista(precio_costal, area_m2)
+                prod['costo_calculado'] = costo_real
+                prod['roi_esperado'] = calcular_roi(valor_neto, costo_real) if valor_neto > 0 else 0.0
             
             # Calcular KPIs de inventario
             productos_ordenados = sorted(result['productos'], key=lambda x: x['Cantidad'])
@@ -339,12 +351,13 @@ def post_publicar_cosecha_route():
         vender_directo = data.get('vender_directamente', False)
         id_cosecha = data.get('id_cosecha') # Opcional
         unidad = data.get('unidad_medida', 'Kg')
+        id_semilla = data.get('id_semilla') # Opcional, para autolink
         
         if not id_productor or not lote or not cantidad:
             return jsonify({"error": "Faltan campos obligatorios (productor, nombre o cantidad)"}), 400
 
         result = registrar_publicacion_cosecha(
-            id_productor, lote, cantidad, precio, vender_directo, id_cosecha, unidad
+            id_productor, lote, cantidad, precio, vender_directo, id_cosecha, unidad, id_semilla
         )
         
         if result['success']:

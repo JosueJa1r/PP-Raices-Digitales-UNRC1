@@ -81,10 +81,12 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Producto Terminado</th>
+                                        <th>Producto</th>
                                         <th>Categoría</th>
-                                        <th>Stock Disponible</th>
-                                        <th>Precio / Unidad</th>
+                                        <th>Stock que se subió</th>
+                                        <th>Stock que resta después de la compra</th>
+                                        <th>Roi esperado</th>
+                                        <th>Total vendido</th>
                                         <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -112,14 +114,14 @@
                                 
                                 <div class="input-group">
                                     <label>Tipo de Producto (Categoría)</label>
-                                    <select id="tipo-producto" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="cargarSemillas(this.value)">
+                                    <select id="tipo-producto" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="cargarSemillas(this.value); actualizarEtiquetaPrecio(); calcularROISimulado();">
                                         <option value="">Cargando categorías...</option>
                                     </select>
                                 </div>
                                 
                                 <div class="input-group" style="margin-top: 1rem;">
                                     <label>Semilla / Producto Específico</label>
-                                    <select id="nombre-especifico" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="actualizarPrecioSemilla()">
+                                    <select id="nombre-especifico" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="actualizarPrecioSemilla(); calcularROISimulado();">
                                         <option value="">Selecciona una categoría primero...</option>
                                     </select>
                                     <input type="hidden" id="nombre-semilla-texto" value="">
@@ -127,7 +129,7 @@
 
                                 <div class="input-group" style="margin-top: 1rem;">
                                     <label>Cantidad Disponible</label>
-                                    <input type="number" id="cantidad-disponible" placeholder="Ej. 100" required oninput="actualizarPrecioSemilla()">
+                                    <input type="number" id="cantidad-disponible" placeholder="Ej. 100" required oninput="actualizarPrecioSemilla(); calcularROISimulado();">
                                 </div>
 
                                 <div class="input-group" style="margin-top: 0.8rem;">
@@ -182,14 +184,27 @@
                                         <span class="setting-toggle-desc">Publicar directo en la Tienda</span>
                                     </div>
                                     <label class="switch">
-                                        <input type="checkbox" id="vender-directamente" checked onchange="document.getElementById('precio-container').style.display = this.checked ? 'block' : 'none'">
+                                        <input type="checkbox" id="vender-directamente" checked onchange="document.getElementById('precio-container').style.display = this.checked ? 'block' : 'none'; calcularROISimulado();">
                                         <span class="slider"></span>
                                     </label>
                                 </div>
 
-                                <div class="input-group" id="precio-container" style="margin-top: 0.5rem;">
-                                    <label>Precio al Público (MXN)</label>
-                                    <input type="number" id="precio-publico" step="0.50" placeholder="$ 0.00" value="0.00">
+                                <div class="input-group" id="gastos-container" style="margin-top: 1.2rem;">
+                                    <label>Gastos Totales del Ciclo (MXN)</label>
+                                    <input type="number" id="gastos-ciclo" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()">
+                                </div>
+
+                                <div id="roi-simulado-container" style="margin-top: 1.2rem; margin-bottom: 1.2rem; display: none; background: #ffffff; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid var(--border-color);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 8px;">
+                                        <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">ROI Estimado:</span> 
+                                        <span id="roi-simulado-valor" style="font-size: 1.15rem; font-weight: 700;">--</span>
+                                    </div>
+                                    <div id="roi-simulado-detalles" style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);"></div>
+                                </div>
+
+                                <div class="input-group" id="precio-container" style="margin-top: 1.2rem;">
+                                    <label id="precio-publico-label">Precio Unitario al Público (MXN)</label>
+                                    <input type="number" id="precio-publico" step="0.50" placeholder="$ 0.00" value="0.00" oninput="calcularROISimulado()">
                                 </div>
 
                                 <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.5rem;">
@@ -226,9 +241,168 @@
                 cargarInventario(idProductor);
             }
             
+            // Escuchar cambios en los radios de unidad de medida para el simulador de ROI
+            document.querySelectorAll('input[name="unidad-medida"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    calcularROISimulado();
+                });
+            });
+            
             // Cargar categorías al iniciar
             cargarCategorias();
         });
+
+        // Factores de conversión basados en el backend para simulación de ROI
+        const conversionPeso = {
+            'kg': 1.0,
+            'kilo': 1.0,
+            'kilogramo': 1.0,
+            'kilogramos': 1.0,
+            'gramos': 0.001,
+            'gramo': 0.001,
+            'gr': 0.001,
+            'g': 0.001,
+            'libras': 0.453592,
+            'libra': 0.453592,
+            'lb': 0.453592,
+            'lbs': 0.453592,
+            'costales': 55.0,
+            'costal': 55.0,
+            'bultos': 50.0,
+            'bulto': 50.0
+        };
+
+        const conversionPieza = {
+            'unidades': 1.0,
+            'unidad': 1.0,
+            'pieza': 1.0,
+            'piezas': 1.0,
+            'manojos': 1.0,
+            'manojo': 1.0,
+            'tallos': 1.0,
+            'tallo': 1.0,
+            'esquejes': 1.0,
+            'esqueje': 1.0,
+            'cajas': 20.0,
+            'caja': 20.0,
+            'kg': 10.0,
+            'kilo': 10.0,
+            'kilogramo': 10.0,
+            'kilogramos': 10.0
+        };
+
+        function actualizarEtiquetaPrecio() {
+            const selectCat = document.getElementById('tipo-producto');
+            const labelPrecio = document.getElementById('precio-publico-label');
+            if (!selectCat || !labelPrecio) return;
+            
+            const idCat = parseInt(selectCat.value);
+            if (isNaN(idCat)) {
+                labelPrecio.textContent = "Precio Unitario al Público (MXN)";
+                return;
+            }
+            
+            // Categorías por pieza/conteo: 2 (Hortaliza de hoja), 3 (Ornamental / Flor)
+            const esPeso = (idCat !== 2 && idCat !== 3);
+            
+            if (esPeso) {
+                labelPrecio.textContent = "Precio Unitario al Público (MXN por Kilo)";
+            } else {
+                labelPrecio.textContent = "Precio Unitario al Público (MXN por Unidad/Manojo)";
+            }
+        }
+
+        function calcularROISimulado() {
+            const selectCat = document.getElementById('tipo-producto');
+            const selectSemilla = document.getElementById('nombre-especifico');
+            const inputCant = document.getElementById('cantidad-disponible');
+            const inputPrecio = document.getElementById('precio-publico');
+            const inputGastos = document.getElementById('gastos-ciclo');
+            const container = document.getElementById('roi-simulado-container');
+            const valorSpan = document.getElementById('roi-simulado-valor');
+            const detallesDiv = document.getElementById('roi-simulado-detalles');
+            
+            if (!selectCat || !selectSemilla || !inputCant || !inputPrecio || !inputGastos || !container || !valorSpan || !detallesDiv) return;
+            
+            const idCat = parseInt(selectCat.value);
+            const cantVal = parseFloat(inputCant.value) || 0;
+            const gastosVal = parseFloat(inputGastos.value) || 0;
+            
+            // Determinar precio unitario
+            let precioVal = 0;
+            if (document.getElementById('vender-directamente').checked) {
+                precioVal = parseFloat(inputPrecio.value) || 0;
+            } else {
+                const selectOption = selectSemilla.options[selectSemilla.selectedIndex];
+                if (selectOption) {
+                    precioVal = parseFloat(selectOption.getAttribute('data-precio')) || 0;
+                }
+            }
+            
+            // Si no hay gastos o no se ha completado cantidad, ocultamos el simulador
+            if (gastosVal <= 0 || cantVal <= 0 || isNaN(idCat)) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            // Obtener unidad seleccionada
+            const radioChecked = document.querySelector('input[name="unidad-medida"]:checked');
+            const uni = (radioChecked ? radioChecked.value : 'Kg').toLowerCase().trim();
+            
+            // Determinar categoría por peso vs pieza
+            const esPeso = (idCat !== 2 && idCat !== 3);
+            
+            let factor = 1.0;
+            if (esPeso) {
+                factor = conversionPeso[uni] || 1.0;
+            } else {
+                factor = conversionPieza[uni] || 1.0;
+            }
+            
+            // Calcular cantidad base
+            const cantidadBase = cantVal * factor;
+            
+            // Calcular Valor Neto (Ingreso Bruto)
+            const valorNeto = cantidadBase * precioVal;
+            
+            // Aplicar merma del 15%
+            const merma = valorNeto * 0.15;
+            const ingresoNeto = valorNeto - merma;
+            
+            // Calcular ROI
+            const roi = ((ingresoNeto - gastosVal) / gastosVal) * 100;
+            
+            // Actualizar color e indicador
+            if (roi >= 0) {
+                valorSpan.style.color = 'var(--accent-green)';
+                valorSpan.textContent = `+${roi.toFixed(1)}%`;
+            } else {
+                valorSpan.style.color = '#ef4444'; // Rojo para ROI negativo
+                valorSpan.textContent = `${roi.toFixed(1)}%`;
+            }
+            
+            // Mostrar desglose amigable y compacto
+            detallesDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span>Ingreso Bruto:</span>
+                    <strong style="color: var(--text-main);">$${valorNeto.toFixed(2)} MXN</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span>Merma (15%):</span>
+                    <strong style="color: #ef4444;">-$${merma.toFixed(2)} MXN</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
+                    <span>Ingreso Neto:</span>
+                    <strong style="color: var(--accent-green);">$${ingresoNeto.toFixed(2)} MXN</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span>Gastos:</span>
+                    <strong style="color: var(--text-main);">$${gastosVal.toFixed(2)} MXN</strong>
+                </div>
+            `;
+        }
 
         async function cargarCategorias() {
             try {
@@ -292,15 +466,8 @@
             let precioNum = parseFloat(precioUnitario);
             if (isNaN(precioNum)) precioNum = 0.00;
             
-            // Obtener la cantidad ingresada (por defecto 1 para mostrar unitario si está vacío)
-            let cantidadInput = document.getElementById('cantidad-disponible').value;
-            let cantidadNum = parseFloat(cantidadInput);
-            if (isNaN(cantidadNum) || cantidadNum <= 0) cantidadNum = 1;
-            
-            // Calcular precio total: Cantidad * Precio Unitario
-            let precioTotal = precioNum * cantidadNum;
-            
-            document.getElementById('precio-publico').value = precioTotal.toFixed(2);
+            // Sugerir el precio unitario base del catálogo
+            document.getElementById('precio-publico').value = precioNum.toFixed(2);
             document.getElementById('nombre-semilla-texto').value = nombre;
         }
 
@@ -321,9 +488,12 @@
                 return;
             }
 
+            const idSemilla = document.getElementById('nombre-especifico').value;
+
             const data = {
                 id_productor: idProductor,
                 lote: loteText,
+                id_semilla: idSemilla,
                 unidad_medida: unidad,
                 cantidad: document.getElementById('cantidad-disponible').value,
                 vender_directamente: document.getElementById('vender-directamente').checked,
@@ -379,26 +549,74 @@
                     result.items.forEach(prod => {
                         const tr = document.createElement('tr');
                         const isPublicado = prod.Estado === 'Publicado';
-                        const colorEstado = isPublicado ? 'var(--accent-green)' : '#f59e0b';
+                        let colorEstado = '#f59e0b';
+                        if (prod.Estado === 'Publicado') colorEstado = 'var(--accent-green)';
+                        else if (prod.Estado === 'Agotado') colorEstado = '#ef4444';
+                        
                         const unidadDisplay = prod.Unidad_Medida || 'Kg';
 
                         const actionBtn = isPublicado 
                             ? `<button class="btn-action-harvest depublish" onclick="toggleEstadoProducto(${prod.Id_Inventario}, '${prod.Estado}')">Guardar en Bodega</button>`
                             : `<button class="btn-action-harvest publish" onclick="toggleEstadoProducto(${prod.Id_Inventario}, '${prod.Estado}')">Poner a la Venta</button>`;
 
+                        const deleteBtn = `<button class="btn-action-harvest delete" onclick="eliminarProducto(${prod.Id_Inventario})">Eliminar</button>`;
+
+                        // Calcular stock que se subió (actual + vendido)
+                        const stockSubio = parseFloat(prod.Cantidad || 0) + parseFloat(prod.Cantidad_Vendida || 0);
+                        
+                        // ROI esperado
+                        const roiVal = parseFloat(prod.roi_esperado || 0);
+                        const roiColor = roiVal > 0 ? 'var(--accent-green)' : 'var(--text-muted)';
+                        const roiDisplay = roiVal > 0 ? `+${roiVal.toFixed(1)}%` : `${roiVal.toFixed(1)}%`;
+
+                        // Total vendido
+                        const cantVendida = parseFloat(prod.Cantidad_Vendida || 0);
+                        const montoVendido = parseFloat(prod.Total_Vendido_Monto || 0);
+
                         tr.innerHTML = `
-                            <td>${prod.Lote}</td>
-                            <td>General</td>
+                            <td>
+                                <div style="font-weight: 600;">${prod.Lote}</div>
+                            </td>
+                            <td>${prod.Nombre_Categoria || 'General'}</td>
+                            <td>${stockSubio.toFixed(1)} ${unidadDisplay}</td>
                             <td>${prod.Cantidad} ${unidadDisplay}</td>
-                            <td>$${prod.Precio_Actual} MXN</td>
+                            <td><span style="color: ${roiColor}; font-weight: 600;">${roiDisplay}</span></td>
+                            <td>${cantVendida.toFixed(1)} ${unidadDisplay} <span style="font-size: 0.8rem; color: var(--text-muted);">($${montoVendido.toFixed(2)} MXN)</span></td>
                             <td><span style="color: ${colorEstado}; font-weight: 600;">${prod.Estado}</span></td>
-                            <td>${actionBtn}</td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    ${actionBtn}
+                                    ${deleteBtn}
+                                </div>
+                            </td>
                         `;
                         tbody.appendChild(tr);
                     });
                 }
             } catch (error) {
                 console.error('Error al cargar inventario:', error);
+            }
+        }
+
+        async function eliminarProducto(id_inventario) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este lote de tu inventario? Esta acción no se puede deshacer.')) return;
+            
+            const idProductor = localStorage.getItem('productor_id');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}?id_productor=${idProductor}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', 'Lote eliminado del inventario correctamente.');
+                    cargarInventario(idProductor);
+                } else {
+                    const errorData = await response.json();
+                    mostrarAlerta('error', 'Error', errorData.error || 'No se pudo eliminar el lote del inventario.');
+                }
+            } catch (error) {
+                console.error('Error al eliminar:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo comunicar con el servidor.');
             }
         }
 

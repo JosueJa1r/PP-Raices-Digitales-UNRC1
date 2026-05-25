@@ -142,15 +142,6 @@
                             </div>
                             <div class="input-row">
                                 <div class="input-group">
-                                    <label>Tipo de Suelo Dominante</label>
-                                    <select id="perfil-suelo" required>
-                                        <option value="Chinampa Arcillosa">Chinampa Arcillosa</option>
-                                        <option value="Suelo Franco">Suelo Franco</option>
-                                        <option value="Suelo Limoso">Suelo Limoso</option>
-                                        <option value="Turba">Turba</option>
-                                    </select>
-                                </div>
-                                <div class="input-group">
                                     <label>Filtro de Agua Utilizado</label>
                                     <select id="perfil-filtro" required>
                                         <option value="Ahuejote">Ahuejote</option>
@@ -321,9 +312,6 @@
                     document.getElementById('perfil-correo').value = data.Correo || '';
                     document.getElementById('perfil-telefono').value = data.Telefono || '';
                     document.getElementById('perfil-hectareas').value = data.Hectareas || 0;
-                    if (data.Tipo_Suelo) {
-                        document.getElementById('perfil-suelo').value = data.Tipo_Suelo;
-                    }
                     if (data.Filtro_Agua) {
                         document.getElementById('perfil-filtro').value = data.Filtro_Agua;
                     }
@@ -356,7 +344,6 @@
                 Correo: document.getElementById('perfil-correo').value,
                 Telefono: document.getElementById('perfil-telefono').value,
                 Hectareas: document.getElementById('perfil-hectareas').value,
-                Tipo_Suelo: document.getElementById('perfil-suelo').value,
                 Filtro_Agua: document.getElementById('perfil-filtro').value,
                 Clabe: document.getElementById('perfil-clabe').value,
                 Envio_Nacional: document.getElementById('perfil-envio').checked,

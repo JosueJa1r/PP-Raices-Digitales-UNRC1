@@ -1,1 +1,12 @@
 .env
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.vscode/
+scratch/
+*.log
+*.broken

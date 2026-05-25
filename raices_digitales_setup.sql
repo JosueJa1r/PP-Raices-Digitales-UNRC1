@@ -33,7 +33,6 @@ CREATE TABLE IF NOT EXISTS productor (
     Telefono VARCHAR(20),
     Contrasena VARCHAR(255) NOT NULL,
     Fecha_Registro DATE DEFAULT (CURRENT_DATE),
-    Tipo_Suelo VARCHAR(50) DEFAULT 'Suelo Franco',
     Filtro_Agua VARCHAR(100) DEFAULT 'Ninguno'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -172,12 +171,12 @@ INSERT INTO semilla (Id_Categoria, Nombre_Semilla, Valor, Tiempo_Produccion, pH_
 (3, 'Caléndula', 50.0, 75, 6.2, 'Otoño-Invierno');
 
 -- C. Productores de prueba (Contraseñas con hash de pbkdf2:sha256/werkzeug equivalentes a '123456')
-INSERT INTO productor (Nombre, Correo, Telefono, Contrasena, Tipo_Suelo, Filtro_Agua) VALUES 
-('Ivan Fernandez Fernandez', 'ivan@unrc.edu.mx', '5512345678', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Suelo Franco Arcilloso', 'Ahuejote'),
-('Josue Jair Pelagio Monroy', 'josue@unrc.edu.mx', '5587654321', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Suelo Limoso', 'Ahuehuete'),
-('Mauricio Fernandez', 'mauricio@unrc.edu.mx', '5523456789', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Suelo Franco', 'Sauce llorón'),
-('Axel Sanchez', 'axel@unrc.edu.mx', '5534567890', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Suelo Franco Arenoso', 'Ninguno'),
-('Mateo Jurado Flores', 'mateo@unrc.edu.mx', '5545678901', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Suelo Franco', 'Fresnos');
+INSERT INTO productor (Nombre, Correo, Telefono, Contrasena, Filtro_Agua) VALUES 
+('Ivan Fernandez Fernandez', 'ivan@unrc.edu.mx', '5512345678', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Ahuejote'),
+('Josue Jair Pelagio Monroy', 'josue@unrc.edu.mx', '5587654321', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Ahuehuete'),
+('Mauricio Fernandez', 'mauricio@unrc.edu.mx', '5523456789', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Sauce llorón'),
+('Axel Sanchez', 'axel@unrc.edu.mx', '5534567890', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Ninguno'),
+('Mateo Jurado Flores', 'mateo@unrc.edu.mx', '5545678901', 'pbkdf2:sha256:600000$hQ3Y7B8W$65c02b1f81014e7a83d7890fe0cfb0e9d6d84a7e93011a681c2e4726ef3565f1', 'Fresnos');
 
 -- D. Estudiantes registrados (Contraseñas equivalentes a '123456')
 INSERT INTO estudiante (Nombre, Correo, Contrasena) VALUES 
