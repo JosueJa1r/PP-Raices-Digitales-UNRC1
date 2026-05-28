@@ -1,9 +1,18 @@
 // Configuración de la URL de la API según el entorno
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
     ? 'http://127.0.0.1:5000'
     : '';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Fallback para recuperar sesión de los parámetros URL en modo file:// (cuando el localStorage está particionado por directorio)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('estudiante_id')) {
+        localStorage.setItem('estudiante_id', urlParams.get('estudiante_id'));
+    }
+    if (urlParams.has('estudiante_nombre')) {
+        localStorage.setItem('estudiante_nombre', urlParams.get('estudiante_nombre'));
+    }
+
     // 1. Verificar sesión del estudiante
     const estudianteId = localStorage.getItem('estudiante_id');
     const estudianteNombre = localStorage.getItem('estudiante_nombre');

@@ -16,7 +16,7 @@ def configurar_bot():
 
 def generar_respuesta_bot(user_message, id_productor=None):
     """
-    Genera la respuesta de RaícesBot IA dado un mensaje de usuario.
+    Genera la respuesta de ChinampaAmigo dado un mensaje de usuario.
     """
     global _generative_model
     
@@ -53,12 +53,12 @@ def generar_respuesta_bot(user_message, id_productor=None):
                 contexto += f"\n- Detalles de cultivos con costos y ROI reales:\n  " + "\n  ".join(cosechas_info)
             
     # Prompt de sistema para mantener el contexto del bot
-    prompt = f"""Eres 'RaícesBot IA', un experto agrícola y asistente de la plataforma Raíces Digitales para los productores chinamperos de Xochimilco. 
+    prompt = f"""Eres 'ChinampaAmigo', un experto agrícola y asistente de la plataforma Raíces Digitales para los productores chinamperos de Xochimilco. 
 Responde de manera breve, amable, útil y profesional a la siguiente consulta del productor.
 {f"Contexto del productor (Úsalo para dar consejos personalizados):{contexto}" if contexto else ""}
-
+ 
 Consulta: {user_message}"""
-
+ 
     # Generar contenido
     response = _generative_model.generate_content(prompt)
     return response.text

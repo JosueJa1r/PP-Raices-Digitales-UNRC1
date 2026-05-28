@@ -16,7 +16,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
                 <a href="../../index.html" class="logo" style="text-decoration: none; color: inherit;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 22v-6"/><path d="M12 16a4 4 0 0 1-4-4V7a5 5 0 0 1 10 0v5a4 4 0 0 1-4 4z"/><path d="M8 12h8"/><path d="M9 7h6"/></svg>
+                    <img src="../../IMG/LOGO RAICES DIGITALES.png" alt="Logo" class="logo-icon" style="height: 28px; width: auto; object-fit: contain;">
                     <span>Raíces Digitales | Productor Chinampero</span>
                 </a>
             </div>
@@ -189,9 +189,31 @@
                                     </label>
                                 </div>
 
-                                <div class="input-group" id="gastos-container" style="margin-top: 1.2rem;">
-                                    <label>Gastos Totales del Ciclo (MXN)</label>
-                                    <input type="number" id="gastos-ciclo" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()">
+                                <div id="gastos-container" style="margin-top: 1.2rem; border-top: 1px solid var(--border-color); padding-top: 1.2rem;">
+                                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--title-primary); margin-bottom: 0.8rem; display: block;">Desglose de Gastos del Ciclo</span>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                                        <div class="input-group">
+                                            <label for="gastos-semilla">Costal de Semillas (MXN)</label>
+                                            <input type="number" id="gastos-semilla" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="gastos-mano-obra">Mano de Obra (MXN)</label>
+                                            <input type="number" id="gastos-mano-obra" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                        <div class="input-group">
+                                            <label for="gastos-herramientas">Herramientas (MXN)</label>
+                                            <input type="number" id="gastos-herramientas" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="gastos-mantenimiento">Mantenimiento Ecológico (MXN)</label>
+                                            <input type="number" id="gastos-mantenimiento" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="gastos-ciclo" value="0">
                                 </div>
 
                                 <div id="roi-simulado-container" style="margin-top: 1.2rem; margin-bottom: 1.2rem; display: none; background: #ffffff; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid var(--border-color);">
@@ -225,11 +247,20 @@
     
     <!-- Script para cargar datos del usuario desde localStorage -->
     <script>
-        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
             ? 'http://127.0.0.1:5000'
             : '';
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Fallback para recuperar sesión de los parámetros URL en modo file:// (cuando el localStorage está particionado por directorio)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('productor_id')) {
+                localStorage.setItem('productor_id', urlParams.get('productor_id'));
+            }
+            if (urlParams.has('productor_nombre')) {
+                localStorage.setItem('productor_nombre', urlParams.get('productor_nombre'));
+            }
+
             const nombreProductor = localStorage.getItem('productor_nombre');
             const idProductor = localStorage.getItem('productor_id');
             
@@ -318,15 +349,29 @@
             const inputCant = document.getElementById('cantidad-disponible');
             const inputPrecio = document.getElementById('precio-publico');
             const inputGastos = document.getElementById('gastos-ciclo');
+            
+            const inputSemilla = document.getElementById('gastos-semilla');
+            const inputManoObra = document.getElementById('gastos-mano-obra');
+            const inputHerramientas = document.getElementById('gastos-herramientas');
+            const inputMantenimiento = document.getElementById('gastos-mantenimiento');
+            
             const container = document.getElementById('roi-simulado-container');
             const valorSpan = document.getElementById('roi-simulado-valor');
             const detallesDiv = document.getElementById('roi-simulado-detalles');
             
-            if (!selectCat || !selectSemilla || !inputCant || !inputPrecio || !inputGastos || !container || !valorSpan || !detallesDiv) return;
+            if (!selectCat || !selectSemilla || !inputCant || !inputPrecio || !inputGastos || !container || !valorSpan || !detallesDiv || !inputSemilla || !inputManoObra || !inputHerramientas || !inputMantenimiento) return;
             
             const idCat = parseInt(selectCat.value);
             const cantVal = parseFloat(inputCant.value) || 0;
-            const gastosVal = parseFloat(inputGastos.value) || 0;
+            
+            // Sumar los 4 inputs de gastos
+            const semillaVal = parseFloat(inputSemilla.value) || 0;
+            const manoObraVal = parseFloat(inputManoObra.value) || 0;
+            const herramientasVal = parseFloat(inputHerramientas.value) || 0;
+            const mantenimientoVal = parseFloat(inputMantenimiento.value) || 0;
+            
+            const gastosVal = semillaVal + manoObraVal + herramientasVal + mantenimientoVal;
+            inputGastos.value = gastosVal; // Mantener input oculto actualizado para compatibilidad
             
             // Determinar precio unitario
             let precioVal = 0;
@@ -339,8 +384,8 @@
                 }
             }
             
-            // Si no hay gastos o no se ha completado cantidad, ocultamos el simulador
-            if (gastosVal <= 0 || cantVal <= 0 || isNaN(idCat)) {
+            // Mostrar simulador si hay costos y precio de venta válidos
+            if (gastosVal <= 0 || precioVal <= 0 || isNaN(idCat)) {
                 container.style.display = 'none';
                 return;
             }
@@ -350,6 +395,7 @@
             // Obtener unidad seleccionada
             const radioChecked = document.querySelector('input[name="unidad-medida"]:checked');
             const uni = (radioChecked ? radioChecked.value : 'Kg').toLowerCase().trim();
+            const uniLabel = radioChecked ? radioChecked.parentNode.querySelector('span').textContent : 'Unidades';
             
             // Determinar categoría por peso vs pieza
             const esPeso = (idCat !== 2 && idCat !== 3);
@@ -361,45 +407,99 @@
                 factor = conversionPieza[uni] || 1.0;
             }
             
-            // Calcular cantidad base
-            const cantidadBase = cantVal * factor;
+            // Precio por la unidad seleccionada
+            const precioPorUnidad = precioVal * factor;
             
-            // Calcular Valor Neto (Ingreso Bruto)
-            const valorNeto = cantidadBase * precioVal;
+            // 2. Cálculo de Costos Totales (CT)
+            const ct_p1 = semillaVal + manoObraVal;
+            const ct_p2 = ct_p1 + herramientasVal;
+            const ct_p3 = ct_p2 + mantenimientoVal;
             
-            // Aplicar merma del 15%
-            const merma = valorNeto * 0.15;
-            const ingresoNeto = valorNeto - merma;
+            // 3. Cálculo del Punto de Equilibrio (PE)
+            const rawPE = gastosVal / precioPorUnidad;
+            const pe = Math.ceil(rawPE);
             
-            // Calcular ROI
-            const roi = ((ingresoNeto - gastosVal) / gastosVal) * 100;
+            // 4. Cálculo de Ingresos en PE
+            const ingresosPE = pe * precioPorUnidad;
             
-            // Actualizar color e indicador
-            if (roi >= 0) {
-                valorSpan.style.color = 'var(--accent-green)';
-                valorSpan.textContent = `+${roi.toFixed(1)}%`;
-            } else {
-                valorSpan.style.color = '#ef4444'; // Rojo para ROI negativo
-                valorSpan.textContent = `${roi.toFixed(1)}%`;
+            // 5. Cálculo del ROI en PE
+            const diffPE = ingresosPE - gastosVal;
+            const rawRoiPE = (diffPE / gastosVal);
+            const roiPE = rawRoiPE * 100;
+            
+            // Proyección del lote actual
+            let proyHTML = '';
+            let roiProyectado = 0;
+            let mostrarRoi = false;
+            
+            if (cantVal > 0) {
+                mostrarRoi = true;
+                const ingresosProyectados = cantVal * precioPorUnidad;
+                roiProyectado = ((ingresosProyectados - gastosVal) / gastosVal) * 100;
+                
+                const esRentable = cantVal >= pe;
+                const diffCant = cantVal - pe;
+                
+                proyHTML = `
+                    <div style="margin-top: 15px; border-top: 2px solid var(--border-color); padding-top: 12px;">
+                        <h4 style="color: var(--title-primary); font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">6. Proyección del Lote Actual</h4>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>Cantidad Disponible:</span>
+                            <strong style="color: var(--text-main);">${cantVal} ${uniLabel}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>Ingresos Proyectados:</span>
+                            <strong style="color: var(--text-main);">$${ingresosProyectados.toFixed(2)} MXN</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span>ROI Proyectado:</span>
+                            <strong style="color: ${roiProyectado >= 0 ? 'var(--accent-green)' : '#ef4444'}; font-weight: 700;">
+                                ${roiProyectado >= 0 ? '+' : ''}${roiProyectado.toFixed(2)}%
+                            </strong>
+                        </div>
+                        <div style="margin-top: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: ${esRentable ? 'rgba(27,67,50,0.05)' : 'rgba(239,68,68,0.05)'}; text-align: center;">
+                            <strong style="color: ${esRentable ? 'var(--accent-green)' : '#ef4444'}; font-size: 0.85rem;">
+                                ${esRentable 
+                                    ? `¡Rentable! Supera el Punto de Equilibrio por ${diffCant} ${uniLabel}.` 
+                                    : `Inviable. Faltan ${Math.abs(diffCant)} ${uniLabel} para cubrir la inversión.`}
+                            </strong>
+                        </div>
+                    </div>
+                `;
             }
             
-            // Mostrar desglose amigable y compacto
+            // Actualizar valor principal de ROI visible en el header de la tarjeta
+            const roiAMostrar = mostrarRoi ? roiProyectado : roiPE;
+            if (roiAMostrar >= 0) {
+                valorSpan.style.color = 'var(--accent-green)';
+                valorSpan.textContent = `+${roiAMostrar.toFixed(2)}%`;
+            } else {
+                valorSpan.style.color = '#ef4444';
+                valorSpan.textContent = `${roiAMostrar.toFixed(2)}%`;
+            }
+            
+            // Renderizar un resumen limpio sin los procedimientos paso a paso largos
             detallesDiv.innerHTML = `
-                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span>Ingreso Bruto:</span>
-                    <strong style="color: var(--text-main);">$${valorNeto.toFixed(2)} MXN</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span>Merma (15%):</span>
-                    <strong style="color: #ef4444;">-$${merma.toFixed(2)} MXN</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 4px; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
-                    <span>Ingreso Neto:</span>
-                    <strong style="color: var(--accent-green);">$${ingresoNeto.toFixed(2)} MXN</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-                    <span>Gastos:</span>
-                    <strong style="color: var(--text-main);">$${gastosVal.toFixed(2)} MXN</strong>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-family: inherit; font-size: 0.85rem; color: var(--text-main);">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
+                        <span>Inversión Total (CT):</span>
+                        <strong>$${gastosVal.toFixed(2)} MXN</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
+                        <span>Punto de Equilibrio (PE):</span>
+                        <strong>${pe} ${uniLabel}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
+                        <span>Ingresos en PE:</span>
+                        <strong>$${ingresosPE.toFixed(2)} MXN</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
+                        <span>ROI en PE:</span>
+                        <strong style="color: ${roiPE >= 0 ? 'var(--accent-green)' : '#ef4444'};">
+                            ${roiPE >= 0 ? '+' : ''}${roiPE.toFixed(2)}%
+                        </strong>
+                    </div>
+                    ${proyHTML}
                 </div>
             `;
         }
@@ -443,8 +543,8 @@
                 
                 if (response.ok) {
                     semillas.forEach(sem => {
-                        // Guardamos el precio en data-precio para usarlo luego
-                        selectSemilla.innerHTML += `<option value="${sem.Id_Semilla}" data-precio="${sem.Valor}" data-nombre="${sem.Nombre_Semilla}">${sem.Nombre_Semilla}</option>`;
+                        // Guardamos el precio de venta en data-precio y el costo en data-costo para usarlo luego
+                        selectSemilla.innerHTML += `<option value="${sem.Id_Semilla}" data-precio="${(sem.Precio_Venta !== null && sem.Precio_Venta !== undefined) ? sem.Precio_Venta : sem.Valor}" data-costo="${sem.Valor}" data-nombre="${sem.Nombre_Semilla}">${sem.Nombre_Semilla}</option>`;
                     });
                 } else {
                     selectSemilla.innerHTML = '<option value="">Error al cargar semillas</option>';
@@ -460,6 +560,7 @@
             
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             let precioUnitario = selectedOption.getAttribute('data-precio');
+            let costoSemilla = selectedOption.getAttribute('data-costo');
             const nombre = selectedOption.getAttribute('data-nombre') || '';
             
             // Validar que el precio base sea un número válido
@@ -469,6 +570,14 @@
             // Sugerir el precio unitario base del catálogo
             document.getElementById('precio-publico').value = precioNum.toFixed(2);
             document.getElementById('nombre-semilla-texto').value = nombre;
+            
+            // Auto-rellenar el costo de semilla si existe
+            let costoNum = parseFloat(costoSemilla);
+            if (isNaN(costoNum)) costoNum = 0.00;
+            const inputSemilla = document.getElementById('gastos-semilla');
+            if (inputSemilla) {
+                inputSemilla.value = costoNum.toFixed(2);
+            }
         }
 
         async function publicarCosecha(event) {

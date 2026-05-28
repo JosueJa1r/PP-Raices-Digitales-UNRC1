@@ -124,6 +124,9 @@ body {
 .logo-icon {
     color: var(--accent-cyan);
     filter: drop-shadow(0 0 5px var(--accent-cyan));
+    height: 28px;
+    width: auto;
+    object-fit: contain;
 }
 
 .search-box {

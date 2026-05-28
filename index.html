@@ -135,7 +135,7 @@
             
             <!-- Login -->
             <!-- TODO BACK/DBA: Endpoint POST /login/cliente. Validar credenciales en la base de datos (tabla Clientes). Iniciar sesión. -->
-            <form onsubmit="event.preventDefault(); window.location.href='vistas/Usuario/cliente_tienda.html';" id="login-cliente">
+            <form id="login-cliente">
                 <div class="input-group">
                     <label>Correo Electrónico</label>
                     <input type="email" name="correo" required>
@@ -150,7 +150,7 @@
 
             <!-- Registro -->
             <!-- TODO BACK/DBA: Endpoint POST /register/cliente. Insertar datos en la base de datos (tabla Clientes). Hash de contraseña. -->
-            <form onsubmit="event.preventDefault(); window.location.href='vistas/Usuario/cliente_tienda.html';" id="register-cliente" style="display:none;">
+            <form id="register-cliente" style="display:none;">
                 <div class="input-group">
                     <label>Nombre Completo</label>
                     <input type="text" name="nombre" required>
@@ -219,6 +219,11 @@
             </form>
         </div>
     </div>
+    
+    <footer style="text-align: center; margin-top: 40px; margin-bottom: 20px; padding: 20px; font-size: 0.95rem; color: #555; position: relative; z-index: 10;">
+        <p>&copy; 2026 Raíces Digitales | <a href="vistas/nosotros/nosotros.html" style="color: #681635; text-decoration: none; font-weight: 700; border-bottom: 2px solid #dab27c; padding-bottom: 2px; transition: all 0.2s;" onmouseover="this.style.color='#dab27c'" onmouseout="this.style.color='#681635'">Comunidad LCDN UNRC</a></p>
+    </footer>
+
     <script src="js/portal.js?v=2"></script>
 </body>
 </html>

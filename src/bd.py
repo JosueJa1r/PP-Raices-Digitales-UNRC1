@@ -629,7 +629,7 @@ def registrar_publicacion_cosecha(id_productor, lote, cantidad, precio, vender_d
                 id_terreno = terrain['Id_Terreno']
                 
                 # 3. Calcular Valor_Neto estimado para la cosecha con conversión de unidades
-                precio_unitario = float(precio) if (precio and float(precio) > 0) else float(seed['Valor'])
+                precio_unitario = float(precio) if (precio and float(precio) > 0) else (float(seed['Precio_Venta']) if (seed.get('Precio_Venta') is not None and seed['Precio_Venta'] > 0) else float(seed['Valor']))
                 
                 id_cat = seed.get('Id_Categoria')
                 # Determinar si la semilla es por peso o por pieza/conteo

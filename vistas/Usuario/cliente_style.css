@@ -79,6 +79,12 @@ body {
     text-decoration: none;
 }
 
+.logo-icon {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
 .search-bar {
     flex: 1;
     max-width: 500px;

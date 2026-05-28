@@ -4,14 +4,19 @@ const initChatbot = () => {
         ? '¡Hola! Soy tu asistente inteligente. ¿En qué te puedo ayudar hoy? Prueba preguntarme sobre "productos", "envíos" o "recomendaciones".'
         : '¡Hola, productor! Soy tu asistente inteligente. ¿En qué te puedo ayudar hoy? Prueba preguntarme sobre "clima", "ventas" o "consejo".';
 
+    const isSubFolder = window.location.pathname.includes('/vistas/');
+    const logoPath = isSubFolder ? '../../IMG/LOGO RAICES DIGITALES.png' : 'IMG/LOGO RAICES DIGITALES.png';
+
     // Inyectar el HTML del Chatbot en el body
     const botHTML = `
         <div id="chatbot-container" class="chatbot-container chatbot-hidden">
             <div class="chatbot-header">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div class="bot-avatar">🤖</div>
+                    <div class="bot-avatar" style="overflow: hidden; background: #fff; border: 1px solid rgba(255, 255, 255, 0.4);">
+                        <img src="${logoPath}" alt="ChinampaAmigo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>
                     <div>
-                        <h4 style="margin: 0; color: #fff; font-weight: 600;">RaícesBot IA</h4>
+                        <h4 style="margin: 0; color: #fff; font-weight: 600;">ChinampaAmigo</h4>
                         <span style="font-size: 0.75rem; color: var(--accent-green); display: flex; align-items: center; gap: 6px;">
                             <span class="online-dot"></span>En línea
                         </span>
@@ -62,7 +67,7 @@ const initChatbot = () => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
-    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
         ? 'http://127.0.0.1:5000'
         : '';
 

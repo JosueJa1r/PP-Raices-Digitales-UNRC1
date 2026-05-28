@@ -1,5 +1,5 @@
 // Configuración de la URL de la API según el entorno
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
     ? 'http://127.0.0.1:5000'
     : '';
 
@@ -148,10 +148,9 @@ if (formRegisterProductor) {
             
             if (response.ok) {
                 alert('¡Registro exitoso! Bienvenido ' + data.nombre);
-                // Guardar en localStorage si es necesario
                 localStorage.setItem('productor_id', result.id_productor);
                 localStorage.setItem('productor_nombre', data.nombre);
-                window.location.href = 'vistas/agricola/productor_dashboard.html';
+                window.location.href = `vistas/agricola/productor_dashboard.html?productor_id=${result.id_productor}&productor_nombre=${encodeURIComponent(data.nombre)}`;
             } else {
                 alert('Error en registro: ' + (result.error || 'Intente de nuevo.'));
             }
@@ -184,7 +183,7 @@ if (formLoginProductor) {
                 // Guardar datos de sesión básica
                 localStorage.setItem('productor_id', result.user.Id_Productor);
                 localStorage.setItem('productor_nombre', result.user.Nombre);
-                window.location.href = 'vistas/agricola/productor_dashboard.html';
+                window.location.href = `vistas/agricola/productor_dashboard.html?productor_id=${result.user.Id_Productor}&productor_nombre=${encodeURIComponent(result.user.Nombre)}`;
             } else {
                 alert('Error en login: ' + (result.error || 'Credenciales inválidas.'));
             }
@@ -219,7 +218,7 @@ if (formRegisterEstudiante) {
                 alert('¡Registro exitoso! Bienvenido ' + data.nombre);
                 localStorage.setItem('estudiante_id', result.id_estudiante);
                 localStorage.setItem('estudiante_nombre', data.nombre);
-                window.location.href = 'vistas/Usuario/estudiante_dashboard.html';
+                window.location.href = `vistas/Usuario/estudiante_dashboard.html?estudiante_id=${result.id_estudiante}&estudiante_nombre=${encodeURIComponent(data.nombre)}`;
             } else {
                 alert('Error en registro: ' + (result.error || 'Intente de nuevo.'));
             }
@@ -251,7 +250,76 @@ if (formLoginEstudiante) {
             if (response.ok) {
                 localStorage.setItem('estudiante_id', result.user.Id_Estudiante);
                 localStorage.setItem('estudiante_nombre', result.user.Nombre);
-                window.location.href = 'vistas/Usuario/estudiante_dashboard.html';
+                window.location.href = `vistas/Usuario/estudiante_dashboard.html?estudiante_id=${result.user.Id_Estudiante}&estudiante_nombre=${encodeURIComponent(result.user.Nombre)}`;
+            } else {
+                alert('Error en login: ' + (result.error || 'Credenciales inválidas.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con el servidor: ' + error.message);
+        }
+    });
+}
+
+// --- Integración con Backend (Cliente) ---
+
+// Manejo del Registro de Cliente
+const formRegisterCliente = document.getElementById('register-cliente');
+if (formRegisterCliente) {
+    formRegisterCliente.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formRegisterCliente);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/register/cliente`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('¡Registro exitoso! Bienvenido/a ' + data.nombre);
+                localStorage.setItem('cliente_id', result.id_cliente);
+                localStorage.setItem('cliente_nombre', data.nombre);
+                localStorage.setItem('cliente_correo', data.correo);
+                window.location.href = `vistas/Usuario/cliente_tienda.html`;
+            } else {
+                alert('Error en registro: ' + (result.error || 'Intente de nuevo.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con el servidor: ' + error.message);
+        }
+    });
+}
+
+// Manejo del Login de Cliente
+const formLoginCliente = document.getElementById('login-cliente');
+if (formLoginCliente) {
+    formLoginCliente.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(formLoginCliente);
+        const data = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/login/cliente`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                localStorage.setItem('cliente_id', result.user.Id_Cliente);
+                localStorage.setItem('cliente_nombre', result.user.Nombre);
+                localStorage.setItem('cliente_correo', result.user.Correo);
+                window.location.href = `vistas/Usuario/cliente_tienda.html`;
             } else {
                 alert('Error en login: ' + (result.error || 'Credenciales inválidas.'));
             }

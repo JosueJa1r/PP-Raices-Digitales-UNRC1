@@ -1,5 +1,5 @@
 // Configuración de la URL de la API según el entorno
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
     ? 'http://127.0.0.1:5000'
     : '';
 
@@ -10,6 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarDatosDashboard() {
+    // Fallback para recuperar sesión de los parámetros URL en modo file:// (cuando el localStorage está particionado por directorio)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('productor_id')) {
+        localStorage.setItem('productor_id', urlParams.get('productor_id'));
+    }
+    if (urlParams.has('productor_nombre')) {
+        localStorage.setItem('productor_nombre', urlParams.get('productor_nombre'));
+    }
+    
+    const nombreProductor = localStorage.getItem('productor_nombre');
+    const nameDisplay = document.getElementById('productor-name-display');
+    if (nombreProductor && nameDisplay) {
+        nameDisplay.innerText = nombreProductor;
+    }
+
     const idProductor = localStorage.getItem('productor_id');
     
     if (!idProductor) {
@@ -207,145 +222,6 @@ function formatearFecha(fechaStr) {
     if (!fechaStr) return 'N/A';
     const date = new Date(fechaStr);
     return date.toLocaleDateString('es-MX');
-}
-
-// --- Lógica específica para la página de Cosechas (Inventario de Venta) ---
-
-if (window.location.pathname.includes('productor_cosechas.html')) {
-    document.addEventListener('DOMContentLoaded', () => {
-        cargarInventarioVenta();
-        configurarFormularioInventario();
-    });
-}
-
-async function cargarInventarioVenta() {
-    const idProductor = localStorage.getItem('productor_id');
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}&tipo=cosecha`);
-        if (response.ok) {
-            const productos = await response.json();
-            renderizarInventarioVenta(productos);
-        }
-    } catch (error) {
-        console.error('Error al cargar inventario:', error);
-    }
-}function renderizarInventarioVenta(productos) {
-    const tbody = document.querySelector('.table-container table tbody');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-    
-    // Si productos.items existe, usamos eso, si no productos directamente
-    const items = productos.items || productos;
-    
-    items.forEach(p => {
-        const tr = document.createElement('tr');
-        const unidadDisplay = p.Unidad_Medida || 'Kg';
-        const isPublicado = p.Estado === 'Publicado';
-        const color = isPublicado ? 'var(--accent-green)' : '#f59e0b';
-        
-        const actionBtn = isPublicado 
-            ? `<button class="btn-action-harvest depublish" onclick="toggleEstadoProducto(${p.Id_Inventario}, '${p.Estado}')">Guardar en Bodega</button>`
-            : `<button class="btn-action-harvest publish" onclick="toggleEstadoProducto(${p.Id_Inventario}, '${p.Estado}')">Poner a la Venta</button>`;
-
-        tr.innerHTML = `
-            <td>${p.Lote}</td>
-            <td>General</td>
-            <td>${p.Cantidad} ${unidadDisplay}</td>
-            <td>$${p.Precio_Actual} MXN</td>
-            <td><span style="color: ${color}; font-weight: 600;">${p.Estado}</span></td>
-            <td>${actionBtn}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-window.toggleEstadoProducto = async function(id_inventario, estadoActual) {
-    let nuevoEstado = '';
-    let precio = null;
-    
-    if (estadoActual === 'Publicado') {
-        nuevoEstado = 'En Bodega';
-        if (!confirm('¿Seguro que deseas quitar este producto de la tienda y guardarlo en bodega?')) return;
-    } else {
-        nuevoEstado = 'Publicado';
-        const inputPrecio = prompt('Ingresa el precio por unidad (MXN) para poner este producto a la venta:', '10.00');
-        if (inputPrecio === null) return; // Cancelado
-        precio = parseFloat(inputPrecio);
-        if (isNaN(precio) || precio <= 0) {
-            if (typeof mostrarAlerta === 'function') {
-                mostrarAlerta('warning', 'Precio inválido', 'El precio debe ser un número mayor a 0.');
-            } else {
-                alert('Precio inválido. Debe ser un número mayor a 0.');
-            }
-            return;
-        }
-    }
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}/estado`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estado: nuevoEstado, precio: precio })
-        });
-        
-        if (response.ok) {
-            if (typeof mostrarAlerta === 'function') {
-                mostrarAlerta('success', 'Éxito', `El producto ahora está: ${nuevoEstado}`);
-            } else {
-                alert(`El producto ahora está: ${nuevoEstado}`);
-            }
-            cargarInventarioVenta(); // Recargar la tabla
-        } else {
-            alert('No se pudo actualizar el estado.');
-        }
-    } catch (error) {
-        console.error('Error al cambiar estado:', error);
-    }
-};
-function configurarFormularioInventario() {
-    const form = document.querySelector('.details-form');
-    if (!form) return;
-
-    form.onsubmit = null; // Quitar el preventDefault de ejemplo del HTML
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const idProductor = localStorage.getItem('productor_id');
-        const lote = form.querySelector('input[type="text"]').value;
-        const cantidad = form.querySelector('input[placeholder="Ej. 100"]').value;
-        const precio = form.querySelector('input[step="0.50"]').value;
-
-        const data = {
-            id_productor: idProductor,
-            lote: lote,
-            cantidad: cantidad,
-            precio: precio,
-            observaciones: 'Registro desde panel'
-        };
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/productor/inventario`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                if (typeof mostrarAlerta === 'function') {
-                    mostrarAlerta('success', 'Éxito', 'Producto registrado correctamente.');
-                } else {
-                    alert('Producto registrado correctamente.');
-                }
-                form.reset();
-                cargarInventarioVenta();
-            } else {
-                alert('Error al registrar producto.');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    });
 }
 
 // --- Lógica específica para la página de Inventario de Insumos (Materia Prima) ---
