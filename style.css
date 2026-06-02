@@ -1618,9 +1618,9 @@ input:checked + .slider:before {
 
 /* Botones de acción para el Inventario de Cosechas (Poner a la venta / Guardar en bodega) */
 .btn-action-harvest {
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
     border: none;

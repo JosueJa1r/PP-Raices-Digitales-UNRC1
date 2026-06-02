@@ -44,7 +44,9 @@ def generar_respuesta_bot(user_message, id_productor=None):
                 valor_neto = c.get('Valor_Neto') or 0.0
                 precio_costal = c.get('Valor_Semilla') or 0.0
                 area_m2 = c.get('Metros_Cuadrados') or 0.0
-                costo_real = calcular_costo_siembra_realista(precio_costal, area_m2)
+                tiempo_prod = c.get('Tiempo_Produccion') or 90
+                costo_semilla = calcular_costo_siembra_realista(precio_costal, area_m2)
+                costo_real = costo_semilla + (350.0 * tiempo_prod) + 400.0 + 900.0
                 roi = calcular_roi(valor_neto, costo_real) if valor_neto > 0 else 0.0
                 
                 info = f"{nombre} (Área: {area_m2} m², Costo estimado de siembra: ${costo_real} MXN, Ingreso Bruto: ${valor_neto} MXN, ROI calculado: {roi}%)"

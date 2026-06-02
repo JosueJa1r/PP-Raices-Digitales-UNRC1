@@ -5,6 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raíces Digitales | Inventario de Cosechas</title>
     <link rel="stylesheet" href="../../style.css">
+    <style>
+        /* Tabs Styles */
+        .harvest-tabs {
+            display: flex;
+            gap: 15px;
+            border-bottom: 2px solid var(--border-color, #e5e7eb);
+            margin-bottom: 25px;
+            padding-bottom: 5px;
+        }
+        .harvest-tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-muted, #6b7280);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .harvest-tab-btn:hover {
+            color: var(--text-main, #1f2937);
+        }
+        .harvest-tab-btn.active {
+            color: var(--accent-green, #1b4332);
+            border-bottom-color: var(--accent-green, #1b4332);
+        }
+        .harvest-tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .harvest-tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #ffffff;
+            padding: 2.25rem;
+            border-radius: 12px;
+            width: 480px;
+            max-width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            border: 2px solid #000000;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+            border-bottom: 1px solid var(--border-color, #e5e7eb);
+            padding-bottom: 0.75rem;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.35rem;
+            color: var(--title-primary, #111827);
+            font-weight: 800;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: var(--text-muted, #9ca3af);
+            line-height: 1;
+            padding: 0;
+        }
+        .close-btn:hover {
+            color: var(--text-main, #111827);
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* Status Colors / Indicators */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-success {
+            background: rgba(27,67,50,0.1);
+            color: var(--accent-green);
+        }
+        .badge-warning {
+            background: rgba(245,158,11,0.1);
+            color: #d97706;
+        }
+        .badge-danger {
+            background: rgba(239,68,68,0.1);
+            color: #dc2626;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -68,191 +195,218 @@
                 <img src="../../IMG/arbol_luminoso.png" alt="Árbol Raíces Digitales" class="dashboard-tree-bg" onerror="this.src='../../IMG/Fondo de Pagina.png'">
                 
                 <div class="analytics-content" style="padding-top: 1rem;">
-                    <div class="dashboard-header">
+                    <div class="dashboard-header" style="margin-bottom: 1.5rem;">
                         <h1>Inventario de Cosechas</h1>
                     </div>
 
-                    <!-- Layout Principal de Cosechas -->
-                    <div class="harvest-grid-container">
-                        
-                        <!-- Columna Izquierda: Tabla de Stock Activo -->
-                        <div class="table-container" style="margin-top: 0;">
+                    <!-- Navigation Tabs -->
+                    <div class="harvest-tabs">
+                        <button class="harvest-tab-btn active" onclick="switchTab('tab-pre-cosecha')">1. Pre Cosecha (En Curso)</button>
+                        <button class="harvest-tab-btn" onclick="switchTab('tab-cosecha-bodega')">2. Cosecha (En Bodega)</button>
+                        <button class="harvest-tab-btn" onclick="switchTab('tab-venta-tienda')">3. Venta (Puesto en Tienda)</button>
+                    </div>
+
+                    <!-- Tab 1: Pre Cosecha (En Curso) -->
+                    <div id="tab-pre-cosecha" class="harvest-tab-content active">
+                        <div class="harvest-grid-container">
+                            <!-- Left: Table -->
+                            <div class="table-container" style="margin-top: 0;">
+                                <h3 class="table-title">Mis Cultivos Activos (Pre Cosecha)</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Semilla / Lote</th>
+                                            <th>Fecha Inicio</th>
+                                            <th>Progreso</th>
+                                            <th>P(Germinación)</th>
+                                            <th>pH (Medido vs Óptimo)</th>
+                                            <th>Salinidad</th>
+                                            <th>Riesgo Desabasto</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="siembras-activas-tbody">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando cultivos activos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Right: Form -->
+                            <aside class="detail-card" style="padding: 1.5rem; margin-top: 0;">
+                                <h3 style="font-size: 1.1rem; margin-bottom: 1.25rem; font-weight: 800;">Iniciar Ciclo de Pre Cosecha</h3>
+                                <form id="form-registrar-siembra" onsubmit="registrarNuevaSiembra(event)" class="details-form">
+                                    <div class="input-group">
+                                        <label>Tipo de Planta (Categoría)</label>
+                                        <select id="siembra-categoria" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="cargarSemillasSiembra(this.value)">
+                                            <option value="">Cargando categorías...</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="input-group" style="margin-top: 1rem;">
+                                        <label>Semilla / Variedad Específica</label>
+                                        <select id="siembra-semilla" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;">
+                                            <option value="">Selecciona una categoría primero...</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input-group" style="margin-top: 1rem;">
+                                        <label>Área a Sembrar (m²)</label>
+                                        <input type="number" id="siembra-metros" placeholder="Ej. 120" required min="1" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; width: 100%; outline: none;">
+                                    </div>
+
+                                    <div class="input-group" style="margin-top: 1rem;">
+                                        <label>Temporada de Cultivo</label>
+                                        <select id="siembra-temporada" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;">
+                                            <option value="Primavera-Verano" selected>Primavera-Verano</option>
+                                            <option value="Otoño-Invierno">Otoño-Invierno</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.75rem; font-weight: 700;">
+                                        Iniciar Pre Cosecha
+                                    </button>
+                                </form>
+                            </aside>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Cosecha (En Bodega) -->
+                    <div id="tab-cosecha-bodega" class="harvest-tab-content">
+                        <div class="table-container" style="margin-top: 0; width: 100%;">
+                            <h3 class="table-title">Monitoreo de Bodega (Decaimiento Post-Cosecha)</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Lote</th>
+                                        <th>Categoría</th>
+                                        <th>Stock Guardado</th>
+                                        <th>Días Almacenado</th>
+                                        <th>Riesgo de Merma</th>
+                                        <th>Merma Proyectada</th>
+                                        <th>ROI Esperado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodega-tbody">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando productos en bodega...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Venta (Puesto en Tienda) -->
+                    <div id="tab-venta-tienda" class="harvest-tab-content">
+                        <div class="table-container" style="margin-top: 0; width: 100%;">
                             <h3 class="table-title">Mis Productos en Venta (Tienda)</h3>
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Producto</th>
                                         <th>Categoría</th>
-                                        <th>Stock que se subió</th>
-                                        <th>Stock que resta después de la compra</th>
-                                        <th>Roi esperado</th>
-                                        <th>Total vendido</th>
-                                        <th>Estado</th>
+                                        <th>Stock subido</th>
+                                        <th>Stock disponible</th>
+                                        <th>Ventas</th>
+                                        <th>Total Vendido</th>
+                                        <th>ROI Real vs Esperado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <!-- TODO BACK/DBA: Endpoint GET /productor/inventario_venta. Realizar query a la base de datos (tabla Productos_Venta) para este productor. Generar filas dinámicamente. -->
-                                <tbody>
-                                    <!-- INICIO BUCLE: for producto in productos -->
+                                <tbody id="venta-tbody">
                                     <tr>
-                                        <td>Macetas de Cempasúchil</td>
-                                        <td>Flores de Ornato</td>
-                                        <td>150 Unidades</td>
-                                        <td>$45.00 MXN</td>
-                                        <td><span style="color: var(--accent-green);">Publicado</span></td>
+                                        <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando productos en venta...</td>
                                     </tr>
-                                    <!-- FIN BUCLE -->
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Columna Derecha: Formulario de Publicación -->
-                        <aside class="detail-card" style="padding: 1.5rem; margin-top: 2rem;">
-                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Publicar Nueva Cosecha</h3>
-                            
-                            <form id="form-publicar-cosecha" onsubmit="publicarCosecha(event)" class="details-form">
-                                
-                                <div class="input-group">
-                                    <label>Tipo de Producto (Categoría)</label>
-                                    <select id="tipo-producto" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="cargarSemillas(this.value); actualizarEtiquetaPrecio(); calcularROISimulado();">
-                                        <option value="">Cargando categorías...</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Semilla / Producto Específico</label>
-                                    <select id="nombre-especifico" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;" onchange="actualizarPrecioSemilla(); calcularROISimulado();">
-                                        <option value="">Selecciona una categoría primero...</option>
-                                    </select>
-                                    <input type="hidden" id="nombre-semilla-texto" value="">
-                                </div>
-
-                                <div class="input-group" style="margin-top: 1rem;">
-                                    <label>Cantidad Disponible</label>
-                                    <input type="number" id="cantidad-disponible" placeholder="Ej. 100" required oninput="actualizarPrecioSemilla(); calcularROISimulado();">
-                                </div>
-
-                                <div class="input-group" style="margin-top: 0.8rem;">
-                                    <label>Unidad de Medida</label>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Kg" checked style="display: none;">
-                                            <span>Kg</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Libras" style="display: none;">
-                                            <span>Libras</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Unidades" style="display: none;">
-                                            <span>Unidades</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Cajas" style="display: none;">
-                                            <span>Cajas</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Manojos" style="display: none;">
-                                            <span>Manojos</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Tallos" style="display: none;">
-                                            <span>Tallos</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Esquejes" style="display: none;">
-                                            <span>Esquejes</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Costales" style="display: none;">
-                                            <span>Costales</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Bultos" style="display: none;">
-                                            <span>Bultos</span>
-                                        </label>
-                                        <label class="medida-pill">
-                                            <input type="radio" name="unidad-medida" value="Gramos" style="display: none;">
-                                            <span>Gramos</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="setting-toggle-row" style="margin-top: 1rem; padding: 10px 0;">
-                                    <div class="setting-toggle-info">
-                                        <span class="setting-toggle-title">Vender Inmediatamente</span>
-                                        <span class="setting-toggle-desc">Publicar directo en la Tienda</span>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="vender-directamente" checked onchange="document.getElementById('precio-container').style.display = this.checked ? 'block' : 'none'; calcularROISimulado();">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div id="gastos-container" style="margin-top: 1.2rem; border-top: 1px solid var(--border-color); padding-top: 1.2rem;">
-                                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--title-primary); margin-bottom: 0.8rem; display: block;">Desglose de Gastos del Ciclo</span>
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
-                                        <div class="input-group">
-                                            <label for="gastos-semilla">Costal de Semillas (MXN)</label>
-                                            <input type="number" id="gastos-semilla" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
-                                        </div>
-                                        <div class="input-group">
-                                            <label for="gastos-mano-obra">Mano de Obra (MXN)</label>
-                                            <input type="number" id="gastos-mano-obra" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                                        <div class="input-group">
-                                            <label for="gastos-herramientas">Herramientas (MXN)</label>
-                                            <input type="number" id="gastos-herramientas" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
-                                        </div>
-                                        <div class="input-group">
-                                            <label for="gastos-mantenimiento">Mantenimiento Ecológico (MXN)</label>
-                                            <input type="number" id="gastos-mantenimiento" step="10.00" placeholder="$ 0.00" min="0" oninput="calcularROISimulado()" style="background: #ffffff; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; width: 100%;">
-                                        </div>
-                                    </div>
-                                    <input type="hidden" id="gastos-ciclo" value="0">
-                                </div>
-
-                                <div id="roi-simulado-container" style="margin-top: 1.2rem; margin-bottom: 1.2rem; display: none; background: #ffffff; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid var(--border-color);">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 8px;">
-                                        <span style="color: var(--text-main); font-weight: 600; font-size: 0.9rem;">ROI Estimado:</span> 
-                                        <span id="roi-simulado-valor" style="font-size: 1.15rem; font-weight: 700;">--</span>
-                                    </div>
-                                    <div id="roi-simulado-detalles" style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);"></div>
-                                </div>
-
-                                <div class="input-group" id="precio-container" style="margin-top: 1.2rem;">
-                                    <label id="precio-publico-label">Precio Unitario al Público (MXN)</label>
-                                    <input type="number" id="precio-publico" step="0.50" placeholder="$ 0.00" value="0.00" oninput="calcularROISimulado()">
-                                </div>
-
-                                <button type="submit" class="submit-btn" style="width: 100%; margin-top: 1.5rem;">
-                                    Registrar y Publicar
-                                </button>
-                            </form>
-                        </aside>
-
                     </div>
+
                 </div>
             </main>
         </div>
     </div>
-    
+
+    <!-- Modal de Cosecha Física -->
+    <div id="harvest-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Cosecha Física</h3>
+                <button class="close-btn" onclick="cerrarModalCosecha()">&times;</button>
+            </div>
+            <form id="form-finalizar-cosecha" onsubmit="registrarCosechaFisica(event)">
+                <input type="hidden" id="harvest-id-cosecha">
+                
+                <div class="input-group">
+                    <label>Cantidad Cosechada Real</label>
+                    <input type="number" id="harvest-cantidad" placeholder="Ej. 120" required min="0.1" step="0.1" style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;">
+                </div>
+
+                <div class="input-group" style="margin-top: 1rem;">
+                    <label>Unidad de Medida</label>
+                    <select id="harvest-unidad" required style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;">
+                        <option value="Kg">Kg</option>
+                        <option value="Libras">Libras</option>
+                        <option value="Unidades">Unidades</option>
+                        <option value="Cajas">Cajas</option>
+                        <option value="Manojos">Manojos</option>
+                        <option value="Tallos">Tallos</option>
+                        <option value="Esquejes">Esquejes</option>
+                        <option value="Costales">Costales</option>
+                        <option value="Bultos">Bultos</option>
+                        <option value="Gramos">Gramos</option>
+                    </select>
+                </div>
+
+                <div class="setting-toggle-row" style="margin-top: 1.2rem; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="setting-toggle-info">
+                        <span class="setting-toggle-title" style="font-weight: 700; color: var(--text-main);">Vender Inmediatamente</span>
+                        <br>
+                        <span class="setting-toggle-desc" style="font-size: 0.8rem; color: var(--text-muted);">Publicar directo en la Tienda</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="harvest-vender-directamente" onchange="toggleHarvestPrecioContainer(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="input-group" id="harvest-precio-container" style="margin-top: 1rem; display: none;">
+                    <label>Precio Unitario al Público (MXN)</label>
+                    <input type="number" id="harvest-precio" step="0.50" placeholder="$ 0.00" value="0.00" style="width: 100%; padding: 10px; background: #ffffff; border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none;">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 2rem;">
+                    <button type="button" class="btn-secondary" onclick="cerrarModalCosecha()" style="flex: 1; padding: 12px; font-weight: 700;">Cancelar</button>
+                    <button type="submit" class="submit-btn" style="flex: 1; padding: 12px; font-weight: 700; background: var(--accent-green); color: white; border: none; border-radius: 6px; cursor: pointer;">Registrar Cosecha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="../../js/alertas.js"></script>
     <script src="../../js/chatbot.js"></script>
     <script src="../../js/responsive.js"></script>
     
-    <!-- Script para cargar datos del usuario desde localStorage -->
     <script>
         const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:'
             ? 'http://127.0.0.1:5000'
             : '';
 
+        function formatearFechaSencilla(fechaStr) {
+            if (!fechaStr) return 'N/A';
+            const d = new Date(fechaStr);
+            if (isNaN(d.getTime())) return String(fechaStr).substring(0, 10);
+            
+            if (String(fechaStr).includes('GMT') || String(fechaStr).includes('Z')) {
+                return d.toLocaleDateString('es-MX', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+            return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Fallback para recuperar sesión de los parámetros URL en modo file:// (cuando el localStorage está particionado por directorio)
+            // Recoger ID de productor desde los parámetros o del localStorage
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('productor_id')) {
                 localStorage.setItem('productor_id', urlParams.get('productor_id'));
@@ -269,247 +423,36 @@
             }
 
             if (idProductor) {
-                cargarInventario(idProductor);
+                cargarDatosCiclos(idProductor);
+            } else {
+                mostrarAlerta('error', 'Sesión no válida', 'Por favor, inicia sesión nuevamente.');
             }
             
-            // Escuchar cambios en los radios de unidad de medida para el simulador de ROI
-            document.querySelectorAll('input[name="unidad-medida"]').forEach(radio => {
-                radio.addEventListener('change', () => {
-                    calcularROISimulado();
-                });
-            });
-            
-            // Cargar categorías al iniciar
-            cargarCategorias();
+            cargarCategoriasSiembra();
         });
 
-        // Factores de conversión basados en el backend para simulación de ROI
-        const conversionPeso = {
-            'kg': 1.0,
-            'kilo': 1.0,
-            'kilogramo': 1.0,
-            'kilogramos': 1.0,
-            'gramos': 0.001,
-            'gramo': 0.001,
-            'gr': 0.001,
-            'g': 0.001,
-            'libras': 0.453592,
-            'libra': 0.453592,
-            'lb': 0.453592,
-            'lbs': 0.453592,
-            'costales': 55.0,
-            'costal': 55.0,
-            'bultos': 50.0,
-            'bulto': 50.0
-        };
-
-        const conversionPieza = {
-            'unidades': 1.0,
-            'unidad': 1.0,
-            'pieza': 1.0,
-            'piezas': 1.0,
-            'manojos': 1.0,
-            'manojo': 1.0,
-            'tallos': 1.0,
-            'tallo': 1.0,
-            'esquejes': 1.0,
-            'esqueje': 1.0,
-            'cajas': 20.0,
-            'caja': 20.0,
-            'kg': 10.0,
-            'kilo': 10.0,
-            'kilogramo': 10.0,
-            'kilogramos': 10.0
-        };
-
-        function actualizarEtiquetaPrecio() {
-            const selectCat = document.getElementById('tipo-producto');
-            const labelPrecio = document.getElementById('precio-publico-label');
-            if (!selectCat || !labelPrecio) return;
+        // Conmutación de pestañas (Tabs)
+        function switchTab(tabId) {
+            // Quitar clase activa a todos los botones y contenidos
+            document.querySelectorAll('.harvest-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.harvest-tab-content').forEach(content => content.classList.remove('active'));
             
-            const idCat = parseInt(selectCat.value);
-            if (isNaN(idCat)) {
-                labelPrecio.textContent = "Precio Unitario al Público (MXN)";
-                return;
-            }
+            // Buscar y activar el botón correcto
+            const btn = document.querySelector(`.harvest-tab-btn[onclick="switchTab('${tabId}')"]`);
+            if (btn) btn.classList.add('active');
             
-            // Categorías por pieza/conteo: 2 (Hortaliza de hoja), 3 (Ornamental / Flor)
-            const esPeso = (idCat !== 2 && idCat !== 3);
-            
-            if (esPeso) {
-                labelPrecio.textContent = "Precio Unitario al Público (MXN por Kilo)";
-            } else {
-                labelPrecio.textContent = "Precio Unitario al Público (MXN por Unidad/Manojo)";
-            }
+            // Activar el contenedor de contenido
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) targetContent.classList.add('active');
         }
 
-        function calcularROISimulado() {
-            const selectCat = document.getElementById('tipo-producto');
-            const selectSemilla = document.getElementById('nombre-especifico');
-            const inputCant = document.getElementById('cantidad-disponible');
-            const inputPrecio = document.getElementById('precio-publico');
-            const inputGastos = document.getElementById('gastos-ciclo');
-            
-            const inputSemilla = document.getElementById('gastos-semilla');
-            const inputManoObra = document.getElementById('gastos-mano-obra');
-            const inputHerramientas = document.getElementById('gastos-herramientas');
-            const inputMantenimiento = document.getElementById('gastos-mantenimiento');
-            
-            const container = document.getElementById('roi-simulado-container');
-            const valorSpan = document.getElementById('roi-simulado-valor');
-            const detallesDiv = document.getElementById('roi-simulado-detalles');
-            
-            if (!selectCat || !selectSemilla || !inputCant || !inputPrecio || !inputGastos || !container || !valorSpan || !detallesDiv || !inputSemilla || !inputManoObra || !inputHerramientas || !inputMantenimiento) return;
-            
-            const idCat = parseInt(selectCat.value);
-            const cantVal = parseFloat(inputCant.value) || 0;
-            
-            // Sumar los 4 inputs de gastos
-            const semillaVal = parseFloat(inputSemilla.value) || 0;
-            const manoObraVal = parseFloat(inputManoObra.value) || 0;
-            const herramientasVal = parseFloat(inputHerramientas.value) || 0;
-            const mantenimientoVal = parseFloat(inputMantenimiento.value) || 0;
-            
-            const gastosVal = semillaVal + manoObraVal + herramientasVal + mantenimientoVal;
-            inputGastos.value = gastosVal; // Mantener input oculto actualizado para compatibilidad
-            
-            // Determinar precio unitario
-            let precioVal = 0;
-            if (document.getElementById('vender-directamente').checked) {
-                precioVal = parseFloat(inputPrecio.value) || 0;
-            } else {
-                const selectOption = selectSemilla.options[selectSemilla.selectedIndex];
-                if (selectOption) {
-                    precioVal = parseFloat(selectOption.getAttribute('data-precio')) || 0;
-                }
-            }
-            
-            // Mostrar simulador si hay costos y precio de venta válidos
-            if (gastosVal <= 0 || precioVal <= 0 || isNaN(idCat)) {
-                container.style.display = 'none';
-                return;
-            }
-            
-            container.style.display = 'block';
-            
-            // Obtener unidad seleccionada
-            const radioChecked = document.querySelector('input[name="unidad-medida"]:checked');
-            const uni = (radioChecked ? radioChecked.value : 'Kg').toLowerCase().trim();
-            const uniLabel = radioChecked ? radioChecked.parentNode.querySelector('span').textContent : 'Unidades';
-            
-            // Determinar categoría por peso vs pieza
-            const esPeso = (idCat !== 2 && idCat !== 3);
-            
-            let factor = 1.0;
-            if (esPeso) {
-                factor = conversionPeso[uni] || 1.0;
-            } else {
-                factor = conversionPieza[uni] || 1.0;
-            }
-            
-            // Precio por la unidad seleccionada
-            const precioPorUnidad = precioVal * factor;
-            
-            // 2. Cálculo de Costos Totales (CT)
-            const ct_p1 = semillaVal + manoObraVal;
-            const ct_p2 = ct_p1 + herramientasVal;
-            const ct_p3 = ct_p2 + mantenimientoVal;
-            
-            // 3. Cálculo del Punto de Equilibrio (PE)
-            const rawPE = gastosVal / precioPorUnidad;
-            const pe = Math.ceil(rawPE);
-            
-            // 4. Cálculo de Ingresos en PE
-            const ingresosPE = pe * precioPorUnidad;
-            
-            // 5. Cálculo del ROI en PE
-            const diffPE = ingresosPE - gastosVal;
-            const rawRoiPE = (diffPE / gastosVal);
-            const roiPE = rawRoiPE * 100;
-            
-            // Proyección del lote actual
-            let proyHTML = '';
-            let roiProyectado = 0;
-            let mostrarRoi = false;
-            
-            if (cantVal > 0) {
-                mostrarRoi = true;
-                const ingresosProyectados = cantVal * precioPorUnidad;
-                roiProyectado = ((ingresosProyectados - gastosVal) / gastosVal) * 100;
-                
-                const esRentable = cantVal >= pe;
-                const diffCant = cantVal - pe;
-                
-                proyHTML = `
-                    <div style="margin-top: 15px; border-top: 2px solid var(--border-color); padding-top: 12px;">
-                        <h4 style="color: var(--title-primary); font-size: 0.85rem; font-weight: 700; margin-bottom: 8px;">6. Proyección del Lote Actual</h4>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span>Cantidad Disponible:</span>
-                            <strong style="color: var(--text-main);">${cantVal} ${uniLabel}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span>Ingresos Proyectados:</span>
-                            <strong style="color: var(--text-main);">$${ingresosProyectados.toFixed(2)} MXN</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                            <span>ROI Proyectado:</span>
-                            <strong style="color: ${roiProyectado >= 0 ? 'var(--accent-green)' : '#ef4444'}; font-weight: 700;">
-                                ${roiProyectado >= 0 ? '+' : ''}${roiProyectado.toFixed(2)}%
-                            </strong>
-                        </div>
-                        <div style="margin-top: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: ${esRentable ? 'rgba(27,67,50,0.05)' : 'rgba(239,68,68,0.05)'}; text-align: center;">
-                            <strong style="color: ${esRentable ? 'var(--accent-green)' : '#ef4444'}; font-size: 0.85rem;">
-                                ${esRentable 
-                                    ? `¡Rentable! Supera el Punto de Equilibrio por ${diffCant} ${uniLabel}.` 
-                                    : `Inviable. Faltan ${Math.abs(diffCant)} ${uniLabel} para cubrir la inversión.`}
-                            </strong>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Actualizar valor principal de ROI visible en el header de la tarjeta
-            const roiAMostrar = mostrarRoi ? roiProyectado : roiPE;
-            if (roiAMostrar >= 0) {
-                valorSpan.style.color = 'var(--accent-green)';
-                valorSpan.textContent = `+${roiAMostrar.toFixed(2)}%`;
-            } else {
-                valorSpan.style.color = '#ef4444';
-                valorSpan.textContent = `${roiAMostrar.toFixed(2)}%`;
-            }
-            
-            // Renderizar un resumen limpio sin los procedimientos paso a paso largos
-            detallesDiv.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 8px; font-family: inherit; font-size: 0.85rem; color: var(--text-main);">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
-                        <span>Inversión Total (CT):</span>
-                        <strong>$${gastosVal.toFixed(2)} MXN</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
-                        <span>Punto de Equilibrio (PE):</span>
-                        <strong>${pe} ${uniLabel}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
-                        <span>Ingresos en PE:</span>
-                        <strong>$${ingresosPE.toFixed(2)} MXN</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 4px;">
-                        <span>ROI en PE:</span>
-                        <strong style="color: ${roiPE >= 0 ? 'var(--accent-green)' : '#ef4444'};">
-                            ${roiPE >= 0 ? '+' : ''}${roiPE.toFixed(2)}%
-                        </strong>
-                    </div>
-                    ${proyHTML}
-                </div>
-            `;
-        }
-
-        async function cargarCategorias() {
+        // Cargar Categorías para el Formulario de Pre Cosecha
+        async function cargarCategoriasSiembra() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/categorias`);
                 const categorias = await response.json();
                 
-                const selectCategoria = document.getElementById('tipo-producto');
+                const selectCategoria = document.getElementById('siembra-categoria');
                 selectCategoria.innerHTML = '<option value="">Selecciona una categoría...</option>';
                 
                 if (response.ok) {
@@ -524,12 +467,12 @@
             }
         }
 
-        async function cargarSemillas(idCategoria) {
-            const selectSemilla = document.getElementById('nombre-especifico');
+        // Cargar Semillas específicas según la categoría seleccionada
+        async function cargarSemillasSiembra(idCategoria) {
+            const selectSemilla = document.getElementById('siembra-semilla');
             
             if (!idCategoria) {
                 selectSemilla.innerHTML = '<option value="">Selecciona una categoría primero...</option>';
-                document.getElementById('precio-publico').value = '0.00';
                 return;
             }
             
@@ -539,12 +482,11 @@
                 const response = await fetch(`${API_BASE_URL}/api/semillas_por_categoria?id_categoria=${idCategoria}`);
                 const semillas = await response.json();
                 
-                selectSemilla.innerHTML = '<option value="" data-precio="0">Selecciona la semilla...</option>';
+                selectSemilla.innerHTML = '<option value="">Selecciona la semilla...</option>';
                 
                 if (response.ok) {
                     semillas.forEach(sem => {
-                        // Guardamos el precio de venta en data-precio y el costo en data-costo para usarlo luego
-                        selectSemilla.innerHTML += `<option value="${sem.Id_Semilla}" data-precio="${(sem.Precio_Venta !== null && sem.Precio_Venta !== undefined) ? sem.Precio_Venta : sem.Valor}" data-costo="${sem.Valor}" data-nombre="${sem.Nombre_Semilla}">${sem.Nombre_Semilla}</option>`;
+                        selectSemilla.innerHTML += `<option value="${sem.Id_Semilla}">${sem.Nombre_Semilla}</option>`;
                     });
                 } else {
                     selectSemilla.innerHTML = '<option value="">Error al cargar semillas</option>';
@@ -554,33 +496,8 @@
             }
         }
 
-        function actualizarPrecioSemilla() {
-            const selectElement = document.getElementById('nombre-especifico');
-            if (!selectElement || selectElement.selectedIndex < 0) return;
-            
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
-            let precioUnitario = selectedOption.getAttribute('data-precio');
-            let costoSemilla = selectedOption.getAttribute('data-costo');
-            const nombre = selectedOption.getAttribute('data-nombre') || '';
-            
-            // Validar que el precio base sea un número válido
-            let precioNum = parseFloat(precioUnitario);
-            if (isNaN(precioNum)) precioNum = 0.00;
-            
-            // Sugerir el precio unitario base del catálogo
-            document.getElementById('precio-publico').value = precioNum.toFixed(2);
-            document.getElementById('nombre-semilla-texto').value = nombre;
-            
-            // Auto-rellenar el costo de semilla si existe
-            let costoNum = parseFloat(costoSemilla);
-            if (isNaN(costoNum)) costoNum = 0.00;
-            const inputSemilla = document.getElementById('gastos-semilla');
-            if (inputSemilla) {
-                inputSemilla.value = costoNum.toFixed(2);
-            }
-        }
-
-        async function publicarCosecha(event) {
+        // Registrar una nueva siembra (Inicio del ciclo de pre cosecha)
+        async function registrarNuevaSiembra(event) {
             event.preventDefault();
             
             const idProductor = localStorage.getItem('productor_id');
@@ -589,28 +506,268 @@
                 return;
             }
 
-            const loteText = document.getElementById('nombre-semilla-texto').value;
-            const unidad = document.querySelector('input[name="unidad-medida"]:checked').value;
-            
-            if (!loteText) {
-                mostrarAlerta('warning', 'Faltan datos', 'Por favor selecciona una semilla de la lista.');
+            const idSemilla = document.getElementById('siembra-semilla').value;
+            const metros = document.getElementById('siembra-metros').value;
+            const temporada = document.getElementById('siembra-temporada').value;
+
+            if (!idSemilla || !metros) {
+                mostrarAlerta('warning', 'Faltan datos', 'Por favor, completa todos los campos.');
                 return;
             }
 
-            const idSemilla = document.getElementById('nombre-especifico').value;
-
             const data = {
                 id_productor: idProductor,
-                lote: loteText,
                 id_semilla: idSemilla,
-                unidad_medida: unidad,
-                cantidad: document.getElementById('cantidad-disponible').value,
-                vender_directamente: document.getElementById('vender-directamente').checked,
-                precio: document.getElementById('precio-publico').value
+                metros_cuadrados: metros,
+                temporada: temporada
             };
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/productor/publicar_cosecha`, {
+                const response = await fetch(`${API_BASE_URL}/api/productor/siembras`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', 'Ciclo de Pre Cosecha iniciado correctamente y registrado.', 5000);
+                    document.getElementById('form-registrar-siembra').reset();
+                    cargarDatosCiclos(idProductor);
+                } else {
+                    mostrarAlerta('error', 'Error', result.error || 'No se pudo registrar la siembra.');
+                }
+            } catch (error) {
+                console.error('Error al registrar siembra:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo contactar con el servidor.');
+            }
+        }
+
+        // Carga y distribución de datos en las tres tablas
+        async function cargarDatosCiclos(idProductor) {
+            try {
+                // 1. Obtener Cosechas activas y terminadas del Productor
+                const responseCosechas = await fetch(`${API_BASE_URL}/api/productor/cosechas?id_productor=${idProductor}`);
+                const cosechas = await responseCosechas.json();
+
+                // 2. Obtener Productos del Inventario (Bodega y Publicados)
+                const responseInventario = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}&tipo=cosecha`);
+                const inventarioResult = await responseInventario.json();
+                const inventarioItems = inventarioResult.items || [];
+
+                // ==========================
+                // RENDER TAB 1: PRE COSECHA
+                // ==========================
+                const tbodyPre = document.getElementById('siembras-activas-tbody');
+                tbodyPre.innerHTML = '';
+                
+                if (responseCosechas.ok) {
+                    // Filtrar solo cultivos que estén 'En proceso'
+                    const siembrasActivas = cosechas.filter(c => c.Estatus === 'En proceso');
+                    
+                    if (siembrasActivas.length === 0) {
+                        tbodyPre.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tienes cultivos en proceso. ¡Inicia un ciclo en el formulario de la derecha!</td></tr>`;
+                    } else {
+                        siembrasActivas.forEach(c => {
+                            const tr = document.createElement('tr');
+                            
+                            // Calcular progreso de manera neutral a la zona horaria (días calendario transcurridos)
+                            let diasTranscurridos = 0;
+                            let pct = 0;
+                            const tiempoProd = c.Tiempo_Produccion || 90;
+                            if (c.Fecha_Inicio) {
+                                const d = new Date(c.Fecha_Inicio);
+                                if (!isNaN(d.getTime())) {
+                                    const fechaInicio = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+                                    const hoy = new Date();
+                                    hoy.setHours(0, 0, 0, 0);
+                                    diasTranscurridos = Math.max(0, Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24)));
+                                    pct = Math.min(100, Math.round((diasTranscurridos / tiempoProd) * 100));
+                                }
+                            }
+                            
+                            // Formato y colores según datos ecológicos del canal chinampero
+                            const pGerm = c.p_germinacion || 85.0;
+                            const pGermColor = pGerm >= 75 ? 'var(--accent-green)' : (pGerm >= 50 ? '#f59e0b' : '#ef4444');
+                            
+                            const phAct = c.ph_actual || 7.0;
+                            const phOpt = c.ph_optimo || 6.5;
+                            const phDiff = Math.abs(phAct - phOpt);
+                            const phColor = phDiff <= 0.5 ? 'var(--accent-green)' : (phDiff <= 1.2 ? '#f59e0b' : '#ef4444');
+                            
+                            const sal = c.salinidad_actual || 1.2;
+                            const salColor = sal <= 1.5 ? 'var(--accent-green)' : (sal <= 3.0 ? '#f59e0b' : '#ef4444');
+                            
+                            const riesgo = c.riesgo_insuficiencia || 10.0;
+                            const desabastoColor = riesgo <= 30 ? 'var(--accent-green)' : (riesgo <= 60 ? '#f59e0b' : '#ef4444');
+
+                            tr.innerHTML = `
+                                <td><strong style="color: var(--title-primary); font-size: 0.95rem;">Lote ${c.Nombre_Semilla}</strong></td>
+                                <td>${formatearFechaSencilla(c.Fecha_Inicio)}</td>
+                                <td>
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <div style="width: 100px; background: #e5e7eb; border-radius: 4px; overflow: hidden; height: 8px;">
+                                            <div style="width: ${pct}%; background: var(--accent-green); height: 100%;"></div>
+                                        </div>
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">${diasTranscurridos} / ${tiempoProd} días (${pct}%)</span>
+                                    </div>
+                                </td>
+                                <td><span style="color: ${pGermColor}; font-weight: 700;">${pGerm}%</span></td>
+                                <td>
+                                    <span style="color: ${phColor}; font-weight: 700;">${phAct.toFixed(1)}</span> 
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">(Opt: ${phOpt.toFixed(1)})</span>
+                                </td>
+                                <td><span style="color: ${salColor}; font-weight: 600;">${sal.toFixed(1)} dS/m</span></td>
+                                <td><span style="color: ${desabastoColor}; font-weight: 700;">${riesgo}%</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button class="btn-action-harvest publish" onclick="abrirModalCosecha(${c.Id_Cosecha})">Cosechar</button>
+                                        <button class="btn-action-harvest delete" onclick="eliminarCosecha(${c.Id_Cosecha})">Eliminar</button>
+                                    </div>
+                                </td>
+                            `;
+                            tbodyPre.appendChild(tr);
+                        });
+                    }
+                }
+
+                // ==========================
+                // RENDER TAB 2: COSECHA (BODEGA)
+                // ==========================
+                const tbodyBodega = document.getElementById('bodega-tbody');
+                tbodyBodega.innerHTML = '';
+                const bodegaItems = inventarioItems.filter(item => item.Estado === 'En Bodega');
+                
+                if (bodegaItems.length === 0) {
+                    tbodyBodega.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tienes productos guardados en Bodega. Cosecha algún lote de pre cosecha para almacenarlo.</td></tr>`;
+                } else {
+                    bodegaItems.forEach(prod => {
+                        const tr = document.createElement('tr');
+                        
+                        const roiVal = parseFloat(prod.roi_esperado || 0);
+                        const roiColor = roiVal > 0 ? 'var(--accent-green)' : (roiVal === 0 ? 'var(--text-muted)' : '#ef4444');
+                        const roiDisplay = roiVal > 0 ? `+${roiVal.toFixed(1)}%` : `${roiVal.toFixed(1)}%`;
+                        
+                        const mermaColor = prod.riesgo_merma <= 15 ? 'var(--accent-green)' : (prod.riesgo_merma <= 40 ? '#f59e0b' : '#ef4444');
+                        const mermaProy = parseFloat(prod.merma_proyectada || 0);
+
+                        tr.innerHTML = `
+                            <td><strong>${prod.Lote}</strong></td>
+                            <td>${prod.Nombre_Categoria || 'General'}</td>
+                            <td>${prod.Cantidad} ${prod.Unidad_Medida || 'Kg'}</td>
+                            <td>${prod.dias_almacenamiento} días</td>
+                            <td><span style="color: ${mermaColor}; font-weight: 700;">${prod.riesgo_merma}%</span></td>
+                            <td><span style="color: #ef4444; font-weight: 600;">$${mermaProy.toFixed(2)} MXN</span></td>
+                            <td><span style="color: ${roiColor}; font-weight: 700;">${roiDisplay}</span></td>
+                            <td>
+                                <button class="btn-action-harvest publish" onclick="ponerAALaVenta(${prod.Id_Inventario})">Poner a la Venta</button>
+                            </td>
+                        `;
+                        tbodyBodega.appendChild(tr);
+                    });
+                }
+
+                // ==========================
+                // RENDER TAB 3: VENTA (TIENDA)
+                // ==========================
+                const tbodyVenta = document.getElementById('venta-tbody');
+                tbodyVenta.innerHTML = '';
+                const ventaItems = inventarioItems.filter(item => item.Estado === 'Publicado' || item.Estado === 'Agotado');
+
+                if (ventaItems.length === 0) {
+                    tbodyVenta.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tienes productos expuestos al público en la tienda. Pone a la venta lotes de tu bodega.</td></tr>`;
+                } else {
+                    ventaItems.forEach(prod => {
+                        const tr = document.createElement('tr');
+                        
+                        const stockSubio = parseFloat(prod.Cantidad || 0) + parseFloat(prod.Cantidad_Vendida || 0);
+                        const roiRealVal = parseFloat(prod.roi_real || 0);
+                        const roiEspVal = parseFloat(prod.roi_esperado || 0);
+                        
+                        const roiRealColor = roiRealVal > 0 ? 'var(--accent-green)' : (roiRealVal === 0 ? 'var(--text-muted)' : '#ef4444');
+                        const roiEspColor = roiEspVal > 0 ? 'var(--accent-green)' : (roiEspVal === 0 ? 'var(--text-muted)' : '#ef4444');
+                        
+                        const roiRealDisplay = roiRealVal > 0 ? `+${roiRealVal.toFixed(1)}%` : `${roiRealVal.toFixed(1)}%`;
+                        const roiEspDisplay = roiEspVal > 0 ? `+${roiEspVal.toFixed(1)}%` : `${roiEspVal.toFixed(1)}%`;
+
+                        tr.innerHTML = `
+                            <td>
+                                <div style="font-weight: 700; color: var(--title-primary);">${prod.Lote}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">$${prod.Precio_Actual ? prod.Precio_Actual.toFixed(2) : '0.00'} MXN / ${prod.Unidad_Medida}</div>
+                            </td>
+                            <td>${prod.Nombre_Categoria || 'General'}</td>
+                            <td>${stockSubio.toFixed(1)} ${prod.Unidad_Medida}</td>
+                            <td><strong style="color: ${prod.Cantidad > 0 ? 'var(--text-main)' : '#ef4444'};">${prod.Cantidad} ${prod.Unidad_Medida}</strong></td>
+                            <td>${prod.Cantidad_Vendida ? prod.Cantidad_Vendida.toFixed(1) : '0.0'} ${prod.Unidad_Medida}</td>
+                            <td><strong style="color: var(--accent-green);">$${prod.Total_Vendido_Monto ? prod.Total_Vendido_Monto.toFixed(2) : '0.00'} MXN</strong></td>
+                            <td>
+                                <div style="font-size: 0.85rem; line-height: 1.4;">
+                                    <div>Real: <span style="color: ${roiRealColor}; font-weight: 700;">${roiRealDisplay}</span></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Esperado: <span style="color: ${roiEspColor}; font-weight: 600;">${roiEspDisplay}</span></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    <button class="btn-action-harvest depublish" onclick="guardarEnBodega(${prod.Id_Inventario})">Guardar en Bodega</button>
+                                    <button class="btn-action-harvest delete" onclick="eliminarProducto(${prod.Id_Inventario})">Eliminar</button>
+                                </div>
+                            </td>
+                        `;
+                        tbodyVenta.appendChild(tr);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error cargando datos de los ciclos:', error);
+            }
+        }
+
+        // Abrir Modal de Cosecha Física
+        function abrirModalCosecha(idCosecha) {
+            document.getElementById('harvest-id-cosecha').value = idCosecha;
+            document.getElementById('harvest-cantidad').value = '';
+            document.getElementById('harvest-vender-directamente').checked = false;
+            document.getElementById('harvest-precio').value = '0.00';
+            document.getElementById('harvest-precio-container').style.display = 'none';
+            document.getElementById('harvest-modal').style.display = 'flex';
+        }
+
+        // Cerrar Modal de Cosecha Física
+        function cerrarModalCosecha() {
+            document.getElementById('harvest-modal').style.display = 'none';
+        }
+
+        // Toggle del campo de precio en el modal de cosecha
+        function toggleHarvestPrecioContainer(checked) {
+            document.getElementById('harvest-precio-container').style.display = checked ? 'block' : 'none';
+        }
+
+        // Procesar recolección física y enviar al backend
+        async function registrarCosechaFisica(event) {
+            event.preventDefault();
+            
+            const idCosecha = document.getElementById('harvest-id-cosecha').value;
+            const cantidad = document.getElementById('harvest-cantidad').value;
+            const unidad = document.getElementById('harvest-unidad').value;
+            const venderDirectamente = document.getElementById('harvest-vender-directamente').checked;
+            const precio = document.getElementById('harvest-precio').value;
+
+            if (!idCosecha || !cantidad) {
+                mostrarAlerta('warning', 'Faltan datos', 'Por favor, introduce la cantidad cosechada.');
+                return;
+            }
+
+            const data = {
+                id_cosecha: idCosecha,
+                cantidad: cantidad,
+                unidad_medida: unidad,
+                vender_directamente: venderDirectamente,
+                precio: precio
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/cosechas/finalizar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -620,144 +777,50 @@
 
                 if (response.ok) {
                     mostrarAlerta('success', 'Éxito', result.message, 5000);
-                    document.getElementById('form-publicar-cosecha').reset();
-                    cargarInventario(idProductor); // Recargar la tabla
-                    
-                    // Alerta de Saturación de Mercado
-                    try {
-                        const anRes = await fetch(`${API_BASE_URL}/api/analiticas/global`);
-                        if (anRes.ok) {
-                            const anData = await anRes.json();
-                            const topProds = anData.top_productos || [];
-                            const isSaturated = topProds.some(p => p.Lote && p.Lote.includes(loteText) && p.total_volumen > 50);
-                            if (isSaturated) {
-                                setTimeout(() => {
-                                    mostrarAlerta('warning', 'Alerta de Sobreoferta', `El mercado actual en Xochimilco tiene un alto volumen de ${loteText}. Te sugerimos diversificar próximos cultivos.`, 10000);
-                                }, 1500);
-                            }
+                    cerrarModalCosecha();
+                    const idProductor = localStorage.getItem('productor_id');
+                    if (idProductor) {
+                        cargarDatosCiclos(idProductor);
+                        // Cambiar automáticamente a la pestaña correspondiente para guiar al usuario
+                        if (venderDirectamente) {
+                            switchTab('tab-venta-tienda');
+                        } else {
+                            switchTab('tab-cosecha-bodega');
                         }
-                    } catch(e) {}
+                    }
                 } else {
-                    mostrarAlerta('error', 'Error', result.error);
+                    mostrarAlerta('error', 'Error', result.error || 'No se pudo finalizar la cosecha.');
                 }
             } catch (error) {
-                console.error('Error:', error);
-                mostrarAlerta('error', 'Error de Conexión', 'No se pudo contactar con el servidor.');
-            }
-        }
-
-        async function cargarInventario(idProductor) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/productor/inventario?id_productor=${idProductor}&tipo=cosecha`);
-                const result = await response.json();
-
-                if (response.ok) {
-                    const tbody = document.querySelector('table tbody');
-                    tbody.innerHTML = ''; // Limpiar tabla
-
-                    result.items.forEach(prod => {
-                        const tr = document.createElement('tr');
-                        const isPublicado = prod.Estado === 'Publicado';
-                        let colorEstado = '#f59e0b';
-                        if (prod.Estado === 'Publicado') colorEstado = 'var(--accent-green)';
-                        else if (prod.Estado === 'Agotado') colorEstado = '#ef4444';
-                        
-                        const unidadDisplay = prod.Unidad_Medida || 'Kg';
-
-                        const actionBtn = isPublicado 
-                            ? `<button class="btn-action-harvest depublish" onclick="toggleEstadoProducto(${prod.Id_Inventario}, '${prod.Estado}')">Guardar en Bodega</button>`
-                            : `<button class="btn-action-harvest publish" onclick="toggleEstadoProducto(${prod.Id_Inventario}, '${prod.Estado}')">Poner a la Venta</button>`;
-
-                        const deleteBtn = `<button class="btn-action-harvest delete" onclick="eliminarProducto(${prod.Id_Inventario})">Eliminar</button>`;
-
-                        // Calcular stock que se subió (actual + vendido)
-                        const stockSubio = parseFloat(prod.Cantidad || 0) + parseFloat(prod.Cantidad_Vendida || 0);
-                        
-                        // ROI esperado
-                        const roiVal = parseFloat(prod.roi_esperado || 0);
-                        const roiColor = roiVal > 0 ? 'var(--accent-green)' : 'var(--text-muted)';
-                        const roiDisplay = roiVal > 0 ? `+${roiVal.toFixed(1)}%` : `${roiVal.toFixed(1)}%`;
-
-                        // Total vendido
-                        const cantVendida = parseFloat(prod.Cantidad_Vendida || 0);
-                        const montoVendido = parseFloat(prod.Total_Vendido_Monto || 0);
-
-                        tr.innerHTML = `
-                            <td>
-                                <div style="font-weight: 600;">${prod.Lote}</div>
-                            </td>
-                            <td>${prod.Nombre_Categoria || 'General'}</td>
-                            <td>${stockSubio.toFixed(1)} ${unidadDisplay}</td>
-                            <td>${prod.Cantidad} ${unidadDisplay}</td>
-                            <td><span style="color: ${roiColor}; font-weight: 600;">${roiDisplay}</span></td>
-                            <td>${cantVendida.toFixed(1)} ${unidadDisplay} <span style="font-size: 0.8rem; color: var(--text-muted);">($${montoVendido.toFixed(2)} MXN)</span></td>
-                            <td><span style="color: ${colorEstado}; font-weight: 600;">${prod.Estado}</span></td>
-                            <td>
-                                <div style="display: flex; gap: 5px;">
-                                    ${actionBtn}
-                                    ${deleteBtn}
-                                </div>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-            } catch (error) {
-                console.error('Error al cargar inventario:', error);
-            }
-        }
-
-        async function eliminarProducto(id_inventario) {
-            if (!confirm('¿Estás seguro de que deseas eliminar este lote de tu inventario? Esta acción no se puede deshacer.')) return;
-            
-            const idProductor = localStorage.getItem('productor_id');
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}?id_productor=${idProductor}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    mostrarAlerta('success', 'Éxito', 'Lote eliminado del inventario correctamente.');
-                    cargarInventario(idProductor);
-                } else {
-                    const errorData = await response.json();
-                    mostrarAlerta('error', 'Error', errorData.error || 'No se pudo eliminar el lote del inventario.');
-                }
-            } catch (error) {
-                console.error('Error al eliminar:', error);
+                console.error('Error al registrar cosecha física:', error);
                 mostrarAlerta('error', 'Error de conexión', 'No se pudo comunicar con el servidor.');
             }
         }
 
-        async function toggleEstadoProducto(id_inventario, estadoActual) {
-            let nuevoEstado = '';
-            let precio = null;
-            
-            if (estadoActual === 'Publicado') {
-                nuevoEstado = 'En Bodega';
-                if (!confirm('¿Seguro que deseas quitar este producto de la tienda y guardarlo en bodega?')) return;
-            } else {
-                nuevoEstado = 'Publicado';
-                const inputPrecio = prompt('Ingresa el precio por unidad (MXN) para poner este producto a la venta:', '10.00');
-                if (inputPrecio === null) return; // Cancelado
-                precio = parseFloat(inputPrecio);
-                if (isNaN(precio) || precio <= 0) {
-                    mostrarAlerta('warning', 'Precio inválido', 'El precio debe ser un número mayor a 0.');
-                    return;
-                }
+        // Poner lote de Bodega a la Venta en Tienda
+        async function ponerAALaVenta(id_inventario) {
+            const inputPrecio = prompt('Ingresa el precio por unidad (MXN) para poner este producto a la venta:', '10.00');
+            if (inputPrecio === null) return; // Cancelar
+            const precio = parseFloat(inputPrecio);
+            if (isNaN(precio) || precio <= 0) {
+                mostrarAlerta('warning', 'Precio inválido', 'El precio debe ser un número mayor a 0.');
+                return;
             }
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}/estado`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ estado: nuevoEstado, precio: precio })
+                    body: JSON.stringify({ estado: 'Publicado', precio: precio })
                 });
 
                 if (response.ok) {
-                    mostrarAlerta('success', 'Éxito', `El producto ahora está: ${nuevoEstado}`);
+                    mostrarAlerta('success', 'Éxito', 'El producto ahora está puesto a la venta en la tienda.');
                     const idProductor = localStorage.getItem('productor_id');
-                    if (idProductor) cargarInventario(idProductor);
+                    if (idProductor) {
+                        cargarDatosCiclos(idProductor);
+                        switchTab('tab-venta-tienda');
+                    }
                 } else {
                     mostrarAlerta('error', 'Error', 'No se pudo actualizar el estado del producto.');
                 }
@@ -767,7 +830,90 @@
             }
         }
 
-        // Lógica de cerrar sesión
+        // Quitar de la Venta en Tienda y guardar en Bodega
+        async function guardarEnBodega(id_inventario) {
+            if (!confirm('¿Seguro que deseas quitar este producto de la tienda y guardarlo en bodega?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}/estado`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'En Bodega', precio: 0.0 })
+                });
+
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', 'El producto ha sido guardado en la bodega.');
+                    const idProductor = localStorage.getItem('productor_id');
+                    if (idProductor) {
+                        cargarDatosCiclos(idProductor);
+                        switchTab('tab-cosecha-bodega');
+                    }
+                } else {
+                    mostrarAlerta('error', 'Error', 'No se pudo guardar el producto en la bodega.');
+                }
+            } catch (error) {
+                console.error('Error al cambiar estado:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo comunicar con el servidor.');
+            }
+        }
+
+        let isDeleting = false;
+
+        // Eliminar ciclo de pre-cosecha activo (proyección)
+        async function eliminarCosecha(id_cosecha) {
+            if (isDeleting) return;
+            if (!confirm('¿Estás seguro de que deseas eliminar esta proyección de cosecha? Esta acción no se puede deshacer.')) return;
+            
+            isDeleting = true;
+            const idProductor = localStorage.getItem('productor_id');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/cosechas/${id_cosecha}?id_productor=${idProductor}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', 'Proyección de cosecha eliminada correctamente.');
+                    if (idProductor) await cargarDatosCiclos(idProductor);
+                } else {
+                    const errorData = await response.json();
+                    mostrarAlerta('error', 'Error', errorData.error || 'No se pudo eliminar la proyección.');
+                }
+            } catch (error) {
+                console.error('Error al eliminar cosecha:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo comunicar con el servidor.');
+            } finally {
+                isDeleting = false;
+            }
+        }
+
+        // Eliminar completamente del inventario
+        async function eliminarProducto(id_inventario) {
+            if (isDeleting) return;
+            if (!confirm('¿Estás seguro de que deseas eliminar este lote de tu inventario? Esta acción no se puede deshacer.')) return;
+            
+            isDeleting = true;
+            const idProductor = localStorage.getItem('productor_id');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/productor/inventario/${id_inventario}?id_productor=${idProductor}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    mostrarAlerta('success', 'Éxito', 'Lote eliminado del inventario correctamente.');
+                    if (idProductor) await cargarDatosCiclos(idProductor);
+                } else {
+                    const errorData = await response.json();
+                    mostrarAlerta('error', 'Error', errorData.error || 'No se pudo eliminar el lote del inventario.');
+                }
+            } catch (error) {
+                console.error('Error al eliminar:', error);
+                mostrarAlerta('error', 'Error de conexión', 'No se pudo comunicar con el servidor.');
+            } finally {
+                isDeleting = false;
+            }
+        }
+
+        // Cerrar sesión
         function cerrarSesionProductor() {
             localStorage.removeItem('productor_nombre');
             localStorage.removeItem('productor_id');

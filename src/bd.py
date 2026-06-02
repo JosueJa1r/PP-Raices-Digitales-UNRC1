@@ -178,10 +178,9 @@ def obtener_cosechas_productor(id_productor):
     try:
         cursor = conexion.cursor(dictionary=True)
         sql = """
-            SELECT c.*, s.Nombre_Semilla, s.Valor AS Valor_Semilla, t.Metros_Cuadrados
+            SELECT c.*, s.Nombre_Semilla, s.Valor AS Valor_Semilla, s.Tiempo_Produccion, c.Metros_Cuadrados
             FROM cosecha c
             LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
-            LEFT JOIN terreno t ON c.Id_Terreno = t.Id_Terreno
             WHERE c.Id_Productor = %s
         """
         cursor.execute(sql, (id_productor,))
@@ -267,15 +266,21 @@ def obtener_stats_productor(id_productor):
         res_terreno = cursor.fetchone()
         terreno = res_terreno['total_m2'] if res_terreno and res_terreno['total_m2'] is not None else 0.0
         
-        # 2. Cosechas Activas
-        cursor.execute("SELECT COUNT(*) as activas FROM cosecha WHERE Id_Productor = %s AND Estatus = 'Activa'", (id_productor,))
+        # 2. Cosechas Activas (de acuerdo a lo que se tiene en su inventario)
+        cursor.execute("""
+            SELECT COUNT(*) as activas 
+            FROM inventario 
+            WHERE Id_Productor = %s 
+              AND Cantidad > 0 
+              AND (Observaciones NOT LIKE '%%pH%%' AND Lote NOT LIKE 'Registro Tierra:%%')
+        """, (id_productor,))
         res_activas = cursor.fetchone()
         activas = res_activas['activas'] if res_activas else 0
         
-        # 3. Valor Neto Total (de cosechas activas)
-        cursor.execute("SELECT SUM(Valor_Neto) as valor FROM cosecha WHERE Id_Productor = %s AND Estatus = 'Activa'", (id_productor,))
+        # 3. Valor Neto Total (suma total de sus cosechas)
+        cursor.execute("SELECT SUM(Valor_Neto) as valor FROM cosecha WHERE Id_Productor = %s", (id_productor,))
         res_valor = cursor.fetchone()
-        valor = res_valor['valor'] if res_valor and res_valor['valor'] else 0
+        valor = res_valor['valor'] if res_valor and res_valor['valor'] is not None else 0.0
         
         return {
             "success": True, 
@@ -310,8 +315,12 @@ def obtener_inventario_productor(id_productor, tipo=None):
                     p.Nombre AS Nombre_Productor,
                     s.Nombre_Semilla,
                     s.Valor AS Valor_Semilla,
+                    s.Tiempo_Produccion,
+                    s.pH_Optimo,
+                    s.Id_Semilla,
                     c.Valor_Neto,
-                    t.Metros_Cuadrados,
+                    c.Fecha_Fin AS Fecha_Cosecha,
+                    c.Metros_Cuadrados,
                     cat.Nombre_Categoria,
                     COALESCE((SELECT SUM(dv.Cantidad) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Cantidad_Vendida,
                     COALESCE((SELECT SUM(dv.Cantidad * dv.Precio_Unitario) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Total_Vendido_Monto
@@ -320,7 +329,6 @@ def obtener_inventario_productor(id_productor, tipo=None):
                 LEFT JOIN cosecha c ON i.Id_Cosecha = c.Id_Cosecha
                 LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
                 LEFT JOIN categoria cat ON s.Id_Categoria = cat.Id_Categoria
-                LEFT JOIN terreno t ON c.Id_Terreno = t.Id_Terreno
                 WHERE i.Id_Productor = %s AND (i.Observaciones NOT LIKE '%pH%' AND i.Lote NOT LIKE 'Registro Tierra:%')
             """
         else:
@@ -330,8 +338,12 @@ def obtener_inventario_productor(id_productor, tipo=None):
                     p.Nombre AS Nombre_Productor,
                     s.Nombre_Semilla,
                     s.Valor AS Valor_Semilla,
+                    s.Tiempo_Produccion,
+                    s.pH_Optimo,
+                    s.Id_Semilla,
                     c.Valor_Neto,
-                    t.Metros_Cuadrados,
+                    c.Fecha_Fin AS Fecha_Cosecha,
+                    c.Metros_Cuadrados,
                     cat.Nombre_Categoria,
                     COALESCE((SELECT SUM(dv.Cantidad) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Cantidad_Vendida,
                     COALESCE((SELECT SUM(dv.Cantidad * dv.Precio_Unitario) FROM detalle_venta dv WHERE dv.Id_Inventario = i.Id_Inventario), 0) AS Total_Vendido_Monto
@@ -340,7 +352,6 @@ def obtener_inventario_productor(id_productor, tipo=None):
                 LEFT JOIN cosecha c ON i.Id_Cosecha = c.Id_Cosecha
                 LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
                 LEFT JOIN categoria cat ON s.Id_Categoria = cat.Id_Categoria
-                LEFT JOIN terreno t ON c.Id_Terreno = t.Id_Terreno
                 WHERE i.Id_Productor = %s
             """
             
@@ -399,6 +410,30 @@ def eliminar_producto_inventario(id_inventario, id_productor):
             cursor.close()
         if conexion.is_connected():
             conexion.close()
+
+def eliminar_cosecha(id_cosecha, id_productor):
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor()
+        sql = "DELETE FROM cosecha WHERE Id_Cosecha = %s AND Id_Productor = %s AND Estatus = 'En proceso'"
+        cursor.execute(sql, (id_cosecha, id_productor))
+        conexion.commit()
+        if cursor.rowcount > 0:
+            return {"success": True, "status": 200}
+        else:
+            return {"success": False, "error": "Proyección no encontrada, ya cosechada o sin permisos", "status": 404}
+    except Error as e:
+        print(f"Error en bd.eliminar_cosecha: {e}")
+        return {"success": False, "error": "Error de base de datos", "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
 
 def eliminar_cuenta_productor(id_productor):
     conexion = conexion_db()
@@ -675,10 +710,11 @@ def registrar_publicacion_cosecha(id_productor, lote, cantidad, precio, vender_d
                 fecha_fin = datetime.date.today()
                 fecha_inicio = fecha_fin - datetime.timedelta(days=int(tiempo_prod))
                 
+                m2_val = float(terrain['Metros_Cuadrados']) if (terrain and terrain.get('Metros_Cuadrados') is not None) else 500.0
                 cursor.execute("""
-                    INSERT INTO cosecha (Id_Productor, Id_Terreno, Id_Semilla, Temporada, Estatus, Fecha_Inicio, Fecha_Fin, Valor_Neto)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """, (id_productor, id_terreno, id_semilla_val, temporada, 'Terminada', fecha_inicio, fecha_fin, valor_neto))
+                    INSERT INTO cosecha (Id_Productor, Id_Terreno, Id_Semilla, Temporada, Estatus, Fecha_Inicio, Fecha_Fin, Valor_Neto, Metros_Cuadrados)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (id_productor, id_terreno, id_semilla_val, temporada, 'Terminada', fecha_inicio, fecha_fin, valor_neto, m2_val))
                 id_cosecha = cursor.lastrowid
         
         # Estado según el flujo: SI vender -> 'Publicado', NO -> 'En Bodega'
@@ -1157,4 +1193,154 @@ def obtener_notificaciones_productor(id_productor):
             cursor.close()
         if conexion.is_connected():
             conexion.close()
+
+def registrar_siembra(id_productor, id_semilla, metros_cuadrados, temporada=None):
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        
+        # 1. Buscar la semilla para conseguir temporada si no se proporciona
+        cursor.execute("SELECT Temporada FROM semilla WHERE Id_Semilla = %s", (id_semilla,))
+        seed = cursor.fetchone()
+        if seed and not temporada:
+            temporada = seed['Temporada'] or 'Primavera-Verano'
+        elif not temporada:
+            temporada = 'Primavera-Verano'
+            
+        # 2. Buscar/crear terreno del productor
+        cursor.execute("SELECT Id_Terreno FROM terreno WHERE Id_Productor = %s LIMIT 1", (id_productor,))
+        terrain = cursor.fetchone()
+        if not terrain:
+            # Crear terreno si no existe con un tamaño por defecto
+            cursor.execute("INSERT INTO terreno (Id_Productor, Metros_Cuadrados) VALUES (%s, 500.0)", (id_productor,))
+            conexion.commit()
+            cursor.execute("SELECT Id_Terreno FROM terreno WHERE Id_Productor = %s LIMIT 1", (id_productor,))
+            terrain = cursor.fetchone()
+                
+        id_terreno = terrain['Id_Terreno']
+        
+        # 3. Insertar la cosecha en proceso
+        import datetime
+        fecha_inicio = datetime.date.today()
+        
+        sql = """
+            INSERT INTO cosecha (Id_Productor, Id_Terreno, Id_Semilla, Temporada, Estatus, Fecha_Inicio, Metros_Cuadrados)
+            VALUES (%s, %s, %s, %s, 'En proceso', %s, %s)
+        """
+        cursor.execute(sql, (id_productor, id_terreno, id_semilla, temporada, fecha_inicio, float(metros_cuadrados or 0.0)))
+        id_cosecha = cursor.lastrowid
+        
+        conexion.commit()
+        return {"success": True, "id_cosecha": id_cosecha, "status": 201}
+    except Error as e:
+        print(f"Error en bd.registrar_siembra: {e}")
+        return {"success": False, "error": str(e), "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
+def cosechar_cultivo(id_cosecha, cantidad, unidad_medida, precio_venta=0.0, vender_directamente=False):
+    conexion = conexion_db()
+    if not conexion:
+        return {"success": False, "error": "Error de conexión", "status": 500}
+    
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        
+        # 1. Obtener datos de la cosecha en proceso
+        cursor.execute("SELECT * FROM cosecha WHERE Id_Cosecha = %s AND Estatus = 'En proceso'", (id_cosecha,))
+        cosecha_row = cursor.fetchone()
+        if not cosecha_row:
+            return {"success": False, "error": "Cosecha en proceso no encontrada", "status": 404}
+            
+        # 2. Buscar la semilla asociada
+        cursor.execute("SELECT * FROM semilla WHERE Id_Semilla = %s", (cosecha_row['Id_Semilla'],))
+        seed = cursor.fetchone()
+        nombre_semilla = seed['Nombre_Semilla'] if seed else 'Cultivo Cosechado'
+        id_cat = seed['Id_Categoria'] if seed else None
+        
+        # Determinar si la semilla es por peso o conteo para conversión
+        es_peso = True
+        if id_cat in [2, 3]: # Hortaliza de hoja, Ornamental / Flor
+            es_peso = False
+            
+        cant_val = float(cantidad)
+        uni = (unidad_medida or 'Kg').lower().strip()
+        
+        if es_peso:
+            if uni in ['kg', 'kilo', 'kilogramo', 'kilogramos']:
+                factor = 1.0
+            elif uni in ['gramos', 'gramo', 'gr', 'g']:
+                factor = 0.001
+            elif uni in ['libras', 'libra', 'lb', 'lbs']:
+                factor = 0.453592
+            elif uni in ['costales', 'costal']:
+                factor = 55.0
+            elif uni in ['bultos', 'bulto']:
+                factor = 50.0
+            else:
+                factor = 1.0
+        else:
+            if uni in ['unidades', 'unidad', 'pieza', 'piezas', 'manojos', 'manojo', 'tallos', 'tallo', 'esquejes', 'esqueje']:
+                factor = 1.0
+            elif uni in ['cajas', 'caja']:
+                factor = 20.0
+            elif uni in ['kg', 'kilo', 'kilogramo', 'kilogramos']:
+                factor = 10.0
+            else:
+                factor = 1.0
+                
+        cantidad_base = cant_val * factor
+        
+        # Precio unitario final
+        precio_unitario = float(precio_venta) if (vender_directamente and precio_venta and float(precio_venta) > 0) else (float(seed['Precio_Venta']) if (seed and seed.get('Precio_Venta') is not None and seed['Precio_Venta'] > 0) else float(seed['Valor'] if seed else 10.0))
+        valor_neto = cantidad_base * precio_unitario
+        
+        # 3. Finalizar la cosecha
+        import datetime
+        fecha_fin = datetime.date.today()
+        cursor.execute("""
+            UPDATE cosecha 
+            SET Estatus = 'Terminada', Fecha_Fin = %s, Valor_Neto = %s
+            WHERE Id_Cosecha = %s
+        """, (fecha_fin, valor_neto, id_cosecha))
+        
+        # 4. Insertar lote en inventario
+        estado = 'Publicado' if vender_directamente else 'En Bodega'
+        precio_inventario = float(precio_venta) if vender_directamente else 0.0
+        obs = f"Cosechado desde ciclo activo. Estatus: {estado}"
+        
+        sql_inv = """
+            INSERT INTO inventario 
+            (Id_Productor, Id_Cosecha, Lote, Cantidad, Unidad_Medida, Precio_Actual, Observaciones, Estado) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(sql_inv, (
+            cosecha_row['Id_Productor'], 
+            id_cosecha, 
+            f"Lote {nombre_semilla}", 
+            float(cantidad), 
+            unidad_medida, 
+            precio_inventario, 
+            obs, 
+            estado
+        ))
+        id_inventario = cursor.lastrowid
+        
+        conexion.commit()
+        return {"success": True, "id_inventario": id_inventario, "estado": estado, "status": 201}
+    except Error as e:
+        print(f"Error en bd.cosechar_cultivo: {e}")
+        return {"success": False, "error": str(e), "status": 500}
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if conexion.is_connected():
+            conexion.close()
+
 

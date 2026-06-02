@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor, obtener_notificaciones_productor
+from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor, obtener_notificaciones_productor, registrar_siembra, cosechar_cultivo, eliminar_cosecha
 from src.ia.bot import generar_respuesta_bot
 from src.contabilidad import calcular_roi, calcular_punto_equilibrio, calcular_utilidad_neta, calcular_costo_siembra_realista
 from src.agronomia import indice_estres_salino
@@ -121,16 +121,79 @@ def get_cosechas_productor_route():
         result = obtener_cosechas_productor(id_productor)
         
         if result['success']:
+            # Obtener el pH y Salinidad más recientes del monitoreo de este productor
+            from src.bd import conexion_db
+            import math
+            ph_actual = 7.0
+            salinidad_actual = 1.2
+            conn = conexion_db()
+            if conn:
+                try:
+                    cursor = conn.cursor(dictionary=True)
+                    cursor.execute("""
+                        SELECT PH, Salinidad FROM monitoreo_chinampa 
+                        WHERE Id_Productor = %s 
+                        ORDER BY Fecha DESC LIMIT 1
+                    """, (id_productor,))
+                    last_m = cursor.fetchone()
+                    if last_m:
+                        ph_actual = float(last_m['PH'])
+                        salinidad_actual = float(last_m['Salinidad'])
+                    cursor.close()
+                    conn.close()
+                except Exception as db_e:
+                    print("Error al obtener último monitoreo en cosechas:", db_e)
+
             # Aplicar modelos matemáticos a cada cosecha antes de enviarla
             for cos in result['cosechas']:
                 valor_neto = cos.get('Valor_Neto') or 0.0
                 precio_costal = cos.get('Valor_Semilla') or 0.0
                 area_m2 = cos.get('Metros_Cuadrados') or 0.0
                 
-                # Calcular costo de siembra real con las fórmulas de contabilidad
-                costo_real = calcular_costo_siembra_realista(precio_costal, area_m2)
+                # Calcular costo de siembra real con las fórmulas de contabilidad (incluyendo gastos fijos: Mano de Obra (350 * Tiempo_Produccion), Herramientas (400), Mantenimiento (900))
+                tiempo_prod = cos.get('Tiempo_Produccion') or 90
+                costo_semilla = calcular_costo_siembra_realista(precio_costal, area_m2)
+                costo_real = costo_semilla + (350.0 * tiempo_prod) + 400.0 + 900.0
                 cos['costo_calculado'] = costo_real
                 cos['roi_calculado'] = calcular_roi(valor_neto, costo_real) if valor_neto > 0 else 0.0
+
+                # Modelos agronómicos y probabilísticos para siembra
+                ph_optimo = cos.get('pH_Optimo') or 6.5
+                diff_ph = abs(ph_actual - ph_optimo)
+                p_base = 0.88
+                
+                if diff_ph <= 0.5:
+                    factor_ph = 1.0
+                elif diff_ph <= 1.2:
+                    factor_ph = 1.0 - (diff_ph - 0.5) * 0.35
+                else:
+                    factor_ph = max(0.15, 0.75 - (diff_ph - 1.2) * 0.30)
+                    
+                if salinidad_actual <= 1.5:
+                    factor_sal = 1.0
+                elif salinidad_actual <= 3.0:
+                    factor_sal = 1.0 - (salinidad_actual - 1.5) * 0.20
+                else:
+                    factor_sal = max(0.20, 0.70 - (salinidad_actual - 3.0) * 0.15)
+                    
+                p_germinacion = max(0.0, min(p_base * factor_ph * factor_sal, 1.0))
+                prob_perdida = 1.0 - p_germinacion
+                
+                cos['ph_actual'] = ph_actual
+                cos['salinidad_actual'] = salinidad_actual
+                cos['ph_optimo'] = ph_optimo
+                cos['p_germinacion'] = round(p_germinacion * 100, 1)
+                cos['prob_perdida'] = round(prob_perdida * 100, 1)
+                
+                # Riesgo desabasto
+                # Simular cantidad total esperada en base a un estándar
+                cant_simulada = 100
+                pedido_simulado = 80
+                from src.probabilidad import probabilidad_binomial_pmf
+                prob_falla = 0.0
+                for x in range(int(pedido_simulado)):
+                    prob_falla += probabilidad_binomial_pmf(cant_simulada, x, p_germinacion)
+                cos['riesgo_insuficiencia'] = round(prob_falla * 100, 1)
                 
             return jsonify(result['cosechas']), result['status']
         else:
@@ -206,20 +269,82 @@ def get_inventario_productor_route():
             
         result = obtener_inventario_productor(id_productor, tipo)
         if result['success']:
-            # Aplicar modelos agronómicos y probabilísticos
+            # Obtener el pH y Salinidad más recientes del monitoreo de este productor
+            from src.bd import conexion_db
+            import math
+            ph_actual = 7.0
+            salinidad_actual = 1.2
+            conn = conexion_db()
+            if conn:
+                try:
+                    cursor = conn.cursor(dictionary=True)
+                    cursor.execute("""
+                        SELECT PH, Salinidad FROM monitoreo_chinampa 
+                        WHERE Id_Productor = %s 
+                        ORDER BY Fecha DESC LIMIT 1
+                    """, (id_productor,))
+                    last_m = cursor.fetchone()
+                    if last_m:
+                        ph_actual = float(last_m['PH'])
+                        salinidad_actual = float(last_m['Salinidad'])
+                    cursor.close()
+                    conn.close()
+                except Exception as db_e:
+                    print("Error al obtener último monitoreo:", db_e)
+
+            # Aplicar modelos agronómicos y probabilísticos de post-cosecha (Opción A)
+            import datetime
+            import math
             for prod in result['productos']:
-                prob_perdida = 0.15
-                precio_actual = prod.get('Precio_Actual', 0)
-                prod['merma_proyectada'] = (prod['Cantidad'] * prob_perdida) * precio_actual
+                # 1. Calcular días en almacenamiento desde la cosecha
+                dias_almacenamiento = 0
+                fecha_cosecha_val = prod.get('Fecha_Cosecha')
+                if fecha_cosecha_val:
+                    try:
+                        if isinstance(fecha_cosecha_val, (datetime.datetime, datetime.date)):
+                            if isinstance(fecha_cosecha_val, datetime.datetime):
+                                fecha_cosecha_dt = fecha_cosecha_val.date()
+                            else:
+                                fecha_cosecha_dt = fecha_cosecha_val
+                        else:
+                            fecha_cosecha_dt = datetime.datetime.strptime(str(fecha_cosecha_val)[:10], '%Y-%m-%d').date()
+                        dias_almacenamiento = max(0, (datetime.date.today() - fecha_cosecha_dt).days)
+                    except Exception as dt_e:
+                        print("Error al calcular dias_almacenamiento:", dt_e)
                 
-                # Calcular costo de siembra real y ROI esperado con las fórmulas de contabilidad
+                # 2. Índice de decaimiento post-cosecha (tasa exponencial)
+                # Hortalizas de hoja o flores se degradan más rápido (12% diario) que tubérculos o frutos (4% diario)
+                id_cat = prod.get('Id_Categoria')
+                lambda_factor = 0.12 if id_cat in (2, 3) else 0.04
+                
+                # Probabilidad de merma acumulada por almacenamiento
+                p_merma = 1.0 - math.exp(-lambda_factor * dias_almacenamiento)
+                
+                # Guardar valores de almacenamiento en el producto
+                prod['dias_almacenamiento'] = dias_almacenamiento
+                prod['riesgo_merma'] = round(p_merma * 100, 1)
+                
+                precio_actual = prod.get('Precio_Actual') or 0.0
+                prod['merma_proyectada'] = (prod['Cantidad'] * p_merma) * precio_actual
+                
+                # 3. Calcular costo de siembra real y ROI con las fórmulas de contabilidad
                 valor_neto = prod.get('Valor_Neto') or 0.0
+                # Si el valor neto no está definido, estimar según cantidad * precio_actual
+                if valor_neto <= 0:
+                    valor_neto = prod['Cantidad'] * precio_actual
+                
                 precio_costal = prod.get('Valor_Semilla') or 0.0
                 area_m2 = prod.get('Metros_Cuadrados') or 0.0
                 
-                costo_real = calcular_costo_siembra_realista(precio_costal, area_m2)
+                tiempo_prod = prod.get('Tiempo_Produccion') or 90
+                costo_semilla = calcular_costo_siembra_realista(precio_costal, area_m2)
+                costo_real = costo_semilla + (350.0 * tiempo_prod) + 400.0 + 900.0
                 prod['costo_calculado'] = costo_real
-                prod['roi_esperado'] = calcular_roi(valor_neto, costo_real) if valor_neto > 0 else 0.0
+                prod['roi_esperado'] = calcular_roi(valor_neto, costo_real) if costo_real > 0 else 0.0
+                
+                # ROI Real basado en ventas reales
+                total_vendido_monto = prod.get('Total_Vendido_Monto') or 0.0
+                prod['roi_real'] = calcular_roi(total_vendido_monto, costo_real) if total_vendido_monto > 0 else 0.0
             
             # Calcular KPIs de inventario
             productos_ordenados = sorted(result['productos'], key=lambda x: x['Cantidad'])
@@ -255,6 +380,22 @@ def delete_inventario_route(id_inventario):
             return jsonify({"error": result['error']}), result.get('status', 500)
     except Exception as e:
         print("Error en ruta eliminar inventario:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/cosechas/<int:id_cosecha>', methods=['DELETE'])
+def delete_cosecha_route(id_cosecha):
+    try:
+        id_productor = request.args.get('id_productor')
+        if not id_productor:
+            return jsonify({"error": "ID de productor requerido"}), 400
+            
+        result = eliminar_cosecha(id_cosecha, id_productor)
+        if result['success']:
+            return jsonify({"message": "Proyección eliminada"}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result.get('status', 500)
+    except Exception as e:
+        print("Error en ruta eliminar cosecha:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
 @app.route('/api/productor/inventario', methods=['POST'])
@@ -587,6 +728,53 @@ def get_notificaciones_productor_route():
             return jsonify({"error": result['error']}), result['status']
     except Exception as e:
         print("Error en ruta obtener notificaciones:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/siembras', methods=['POST'])
+def post_registrar_siembra():
+    try:
+        data = request.get_json()
+        id_productor = data.get('id_productor')
+        id_semilla = data.get('id_semilla')
+        metros_cuadrados = data.get('metros_cuadrados')
+        temporada = data.get('temporada')
+        
+        if not id_productor or not id_semilla:
+            return jsonify({"error": "ID de productor e ID de semilla son requeridos"}), 400
+            
+        result = registrar_siembra(id_productor, id_semilla, metros_cuadrados, temporada)
+        if result['success']:
+            return jsonify({"message": "Siembra registrada exitosamente", "id_cosecha": result['id_cosecha']}), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta registrar siembra:", e)
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+@app.route('/api/productor/cosechas/finalizar', methods=['POST'])
+def post_finalizar_cosecha():
+    try:
+        data = request.get_json()
+        id_cosecha = data.get('id_cosecha')
+        cantidad = data.get('cantidad')
+        unidad_medida = data.get('unidad_medida', 'Kg')
+        precio = data.get('precio', 0.0)
+        vender_directamente = data.get('vender_directamente', False)
+        
+        if not id_cosecha or cantidad is None:
+            return jsonify({"error": "ID de cosecha y cantidad son requeridos"}), 400
+            
+        result = cosechar_cultivo(id_cosecha, cantidad, unidad_medida, precio, vender_directamente)
+        if result['success']:
+            return jsonify({
+                "message": f"Cultivo cosechado y guardado en {result['estado']}",
+                "id_inventario": result['id_inventario'],
+                "estado": result['estado']
+            }), result['status']
+        else:
+            return jsonify({"error": result['error']}), result['status']
+    except Exception as e:
+        print("Error en ruta finalizar cosecha:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
 if __name__ == '__main__':
