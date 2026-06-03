@@ -188,142 +188,153 @@ async function autocompletarClimaFormulario() {
     }
 }
 
-async function obtenerLluviaRealOpenMeteo() {
-    const integralInput = document.getElementById('integral-tasas');
-    
-    // Coordenadas aproximadas de las Chinampas de Xochimilco: 19.2638, -99.102
-    const lat = 19.2638;
-    const lon = -99.102;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum&past_days=7&timezone=America/Mexico_City`;
-    
+// Función para exportar la bitácora del estudiante a un archivo CSV (descarga directa)
+async function exportarBitacoraCSV() {
+    const estudianteId = localStorage.getItem('estudiante_id');
+    if (!estudianteId) {
+        alert('No se pudo identificar la sesión del estudiante.');
+        return;
+    }
+
     try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (response.ok && data.daily && data.daily.precipitation_sum) {
-            // Tomamos los últimos 7 días de registros históricos de lluvia (excluyendo hoy que puede estar incompleto)
-            const rainData = data.daily.precipitation_sum.slice(0, 7);
-            integralInput.value = rainData.join(', ');
-            alert('¡Datos de precipitación reales cargados con éxito desde Open-Meteo para Xochimilco!');
-            calcularIntegralLluvia();
-        } else {
-            alert('No se pudo obtener datos válidos de Open-Meteo. Usando valores por defecto.');
+        const response = await fetch(`${API_BASE_URL}/api/estudiante/monitoreos?id_estudiante=${estudianteId}`);
+        const monitoreos = await response.json();
+
+        if (!response.ok || !monitoreos || monitoreos.length === 0) {
+            alert('No tienes registros de monitoreo para exportar aún.');
+            return;
         }
+
+        // Encabezado del CSV con BOM (para compatibilidad de acentos en Microsoft Excel)
+        let csvContent = "\uFEFF";
+        csvContent += "Fecha,Productor,pH,Salinidad (dS/m),Humedad (%),Temperatura (C),Observaciones\n";
+
+        monitoreos.forEach(mon => {
+            // Limpieza de caracteres de escape en observaciones
+            const obsClean = (mon.Observaciones || "").replace(/"/g, '""').replace(/\r?\n|\r/g, " ");
+            const row = `"${mon.Fecha}","${mon.Nombre_Productor}",${mon.PH},${mon.Salinidad},${mon.Humedad},${mon.Temperatura},"${obsClean}"`;
+            csvContent += row + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Bitacora_Monitoreo_Estudiante_${estudianteId}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Error al consultar Open-Meteo:', error);
-        alert('Error de conexión con la API de Open-Meteo.');
+        console.error('Error al exportar bitácora a CSV:', error);
+        alert('Ocurrió un error al generar la descarga del archivo CSV.');
     }
 }
 
-async function calcularIntegralLluvia() {
-    const input = document.getElementById('integral-tasas').value;
-    const resEl = document.getElementById('integral-resultado');
-    const container = document.getElementById('riemann-container');
-
-    const rates = input.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
-
-    if (rates.length === 0) {
-        alert('Ingresa una lista de números válidos separados por comas.');
+// Analizar la aptitud del suelo comparando los datos contra el catálogo general de semillas
+async function analizarAptitudSuelo() {
+    const inputPh = parseFloat(document.getElementById('calc-ph').value);
+    const inputSal = parseFloat(document.getElementById('calc-salinidad').value);
+    
+    if (isNaN(inputPh) || isNaN(inputSal)) {
+        alert('Por favor, ingresa valores numéricos de pH y salinidad válidos.');
         return;
     }
-
+    
     try {
-        const res = await fetch(`${API_BASE_URL}/api/calculos/integral`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tasas: rates })
-        });
-        const data = await res.json();
+        const response = await fetch(`${API_BASE_URL}/api/semillas`);
+        const semillas = await response.json();
         
-        if (res.ok) {
-            resEl.innerText = `Resultado: ${data.resultado} ${data.unidad}`;
-            
-            // Dibujar las barras de Riemann de forma dinámica
-            container.innerHTML = '';
-            const maxRate = Math.max(...rates, 1);
-            
-            rates.forEach((rate, i) => {
-                const bar = document.createElement('div');
-                const heightPercent = (rate / maxRate) * 100;
-                
-                bar.style.height = `${Math.max(heightPercent, 5)}%`;
-                bar.style.width = '30px';
-                bar.style.background = 'rgba(255, 159, 67, 0.7)';
-                bar.style.border = '2px solid #ff9f43';
-                bar.style.borderRadius = '4px 4px 0 0';
-                bar.style.position = 'relative';
-                bar.style.cursor = 'pointer';
-                bar.title = `Día ${i+1}: ${rate} mm/día`;
-                
-                // Efecto hover
-                bar.addEventListener('mouseenter', () => {
-                    bar.style.background = '#ff9f43';
-                    bar.style.boxShadow = '0 0 8px rgba(255, 159, 67, 0.6)';
-                });
-                bar.addEventListener('mouseleave', () => {
-                    bar.style.background = 'rgba(255, 159, 67, 0.7)';
-                    bar.style.boxShadow = 'none';
-                });
-
-                container.appendChild(bar);
-            });
-        } else {
-            resEl.innerText = `Error: ${data.error}`;
+        if (!response.ok) {
+            alert('No se pudo acceder al catálogo de semillas del servidor.');
+            return;
         }
-    } catch (e) {
-        console.error(e);
-        resEl.innerText = 'Error al conectar con la API de Integral.';
-    }
-}
-
-async function calcularProbabilidadBayesiana() {
-    const pa = parseFloat(document.getElementById('bayes-pa').value);
-    const pba = parseFloat(document.getElementById('bayes-pba').value);
-    const pb = parseFloat(document.getElementById('bayes-pb').value);
-    const resEl = document.getElementById('bayes-resultado');
-    const barEl = document.getElementById('bayes-bar');
-
-    if (isNaN(pa) || isNaN(pba) || isNaN(pb) || pb <= 0) {
-        alert('Por favor ingresa valores de probabilidad válidos.');
-        return;
-    }
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/calculos/bayes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_exito: pa, p_clima_exito: pba, p_clima: pb })
-        });
-        const data = await res.json();
         
-        if (res.ok) {
-            let resultado = data.resultado;
-            if (resultado > 100) resultado = 100; // Límite matemático coherente
+        const recomendados = [];
+        const advertencias = [];
+        
+        semillas.forEach(sem => {
+            const phOpt = parseFloat(sem.pH_Optimo || 6.5);
+            const diffPh = Math.abs(inputPh - phOpt);
             
-            resEl.innerText = `Resultado: ${resultado.toFixed(2)} ${data.unidad}`;
-            barEl.style.width = `${resultado}%`;
-
-            // Escala de colores según el nivel de éxito
-            if (resultado >= 70) {
-                barEl.style.background = '#2ec4b6'; // verde azulado ecológico
-            } else if (resultado >= 40) {
-                barEl.style.background = '#ff9f43'; // naranja estudiante
+            // Fórmulas de aptitud coincidentes con los modelos agronómicos del backend
+            let factorPh = 1.0;
+            if (diffPh <= 0.5) {
+                factorPh = 1.0;
+            } else if (diffPh <= 1.2) {
+                factorPh = 1.0 - (diffPh - 0.5) * 0.35;
             } else {
-                barEl.style.background = '#e71d36'; // rojo
+                factorPh = Math.max(0.15, 0.75 - (diffPh - 1.2) * 0.30);
             }
+            
+            let factorSal = 1.0;
+            if (inputSal <= 1.5) {
+                factorSal = 1.0;
+            } else if (inputSal <= 3.0) {
+                factorSal = 1.0 - (inputSal - 1.5) * 0.20;
+            } else {
+                factorSal = Math.max(0.20, 0.70 - (inputSal - 3.0) * 0.15);
+            }
+            
+            const aptitud = factorPh * factorSal * 100;
+            
+            if (aptitud >= 75) {
+                recomendados.push({ nombre: sem.Nombre_Semilla, aptitud: Math.round(aptitud) });
+            } else {
+                advertencias.push({ nombre: sem.Nombre_Semilla, aptitud: Math.round(aptitud), phOpt: phOpt });
+            }
+        });
+        
+        // Ordenar por nivel de idoneidad
+        recomendados.sort((a, b) => b.aptitud - a.aptitud);
+        advertencias.sort((a, b) => a.aptitud - b.aptitud);
+        
+        // Renderizar los resultados en las dos columnas
+        const container = document.getElementById('aptitud-resultados-container');
+        const grid = document.getElementById('aptitud-listas-grid');
+        
+        container.style.display = 'block';
+        
+        let htmlRecomendados = `
+            <div>
+                <h4 style="color: var(--accent-green, #2ec4b6); margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">Cultivos Recomendados (Alto Éxito):</h4>
+                <div style="max-height: 250px; overflow-y: auto; border: 2px solid #000; border-radius: 6px; padding: 10px; background: #f0fdf4; box-shadow: 2px 2px 0px #000;">
+                    <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+        `;
+        if (recomendados.length === 0) {
+            htmlRecomendados += '<li style="color:#718096; font-size:0.9rem;">No hay cultivos óptimos recomendados para estas condiciones de suelo.</li>';
         } else {
-            resEl.innerText = `Error: ${data.error}`;
+            recomendados.forEach(item => {
+                htmlRecomendados += `<li style="margin-bottom: 5px; display:flex; justify-content:space-between; font-size:0.9rem; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom:3px;">
+                    <span><strong>${item.nombre}</strong></span>
+                    <span style="color: #2ec4b6; font-weight: 700;">${item.aptitud}% apto</span>
+                </li>`;
+            });
         }
-    } catch (e) {
-        console.error(e);
-        resEl.innerText = 'Error al conectar con la API de Bayes.';
+        htmlRecomendados += `</ul></div></div>`;
+        
+        let htmlAdvertencias = `
+            <div>
+                <h4 style="color: #ef4444; margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">No Recomendados / Con Alerta:</h4>
+                <div style="max-height: 250px; overflow-y: auto; border: 2px solid #000; border-radius: 6px; padding: 10px; background: #fef2f2; box-shadow: 2px 2px 0px #000;">
+                    <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+        `;
+        if (advertencias.length === 0) {
+            htmlAdvertencias += '<li style="color:#718096; font-size:0.9rem;">No hay cultivos de riesgo para estas condiciones de suelo.</li>';
+        } else {
+            advertencias.forEach(item => {
+                htmlAdvertencias += `<li style="margin-bottom: 5px; display:flex; justify-content:space-between; font-size:0.9rem; border-bottom: 1px dashed rgba(0,0,0,0.1); padding-bottom:3px;">
+                    <span><strong>${item.nombre}</strong> <span style="font-size:0.75rem; color:#718096;">(Opt: ${item.phOpt})</span></span>
+                    <span style="color: #ef4444; font-weight: 700;">${item.aptitud}% apto</span>
+                </li>`;
+            });
+        }
+        htmlAdvertencias += `</ul></div></div>`;
+        
+        grid.innerHTML = htmlRecomendados + htmlAdvertencias;
+        
+    } catch (error) {
+        console.error('Error al analizar aptitud del suelo:', error);
+        alert('No se pudo conectar al catálogo de semillas del servidor.');
     }
 }
-
-// Inicializar simulaciones al cargar la página
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        calcularIntegralLluvia();
-        calcularProbabilidadBayesiana();
-    }, 500);
-});

@@ -150,15 +150,24 @@ def get_cosechas_productor_route():
                 precio_costal = cos.get('Valor_Semilla') or 0.0
                 area_m2 = cos.get('Metros_Cuadrados') or 0.0
                 
-                # Calcular costo de siembra real con las fórmulas de contabilidad (incluyendo gastos fijos: Mano de Obra (350 * Tiempo_Produccion), Herramientas (400), Mantenimiento (900))
+                # Calcular costo de siembra real con las fórmulas de contabilidad (Opción 2: Escalar según m2 con 15% dedicación de mano de obra)
                 tiempo_prod = cos.get('Tiempo_Produccion') or 90
                 costo_semilla = calcular_costo_siembra_realista(precio_costal, area_m2)
-                costo_real = costo_semilla + (350.0 * tiempo_prod) + 400.0 + 900.0
+                
+                escala_area = area_m2 / 500.0 if area_m2 > 0 else 0.2
+                costo_mano_obra = (350.0 * tiempo_prod) * escala_area * 0.15
+                costo_herramientas = 400.0 * escala_area
+                costo_mantenimiento = 900.0 * escala_area
+                
+                costo_real = costo_semilla + costo_mano_obra + costo_herramientas + costo_mantenimiento
                 cos['costo_calculado'] = costo_real
                 cos['roi_calculado'] = calcular_roi(valor_neto, costo_real) if valor_neto > 0 else 0.0
 
                 # Modelos agronómicos y probabilísticos para siembra
-                ph_optimo = cos.get('pH_Optimo') or 6.5
+                ph_optimo_val = cos.get('pH_Optimo')
+                if ph_optimo_val is None:
+                    ph_optimo_val = cos.get('ph_optimo')
+                ph_optimo = float(ph_optimo_val) if ph_optimo_val is not None else 6.5
                 diff_ph = abs(ph_actual - ph_optimo)
                 p_base = 0.88
                 
@@ -175,8 +184,18 @@ def get_cosechas_productor_route():
                     factor_sal = 1.0 - (salinidad_actual - 1.5) * 0.20
                 else:
                     factor_sal = max(0.20, 0.70 - (salinidad_actual - 3.0) * 0.15)
-                    
-                p_germinacion = max(0.0, min(p_base * factor_ph * factor_sal, 1.0))
+                
+                # Factor de Temporada (Desviación estacional)
+                temporada_ciclo = cos.get('Temporada')
+                temporada_semilla = cos.get('Temporada_Semilla')
+                factor_temp = 1.0
+                if temporada_ciclo and temporada_semilla and temporada_semilla != 'Perennes':
+                    # Si la temporada elegida no coincide con la de la semilla, se penaliza un 25%
+                    if (temporada_ciclo == 'Primavera-Verano' and temporada_semilla == 'Otoño-Invierno') or \
+                        (temporada_ciclo == 'Otoño-Invierno' and temporada_semilla == 'Primavera-Verano'):
+                        factor_temp = 0.75
+                
+                p_germinacion = max(0.0, min(p_base * factor_ph * factor_sal * factor_temp, 1.0))
                 prob_perdida = 1.0 - p_germinacion
                 
                 cos['ph_actual'] = ph_actual
@@ -327,7 +346,7 @@ def get_inventario_productor_route():
                 precio_actual = prod.get('Precio_Actual') or 0.0
                 prod['merma_proyectada'] = (prod['Cantidad'] * p_merma) * precio_actual
                 
-                # 3. Calcular costo de siembra real y ROI con las fórmulas de contabilidad
+                # 3. Calcular costo de siembra real y ROI con las fórmulas de contabilidad (Opción 2: Escalar según m2 con 15% dedicación de mano de obra)
                 valor_neto = prod.get('Valor_Neto') or 0.0
                 # Si el valor neto no está definido, estimar según cantidad * precio_actual
                 if valor_neto <= 0:
@@ -338,13 +357,27 @@ def get_inventario_productor_route():
                 
                 tiempo_prod = prod.get('Tiempo_Produccion') or 90
                 costo_semilla = calcular_costo_siembra_realista(precio_costal, area_m2)
-                costo_real = costo_semilla + (350.0 * tiempo_prod) + 400.0 + 900.0
+                
+                escala_area = area_m2 / 500.0 if area_m2 > 0 else 0.2
+                costo_mano_obra = (350.0 * tiempo_prod) * escala_area * 0.15
+                costo_herramientas = 400.0 * escala_area
+                costo_mantenimiento = 900.0 * escala_area
+                
+                costo_real = costo_semilla + costo_mano_obra + costo_herramientas + costo_mantenimiento
                 prod['costo_calculado'] = costo_real
                 prod['roi_esperado'] = calcular_roi(valor_neto, costo_real) if costo_real > 0 else 0.0
                 
                 # ROI Real basado en ventas reales
                 total_vendido_monto = prod.get('Total_Vendido_Monto') or 0.0
                 prod['roi_real'] = calcular_roi(total_vendido_monto, costo_real) if total_vendido_monto > 0 else 0.0
+                
+                # Calcular Punto de Equilibrio
+                pef = 0
+                if precio_actual > 0:
+                    costo_var_unidad = costo_semilla / (prod['Cantidad'] if prod['Cantidad'] > 0 else 1.0)
+                    costos_fijos = costo_mano_obra + costo_herramientas + costo_mantenimiento
+                    pef = calcular_punto_equilibrio(costos_fijos, precio_actual, costo_var_unidad)
+                prod['punto_equilibrio'] = pef
             
             # Calcular KPIs de inventario
             productos_ordenados = sorted(result['productos'], key=lambda x: x['Cantidad'])

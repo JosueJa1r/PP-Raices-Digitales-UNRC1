@@ -217,7 +217,6 @@
                                         <tr>
                                             <th>Semilla / Lote</th>
                                             <th>Fecha Inicio</th>
-                                            <th>Progreso</th>
                                             <th>P(Germinación)</th>
                                             <th>pH (Medido vs Óptimo)</th>
                                             <th>Salinidad</th>
@@ -227,7 +226,7 @@
                                     </thead>
                                     <tbody id="siembras-activas-tbody">
                                         <tr>
-                                            <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando cultivos activos...</td>
+                                            <td colspan="7" style="text-align: center; color: var(--text-muted);">Cargando cultivos activos...</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -286,12 +285,13 @@
                                         <th>Riesgo de Merma</th>
                                         <th>Merma Proyectada</th>
                                         <th>ROI Esperado</th>
+                                        <th>Punto Equilibrio</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bodega-tbody">
                                     <tr>
-                                        <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando productos en bodega...</td>
+                                        <td colspan="9" style="text-align: center; color: var(--text-muted);">Cargando productos en bodega...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -312,12 +312,13 @@
                                         <th>Ventas</th>
                                         <th>Total Vendido</th>
                                         <th>ROI Real vs Esperado</th>
+                                        <th>Punto Equilibrio</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="venta-tbody">
                                     <tr>
-                                        <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando productos en venta...</td>
+                                        <td colspan="9" style="text-align: center; color: var(--text-muted);">Cargando productos en venta...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -557,6 +558,7 @@
                 const inventarioItems = inventarioResult.items || [];
 
                 // ==========================
+                // ==========================
                 // RENDER TAB 1: PRE COSECHA
                 // ==========================
                 const tbodyPre = document.getElementById('siembras-activas-tbody');
@@ -567,25 +569,10 @@
                     const siembrasActivas = cosechas.filter(c => c.Estatus === 'En proceso');
                     
                     if (siembrasActivas.length === 0) {
-                        tbodyPre.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tienes cultivos en proceso. ¡Inicia un ciclo en el formulario de la derecha!</td></tr>`;
+                        tbodyPre.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No tienes cultivos en proceso. ¡Inicia un ciclo en el formulario de la derecha!</td></tr>`;
                     } else {
                         siembrasActivas.forEach(c => {
                             const tr = document.createElement('tr');
-                            
-                            // Calcular progreso de manera neutral a la zona horaria (días calendario transcurridos)
-                            let diasTranscurridos = 0;
-                            let pct = 0;
-                            const tiempoProd = c.Tiempo_Produccion || 90;
-                            if (c.Fecha_Inicio) {
-                                const d = new Date(c.Fecha_Inicio);
-                                if (!isNaN(d.getTime())) {
-                                    const fechaInicio = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-                                    const hoy = new Date();
-                                    hoy.setHours(0, 0, 0, 0);
-                                    diasTranscurridos = Math.max(0, Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24)));
-                                    pct = Math.min(100, Math.round((diasTranscurridos / tiempoProd) * 100));
-                                }
-                            }
                             
                             // Formato y colores según datos ecológicos del canal chinampero
                             const pGerm = c.p_germinacion || 85.0;
@@ -605,14 +592,6 @@
                             tr.innerHTML = `
                                 <td><strong style="color: var(--title-primary); font-size: 0.95rem;">Lote ${c.Nombre_Semilla}</strong></td>
                                 <td>${formatearFechaSencilla(c.Fecha_Inicio)}</td>
-                                <td>
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                                        <div style="width: 100px; background: #e5e7eb; border-radius: 4px; overflow: hidden; height: 8px;">
-                                            <div style="width: ${pct}%; background: var(--accent-green); height: 100%;"></div>
-                                        </div>
-                                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">${diasTranscurridos} / ${tiempoProd} días (${pct}%)</span>
-                                    </div>
-                                </td>
                                 <td><span style="color: ${pGermColor}; font-weight: 700;">${pGerm}%</span></td>
                                 <td>
                                     <span style="color: ${phColor}; font-weight: 700;">${phAct.toFixed(1)}</span> 
@@ -630,92 +609,103 @@
                             tbodyPre.appendChild(tr);
                         });
                     }
+                } else {
+                    tbodyPre.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; font-weight: bold; padding: 1.5rem;">Error al cargar cultivos activos: ${cosechas.error || 'Problema de conexión con el servidor'}</td></tr>`;
                 }
 
                 // ==========================
-                // RENDER TAB 2: COSECHA (BODEGA)
+                // RENDER TAB 2: COSECHA (BODEGA) & TAB 3: VENTA (TIENDA)
                 // ==========================
                 const tbodyBodega = document.getElementById('bodega-tbody');
                 tbodyBodega.innerHTML = '';
-                const bodegaItems = inventarioItems.filter(item => item.Estado === 'En Bodega');
-                
-                if (bodegaItems.length === 0) {
-                    tbodyBodega.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tienes productos guardados en Bodega. Cosecha algún lote de pre cosecha para almacenarlo.</td></tr>`;
-                } else {
-                    bodegaItems.forEach(prod => {
-                        const tr = document.createElement('tr');
-                        
-                        const roiVal = parseFloat(prod.roi_esperado || 0);
-                        const roiColor = roiVal > 0 ? 'var(--accent-green)' : (roiVal === 0 ? 'var(--text-muted)' : '#ef4444');
-                        const roiDisplay = roiVal > 0 ? `+${roiVal.toFixed(1)}%` : `${roiVal.toFixed(1)}%`;
-                        
-                        const mermaColor = prod.riesgo_merma <= 15 ? 'var(--accent-green)' : (prod.riesgo_merma <= 40 ? '#f59e0b' : '#ef4444');
-                        const mermaProy = parseFloat(prod.merma_proyectada || 0);
-
-                        tr.innerHTML = `
-                            <td><strong>${prod.Lote}</strong></td>
-                            <td>${prod.Nombre_Categoria || 'General'}</td>
-                            <td>${prod.Cantidad} ${prod.Unidad_Medida || 'Kg'}</td>
-                            <td>${prod.dias_almacenamiento} días</td>
-                            <td><span style="color: ${mermaColor}; font-weight: 700;">${prod.riesgo_merma}%</span></td>
-                            <td><span style="color: #ef4444; font-weight: 600;">$${mermaProy.toFixed(2)} MXN</span></td>
-                            <td><span style="color: ${roiColor}; font-weight: 700;">${roiDisplay}</span></td>
-                            <td>
-                                <button class="btn-action-harvest publish" onclick="ponerAALaVenta(${prod.Id_Inventario})">Poner a la Venta</button>
-                            </td>
-                        `;
-                        tbodyBodega.appendChild(tr);
-                    });
-                }
-
-                // ==========================
-                // RENDER TAB 3: VENTA (TIENDA)
-                // ==========================
                 const tbodyVenta = document.getElementById('venta-tbody');
                 tbodyVenta.innerHTML = '';
-                const ventaItems = inventarioItems.filter(item => item.Estado === 'Publicado' || item.Estado === 'Agotado');
 
-                if (ventaItems.length === 0) {
-                    tbodyVenta.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No tienes productos expuestos al público en la tienda. Pone a la venta lotes de tu bodega.</td></tr>`;
+                if (responseInventario.ok) {
+                    // Renderizar Bodega
+                    const bodegaItems = inventarioItems.filter(item => item.Estado === 'En Bodega');
+                    if (bodegaItems.length === 0) {
+                        tbodyBodega.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No tienes productos guardados en Bodega. Cosecha algún lote de pre cosecha para almacenarlo.</td></tr>`;
+                    } else {
+                        bodegaItems.forEach(prod => {
+                            const tr = document.createElement('tr');
+                            
+                            const roiVal = parseFloat(prod.roi_esperado || 0);
+                            const roiColor = roiVal > 0 ? 'var(--accent-green)' : (roiVal === 0 ? 'var(--text-muted)' : '#ef4444');
+                            const roiDisplay = roiVal > 0 ? `+${roiVal.toFixed(1)}%` : `${roiVal.toFixed(1)}%`;
+                            
+                            const mermaColor = prod.riesgo_merma <= 15 ? 'var(--accent-green)' : (prod.riesgo_merma <= 40 ? '#f59e0b' : '#ef4444');
+                            const mermaProy = parseFloat(prod.merma_proyectada || 0);
+
+                            tr.innerHTML = `
+                                <td><strong>${prod.Lote}</strong></td>
+                                <td>${prod.Nombre_Categoria || 'General'}</td>
+                                <td>${prod.Cantidad} ${prod.Unidad_Medida || 'Kg'}</td>
+                                <td>${prod.dias_almacenamiento} días</td>
+                                <td><span style="color: ${mermaColor}; font-weight: 700;">${prod.riesgo_merma}%</span></td>
+                                <td><span style="color: #ef4444; font-weight: 600;">$${mermaProy.toFixed(2)} MXN</span></td>
+                                <td><span style="color: ${roiColor}; font-weight: 700;">${roiDisplay}</span></td>
+                                <td><strong style="color: var(--title-primary);">${prod.punto_equilibrio}</strong> <span style="font-size: 0.8rem; color: var(--text-muted);">${prod.Unidad_Medida || 'Kg'}</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button class="btn-action-harvest publish" onclick="ponerAALaVenta(${prod.Id_Inventario})">Poner a la Venta</button>
+                                        <button class="btn-action-harvest delete" onclick="eliminarProducto(${prod.Id_Inventario})">Eliminar</button>
+                                    </div>
+                                </td>
+                            `;
+                            tbodyBodega.appendChild(tr);
+                        });
+                    }
+
+                    // Renderizar Venta
+                    const ventaItems = inventarioItems.filter(item => item.Estado === 'Publicado' || item.Estado === 'Agotado');
+                    if (ventaItems.length === 0) {
+                        tbodyVenta.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No tienes productos expuestos al público en la tienda. Pone a la venta lotes de tu bodega.</td></tr>`;
+                    } else {
+                        ventaItems.forEach(prod => {
+                            const tr = document.createElement('tr');
+                            
+                            const stockSubio = parseFloat(prod.Cantidad || 0) + parseFloat(prod.Cantidad_Vendida || 0);
+                            const roiRealVal = parseFloat(prod.roi_real || 0);
+                            const roiEspVal = parseFloat(prod.roi_esperado || 0);
+                            
+                            const roiRealColor = roiRealVal > 0 ? 'var(--accent-green)' : (roiRealVal === 0 ? 'var(--text-muted)' : '#ef4444');
+                            const roiEspColor = roiEspVal > 0 ? 'var(--accent-green)' : (roiEspVal === 0 ? 'var(--text-muted)' : '#ef4444');
+                            
+                            const roiRealDisplay = roiRealVal > 0 ? `+${roiRealVal.toFixed(1)}%` : `${roiRealVal.toFixed(1)}%`;
+                            const roiEspDisplay = roiEspVal > 0 ? `+${roiEspVal.toFixed(1)}%` : `${roiEspVal.toFixed(1)}%`;
+
+                            tr.innerHTML = `
+                                <td>
+                                    <div style="font-weight: 700; color: var(--title-primary);">${prod.Lote}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">$${prod.Precio_Actual ? prod.Precio_Actual.toFixed(2) : '0.00'} MXN / ${prod.Unidad_Medida}</div>
+                                </td>
+                                <td>${prod.Nombre_Categoria || 'General'}</td>
+                                <td>${stockSubio.toFixed(1)} ${prod.Unidad_Medida}</td>
+                                <td><strong style="color: ${prod.Cantidad > 0 ? 'var(--text-main)' : '#ef4444'};">${prod.Cantidad} ${prod.Unidad_Medida}</strong></td>
+                                <td>${prod.Cantidad_Vendida ? prod.Cantidad_Vendida.toFixed(1) : '0.0'} ${prod.Unidad_Medida}</td>
+                                <td><strong style="color: var(--accent-green);">$${prod.Total_Vendido_Monto ? prod.Total_Vendido_Monto.toFixed(2) : '0.00'} MXN</strong></td>
+                                <td>
+                                    <div style="font-size: 0.85rem; line-height: 1.4;">
+                                        <div>Real: <span style="color: ${roiRealColor}; font-weight: 700;">${roiRealDisplay}</span></div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Esperado: <span style="color: ${roiEspColor}; font-weight: 600;">${roiEspDisplay}</span></div>
+                                    </div>
+                                </td>
+                                <td><strong style="color: var(--title-primary);">${prod.punto_equilibrio}</strong> <span style="font-size: 0.8rem; color: var(--text-muted);">${prod.Unidad_Medida || 'Kg'}</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button class="btn-action-harvest depublish" onclick="guardarEnBodega(${prod.Id_Inventario})">Guardar en Bodega</button>
+                                        <button class="btn-action-harvest delete" onclick="eliminarProducto(${prod.Id_Inventario})">Eliminar</button>
+                                    </div>
+                                </td>
+                            `;
+                            tbodyVenta.appendChild(tr);
+                        });
+                    }
                 } else {
-                    ventaItems.forEach(prod => {
-                        const tr = document.createElement('tr');
-                        
-                        const stockSubio = parseFloat(prod.Cantidad || 0) + parseFloat(prod.Cantidad_Vendida || 0);
-                        const roiRealVal = parseFloat(prod.roi_real || 0);
-                        const roiEspVal = parseFloat(prod.roi_esperado || 0);
-                        
-                        const roiRealColor = roiRealVal > 0 ? 'var(--accent-green)' : (roiRealVal === 0 ? 'var(--text-muted)' : '#ef4444');
-                        const roiEspColor = roiEspVal > 0 ? 'var(--accent-green)' : (roiEspVal === 0 ? 'var(--text-muted)' : '#ef4444');
-                        
-                        const roiRealDisplay = roiRealVal > 0 ? `+${roiRealVal.toFixed(1)}%` : `${roiRealVal.toFixed(1)}%`;
-                        const roiEspDisplay = roiEspVal > 0 ? `+${roiEspVal.toFixed(1)}%` : `${roiEspVal.toFixed(1)}%`;
-
-                        tr.innerHTML = `
-                            <td>
-                                <div style="font-weight: 700; color: var(--title-primary);">${prod.Lote}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">$${prod.Precio_Actual ? prod.Precio_Actual.toFixed(2) : '0.00'} MXN / ${prod.Unidad_Medida}</div>
-                            </td>
-                            <td>${prod.Nombre_Categoria || 'General'}</td>
-                            <td>${stockSubio.toFixed(1)} ${prod.Unidad_Medida}</td>
-                            <td><strong style="color: ${prod.Cantidad > 0 ? 'var(--text-main)' : '#ef4444'};">${prod.Cantidad} ${prod.Unidad_Medida}</strong></td>
-                            <td>${prod.Cantidad_Vendida ? prod.Cantidad_Vendida.toFixed(1) : '0.0'} ${prod.Unidad_Medida}</td>
-                            <td><strong style="color: var(--accent-green);">$${prod.Total_Vendido_Monto ? prod.Total_Vendido_Monto.toFixed(2) : '0.00'} MXN</strong></td>
-                            <td>
-                                <div style="font-size: 0.85rem; line-height: 1.4;">
-                                    <div>Real: <span style="color: ${roiRealColor}; font-weight: 700;">${roiRealDisplay}</span></div>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Esperado: <span style="color: ${roiEspColor}; font-weight: 600;">${roiEspDisplay}</span></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; gap: 5px;">
-                                    <button class="btn-action-harvest depublish" onclick="guardarEnBodega(${prod.Id_Inventario})">Guardar en Bodega</button>
-                                    <button class="btn-action-harvest delete" onclick="eliminarProducto(${prod.Id_Inventario})">Eliminar</button>
-                                </div>
-                            </td>
-                        `;
-                        tbodyVenta.appendChild(tr);
-                    });
+                    const errorRow = `<tr><td colspan="9" style="text-align: center; color: #ef4444; font-weight: bold; padding: 1.5rem;">Error al cargar inventario: ${inventarioResult.error || 'Problema de conexión con el servidor'}</td></tr>`;
+                    tbodyBodega.innerHTML = errorRow;
+                    tbodyVenta.innerHTML = errorRow;
                 }
 
             } catch (error) {

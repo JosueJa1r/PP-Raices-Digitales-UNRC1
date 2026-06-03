@@ -178,7 +178,7 @@ def obtener_cosechas_productor(id_productor):
     try:
         cursor = conexion.cursor(dictionary=True)
         sql = """
-            SELECT c.*, s.Nombre_Semilla, s.Valor AS Valor_Semilla, s.Tiempo_Produccion, c.Metros_Cuadrados
+            SELECT c.*, s.Nombre_Semilla, s.Valor AS Valor_Semilla, s.Tiempo_Produccion, s.pH_Optimo, s.Temporada AS Temporada_Semilla, c.Metros_Cuadrados
             FROM cosecha c
             LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
             WHERE c.Id_Productor = %s
@@ -769,7 +769,7 @@ def actualizar_estado_inventario(id_inventario, estado, precio=None):
             conexion.close()
 
 def obtener_catalogo_publicado(busqueda=None):
-    """Obtiene todos los productos publicados en la tienda, con nombre del productor."""
+    """Obtiene todos los productos publicados en la tienda, con nombre del productor y categoría."""
     conexion = conexion_db()
     if not conexion:
         return {"success": False, "error": "Error de conexión", "status": 500}
@@ -785,9 +785,13 @@ def obtener_catalogo_publicado(busqueda=None):
                 i.Precio_Actual,
                 i.Estado,
                 p.Nombre AS Nombre_Productor,
-                p.Id_Productor
+                p.Id_Productor,
+                cat.Nombre_Categoria AS Categoria
             FROM inventario i
             JOIN productor p ON i.Id_Productor = p.Id_Productor
+            LEFT JOIN cosecha c ON i.Id_Cosecha = c.Id_Cosecha
+            LEFT JOIN semilla s ON c.Id_Semilla = s.Id_Semilla
+            LEFT JOIN categoria cat ON s.Id_Categoria = cat.Id_Categoria
             WHERE i.Estado = 'Publicado' AND i.Cantidad > 0
         """
         params = []
@@ -1299,7 +1303,7 @@ def cosechar_cultivo(id_cosecha, cantidad, unidad_medida, precio_venta=0.0, vend
         cantidad_base = cant_val * factor
         
         # Precio unitario final
-        precio_unitario = float(precio_venta) if (vender_directamente and precio_venta and float(precio_venta) > 0) else (float(seed['Precio_Venta']) if (seed and seed.get('Precio_Venta') is not None and seed['Precio_Venta'] > 0) else float(seed['Valor'] if seed else 10.0))
+        precio_unitario = float(precio_venta) if (vender_directamente and precio_venta and float(precio_venta) > 0) else (float(seed['Precio_Venta']) if (seed and seed.get('Precio_Venta') is not None and seed['Precio_Venta'] > 0) else (float(seed['Valor']) if seed else 10.0))
         valor_neto = cantidad_base * precio_unitario
         
         # 3. Finalizar la cosecha

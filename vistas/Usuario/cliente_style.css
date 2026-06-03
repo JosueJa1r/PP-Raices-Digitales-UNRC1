@@ -292,6 +292,34 @@ body {
     transform: rotate(45deg);
 }
 
+.filter-option input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.filter-option input[type="radio"]:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.filter-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+}
+
 /* --- Products Grid --- */
 .products-header {
     display: flex;

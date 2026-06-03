@@ -61,10 +61,16 @@
                 <label class="filter-option"><input type="radio" name="sort" value="stock-desc" onchange="sortProducts(this.value)"><span>Mayor Stock</span></label>
             </div>
             <div class="filter-group">
+                <h4>Categorías</h4>
+                <div id="categories-filter-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- Se cargará dinámicamente en JS -->
+                </div>
+            </div>
+            <div class="filter-group">
                 <h4>Estado de la tienda</h4>
                 <div id="stats-panel" style="font-size:0.85rem;color:#555;line-height:2;">
-                    <div>🌱 Productos disponibles: <strong id="stat-count">—</strong></div>
-                    <div>👨‍🌾 Productores activos: <strong id="stat-prod">—</strong></div>
+                    <div>Productos disponibles: <strong id="stat-count">—</strong></div>
+                    <div>Productores activos: <strong id="stat-prod">—</strong></div>
                 </div>
             </div>
         </aside>
@@ -97,7 +103,7 @@
     <!-- Cart Sidebar -->
     <aside class="right-sidebar cart-sidebar" id="cart-sidebar">
         <div class="sidebar-header">
-            <h3>🛒 Mi Carrito</h3>
+            <h3>Mi Carrito</h3>
             <button class="close-sidebar-btn" onclick="toggleSidebar('cart-sidebar')" aria-label="Cerrar carrito">&times;</button>
         </div>
         <div class="cart-items" id="cart-items">
@@ -167,6 +173,8 @@
         let allProducts = [];
         let cart = {};   // { id_inventario: { product, qty } }
         let searchTimer = null;
+        let activeSort = 'newest';
+        let activeCategory = 'all';
 
         // ─── Init ─────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
@@ -187,7 +195,9 @@
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Server error');
                 allProducts = await res.json();
-                renderProductos(allProducts);
+                
+                renderCategorias(allProducts);
+                updateProductDisplay();
                 actualizarStats(allProducts);
             } catch (err) {
                 console.error('Error cargando catálogo:', err);
@@ -201,15 +211,63 @@
             }
         }
 
+        // ─── Dynamic Categories Filter UI ──────────────────────────
+        function renderCategorias(productos) {
+            const container = document.getElementById('categories-filter-list');
+            if (!container) return;
+
+            const categorias = new Set();
+            productos.forEach(p => { if (p.Categoria) categorias.add(p.Categoria); });
+
+            let html = `
+                <label class="filter-option">
+                    <input type="radio" name="category" value="all" ${activeCategory === 'all' ? 'checked' : ''} onchange="filterByCategory('all')">
+                    <span>Todas</span>
+                </label>
+            `;
+            categorias.forEach(cat => {
+                html += `
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="${cat}" ${activeCategory === cat ? 'checked' : ''} onchange="filterByCategory('${cat}')">
+                        <span>${cat}</span>
+                    </label>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ─── Filter & Sort Coordinator ────────────────────────────
+        function updateProductDisplay() {
+            let filtered = [...allProducts];
+
+            // 1. Filtrar por Categoría
+            if (activeCategory !== 'all') {
+                filtered = filtered.filter(p => p.Categoria === activeCategory);
+            }
+
+            // 2. Ordenar
+            if (activeSort === 'price-asc') {
+                filtered.sort((a, b) => (a.Precio_Actual || 0) - (b.Precio_Actual || 0));
+            } else if (activeSort === 'price-desc') {
+                filtered.sort((a, b) => (b.Precio_Actual || 0) - (a.Precio_Actual || 0));
+            } else if (activeSort === 'stock-desc') {
+                filtered.sort((a, b) => (b.Cantidad || 0) - (a.Cantidad || 0));
+            } else {
+                filtered.sort((a, b) => b.Id_Inventario - a.Id_Inventario);
+            }
+
+            renderProductos(filtered);
+        }
+
+        function filterByCategory(cat) { activeCategory = cat; updateProductDisplay(); }
+        function sortProducts(criteria) { activeSort = criteria; updateProductDisplay(); }
+
+        // ─── Render Products Grid ─────────────────────────────────
         function renderProductos(productos) {
             const grid = document.getElementById('products-grid');
             if (!productos.length) { showState('empty'); return; }
             showState('grid');
 
-            // Stats
-            document.getElementById('stat-count').innerText = productos.length;
-            const uniqueProd = new Set(productos.map(p => p.Id_Productor)).size;
-            document.getElementById('stat-prod').innerText = uniqueProd;
             document.getElementById('product-count-label').innerText = `${productos.length} producto(s) disponibles`;
 
             grid.innerHTML = '';
@@ -217,28 +275,27 @@
                  const loteClean = prod.Lote.replace(/\s*\([^)]+\)$/, '');
                  const unidad = prod.Unidad_Medida || (prod.Lote.match(/\(([^)]+)\)$/) || [])[1] || 'unidades';
                  const precio = parseFloat(prod.Precio_Actual) || 0;
-                 const inCart = cart[prod.Id_Inventario];
+                 const categoria = prod.Categoria || 'Hortalizas';
 
                 const card = document.createElement('article');
                 card.className = 'product-card';
                 card.id = `card-${prod.Id_Inventario}`;
                 card.style.animationDelay = `${i * 0.05}s`;
                 
-                // Imagen aleatoria según tipo (simulado)
                 const imgPath = i % 2 === 0 ? '../../IMG/hortalizas.png' : '../../IMG/flores.png';
 
                 card.innerHTML = `
                     <div class="product-image-container">
-                        <span class="product-badge" style="background:var(--accent-green);">Cosecha</span>
+                        <span class="product-badge" style="background:var(--accent-green);">${categoria}</span>
                         <img src="${imgPath}" alt="${loteClean}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#1B4332" stroke-width="1.5" opacity="0.5" style="display:none;">
                             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                         </svg>
                     </div>
                     <div class="product-info">
-                        <span class="product-category">👨‍🌾 Productor: ${prod.Nombre_Productor}</span>
+                        <span class="product-category">Productor: ${prod.Nombre_Productor}</span>
                         <h3 class="product-title">${loteClean}</h3>
-                        <p style="font-size:0.8rem;color:#777;margin:4px 0;">📦 Stock: ${prod.Cantidad} ${unidad}</p>
+                        <p style="font-size:0.8rem;color:#777;margin:4px 0;">Stock: ${prod.Cantidad} ${unidad}</p>
                         <div class="product-footer">
                             <span class="product-price">$${precio.toFixed(2)} MXN</span>
                             ${precio > 0
@@ -264,43 +321,31 @@
                 return;
             }
 
-            const defaultQty = cart[id] ? cart[id].qty : 2;
-            const inputQty = prompt(`¿Cuántos kilos (o unidades) de "${nombre}" deseas agregar al carrito?\n(Mínimo 2 | Stock disponible: ${stockMax}):`, defaultQty);
-            
-            if (inputQty === null) return; // Cancelado
-
-            const qty = parseInt(inputQty);
-            if (isNaN(qty) || qty < 2) {
-                mostrarAlerta('warning', 'Cantidad inválida', 'La compra mínima es de 2 kilos/unidades.');
-                return;
+            if (!cart[id]) {
+                cart[id] = { id, nombre, precio, stockMax, qty: 2 };
+                mostrarAlerta('success', 'Añadido al carrito', `Se agregaron 2 kilos/unidades de "${nombre}" al carrito.`, 2500);
+            } else {
+                const nuevaQty = cart[id].qty + 1;
+                if (nuevaQty > stockMax) {
+                    mostrarAlerta('warning', 'Stock límite alcanzado', `No es posible agregar más de ${stockMax} kilos/unidades de "${nombre}".`, 2500);
+                    return;
+                }
+                cart[id].qty = nuevaQty;
+                mostrarAlerta('success', 'Cantidad actualizada', `Se incrementó la cantidad de "${nombre}" a ${nuevaQty} kilos/unidades.`, 2000);
             }
-
-            if (qty > stockMax) {
-                mostrarAlerta('warning', 'Stock excedido', `No es posible agregar ${qty} unidades. El stock máximo disponible es de ${stockMax}.`);
-                return;
-            }
-
-            cart[id] = { id, nombre, precio, stockMax, qty: qty };
             renderCarrito();
-            
-            // Animación del badge
             const badge = document.getElementById('cart-badge');
             badge.classList.add('pulse');
             setTimeout(() => badge.classList.remove('pulse'), 300);
-
-            mostrarAlerta('success', '¡Añadido!', `Se agregaron ${qty} kilos/unidades de ${nombre} al carrito.`, 2500);
         }
 
         function cambiarCantidadCarrito(id, delta) {
             if (!cart[id]) return;
             const nuevo = cart[id].qty + delta;
-            
             if (nuevo < 2) {
-                if (confirm(`La cantidad mínima de compra es de 2 kilos/unidades. ¿Deseas remover "${cart[id].nombre}" de tu carrito?`)) {
-                    delete cart[id];
-                }
+                if (confirm(`Remover "${cart[id].nombre}" del carrito?`)) delete cart[id];
             } else if (nuevo > cart[id].stockMax) {
-                mostrarAlerta('warning', 'Stock máximo', `Límite de stock disponible: ${cart[id].stockMax}`);
+                mostrarAlerta('warning', 'Stock máximo', `Límite alcanzado: ${cart[id].stockMax}`);
                 return;
             } else {
                 cart[id].qty = nuevo;
@@ -323,10 +368,8 @@
                 return;
             }
 
-            let total = 0;
-            let totalItems = 0;
+            let total = 0; let totalItems = 0;
             container.innerHTML = '';
-
             keys.forEach(id => {
                 const item = cart[id];
                 total += item.precio * item.qty;
@@ -334,15 +377,12 @@
                 const div = document.createElement('div');
                 div.className = 'cart-item';
                 div.innerHTML = `
-                    <div class="cart-item-img">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1B4332" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                    </div>
                     <div class="cart-item-info" style="flex:1;">
                         <h4 style="font-size:0.85rem;">${item.nombre}</h4>
                         <span class="price">$${(item.precio * item.qty).toFixed(2)} MXN</span>
                         <div class="qty-ctrl" style="margin-top:6px;">
                             <button onclick="cambiarCantidadCarrito(${id}, -1)">−</button>
-                            <input type="number" value="${item.qty}" min="2" max="${item.stockMax}" readonly style="pointer-events:none;">
+                            <input type="number" value="${item.qty}" readonly style="pointer-events:none;">
                             <button onclick="cambiarCantidadCarrito(${id}, 1)">+</button>
                             <button onclick="delete cart[${id}]; renderCarrito();" style="margin-left:4px;color:#E4007C;border-color:#E4007C;">×</button>
                         </div>
@@ -350,7 +390,6 @@
                 `;
                 container.appendChild(div);
             });
-
             badge.innerText = totalItems;
             badge.style.display = 'flex';
             totalEl.innerText = `$${total.toFixed(2)} MXN`;
@@ -361,66 +400,32 @@
         async function procesarCompra() {
             const keys = Object.keys(cart);
             if (!keys.length) return;
-
             const btn = document.getElementById('checkout-btn');
-            btn.disabled = true;
-            btn.innerText = 'Procesando...';
-
-            let errores = [];
-            let exitosos = [];
-
+            btn.disabled = true; btn.innerText = 'Procesando...';
+            let errores = []; let exitosos = [];
             for (const id of keys) {
                 const item = cart[id];
                 try {
                     const res = await fetch(`${API_BASE_URL}/api/cliente/comprar`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            id_inventario: parseInt(id), 
-                            cantidad: item.qty,
-                            id_cliente: parseInt(localStorage.getItem('cliente_id')) || null
-                        })
+                        body: JSON.stringify({ id_inventario: parseInt(id), cantidad: item.qty, id_cliente: parseInt(localStorage.getItem('cliente_id')) || null })
                     });
-                    const data = await res.json();
-                    if (res.ok) {
-                        exitosos.push(item.nombre);
-                        delete cart[id];
-                    } else {
-                        errores.push(`${item.nombre}: ${data.error}`);
-                    }
-                } catch(e) {
-                    errores.push(`${item.nombre}: Error de conexión`);
-                }
+                    if (res.ok) { exitosos.push(item.nombre); delete cart[id]; } else { errores.push(`${item.nombre}: Error`); }
+                } catch(e) { errores.push(`${item.nombre}: Error red`); }
             }
-
             renderCarrito();
             await cargarCatalogo(document.getElementById('search-input').value);
-
             if (exitosos.length) {
-                // Mostrar modal en lugar de alerta simple
-                document.getElementById('success-modal-message').innerText = `Se han procesado ${exitosos.length} producto(s) correctamente. Tu apoyo ayuda a preservar las chinampas de Xochimilco.`;
+                document.getElementById('success-modal-message').innerText = `Se han procesado ${exitosos.length} producto(s) correctamente.`;
                 document.getElementById('success-modal-overlay').classList.add('show');
             }
-            if (errores.length) {
-                mostrarAlerta('error', 'Algunos artículos fallaron', errores.join('\n'));
-            }
-
+            if (errores.length) mostrarAlerta('error', 'Fallos', errores.join(', '));
             btn.innerText = 'Comprar Ahora';
         }
 
         // ─── Search & Sort ────────────────────────────────────────
-        function debounceSearch(val) {
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(() => cargarCatalogo(val), 400);
-        }
-
-        function sortProducts(criteria) {
-            let sorted = [...allProducts];
-            if (criteria === 'price-asc') sorted.sort((a,b) => a.Precio_Actual - b.Precio_Actual);
-            else if (criteria === 'price-desc') sorted.sort((a,b) => b.Precio_Actual - a.Precio_Actual);
-            else if (criteria === 'stock-desc') sorted.sort((a,b) => b.Cantidad - a.Cantidad);
-            renderProductos(sorted);
-        }
+        function debounceSearch(val) { clearTimeout(searchTimer); searchTimer = setTimeout(() => cargarCatalogo(val), 400); }
 
         // ─── UI Helpers ───────────────────────────────────────────
         function showState(state) {
@@ -434,15 +439,9 @@
             document.getElementById('stat-prod').innerText = new Set(productos.map(p => p.Id_Productor)).size;
         }
 
-        function cerrarSesion() {
-            localStorage.removeItem('cliente_nombre');
-            localStorage.removeItem('cliente_correo');
-            localStorage.removeItem('cliente_id');
-        }
+        function cerrarSesion() { localStorage.removeItem('cliente_nombre'); localStorage.removeItem('cliente_correo'); localStorage.removeItem('cliente_id'); }
 
-        function closeSuccessModal() {
-            document.getElementById('success-modal-overlay').classList.remove('show');
-        }
+        function closeSuccessModal() { document.getElementById('success-modal-overlay').classList.remove('show'); }
     </script>
 </body>
 </html>
