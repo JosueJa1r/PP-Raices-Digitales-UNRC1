@@ -134,38 +134,100 @@ Donde $n$ es la cantidad de semillas proyectadas, $k$ es el pedido mínimo y $p$
 
 ## Costos en la Nube, Viabilidad y Payback (Retorno de Inversión)
 
-Para garantizar que Raíces Digitales sea un proyecto viable para la comunidad, se ha diseñado una estructura de costos operativos de infraestructura optimizados en la nube:
+Para garantizar que Raíces Digitales sea un proyecto viable, escalable y comercialmente transferible, se ha diseñado una estructura de costos operativos de infraestructura en la nube (comparando **Amazon Web Services (AWS)** y **Oracle Cloud Infrastructure (OCI)**) junto con la valorización del desarrollo profesional.
 
-### 1. Costo Operativo de Infraestructura Mensual
-El sistema está diseñado sobre plataformas en la nube de pago por uso y capas de desarrollo optimizadas:
+### 1. Costo Operativo de Infraestructura Mensual (Producción)
 
-| Componente | Proveedor / Servicio | Configuración de Servidor | Costo Estimado (Mensual) |
+A continuación se detallan las dos alternativas de arquitectura de nube comercial:
+
+#### Alternativa A: Amazon Web Services (AWS)
+| Componente | Servicio AWS | Configuración de Servidor | Costo Estimado (Mensual) |
 | :--- | :--- | :--- | :--- |
-| **Base de Datos** | Aiven Cloud MySQL | Plan Startup (1 CPU, 1GB RAM, 10GB SSD) | $320.00 MXN ($19 USD) |
-| **Backend API** | Render Cloud | Instancia Web Flask (0.5 CPU, 512MB RAM) | $250.00 MXN ($15 USD) |
-| **Frontend** | Vercel | CDN Edge Distributions & Static Hosting | $340.00 MXN ($20 USD) |
-| **API Asistente Inteligente** | Gemini Cloud API | Pago por consumo de tokens (~20,000 consultas) | $200.00 MXN ($10 USD) |
-| **Dominio y Certificados** | GoDaddy / Let's Encrypt | Dominio `.mx` con cifrado SSL automático | $50.00 MXN ($2.5 USD) |
-| **Mantenimiento Técnico** | Soporte Remoto | Actualizaciones mensuales y respaldos | $2,000.00 MXN |
-| **TOTAL MENSUAL** | | | **$3,160.00 MXN** |
+| **Base de Datos** | Amazon RDS for MySQL | Instancia `db.t4g.micro` (2 vCPUs, 1GB RAM, 20GB SSD gp3) | $340.00 MXN ($20 USD) |
+| **Backend API** | AWS App Runner / ECS | Contenedor de microservicio Flask (0.5 vCPU, 1GB RAM) | $255.00 MXN ($15 USD) |
+| **Frontend** | AWS Amplify / S3 + CloudFront | Hosting estático y distribución de CDN Edge | $85.00 MXN ($5 USD) |
+| **Asistente IA** | Gemini API | Consumo promedio de tokens para asistente conversacional | $170.00 MXN ($10 USD) |
+| **DNS & Seguridad** | AWS Route 53 + Shield | Resolución de dominio y protección básica contra DDoS | $34.00 MXN ($2 USD) |
+| **Soporte & Mantenimiento** | Soporte Remoto Técnico | Actualizaciones y backups automatizados (S3) | $2,000.00 MXN |
+| **TOTAL MENSUAL AWS** | | | **$2,884.00 MXN** |
+
+#### Alternativa B: Oracle Cloud Infrastructure (OCI)
+| Componente | Servicio OCI | Configuración de Servidor | Costo Estimado (Mensual) |
+| :--- | :--- | :--- | :--- |
+| **Base de Datos** | OCI MySQL Database Service | Forma mínima dedicada (1 OCPU, 8GB RAM, 50GB Block Volume) | $425.00 MXN ($25 USD) |
+| **Backend API** | OCI Compute Instance | Instancia Standard.E4.Flex (1 OCPU, 2GB RAM Linux) | $204.00 MXN ($12 USD) |
+| **Frontend** | OCI Object Storage + CDN | Almacenamiento de cubos y distribución de borde WAF | $51.00 MXN ($3 USD) |
+| **Asistente IA** | Gemini API | Integración externa por API | $170.00 MXN ($10 USD) |
+| **DNS & Seguridad** | OCI DNS & WAF | Administración de dominio y firewall de aplicaciones | $34.00 MXN ($2 USD) |
+| **Soporte & Mantenimiento** | Soporte Remoto Técnico | Actualizaciones y backups de bloque | $2,000.00 MXN |
+| **TOTAL MENSUAL OCI** | | | **$2,884.00 MXN** |
 
 > [!NOTE]
-> Dado que la base de datos MySQL en Aiven Cloud y el hosting de Vercel soportan múltiples accesos recurrentes, el costo mensual es plano para la comunidad. Si hay 200 productores activos, el costo mensual de infraestructura por chinampero es de tan solo **$15.80 MXN**.
+> Ambas opciones de nube profesional son muy similares en costo, rondando los **$2,884.00 MXN mensuales** (con el soporte técnico incluido). A nivel de infraestructura pura de nube, el costo es de apenas **$884.00 MXN mensuales**, lo que hace que el sistema sea extremadamente ligero y económicamente viable.
 
-### 2. Periodo de Recuperación (Payback Period)
-Asumiendo un costo de desarrollo inicial de **$120,000.00 MXN** (diseño UI/UX, maquetación, conexión con base de datos, modelos matemáticos e inteligencia artificial conversacional), se evalúan dos vías de retorno financiero sustentable:
+---
 
-*   **Modelo A: Cuota de Cooperativa Agrícola (Suscripción)**
-    *   Suscripción mensual de **$25.00 MXN** por productor (incluye acceso completo a analíticas, RaícesBot y pasarela de venta).
-    *   Con **500 productores activos**, se recaudan $\$12,500.00$ MXN mensuales.
-    *   Restando el costo operativo mensual ($\$3,160.00$ MXN), se genera un flujo libre de efectivo neto de **$9,340.00 MXN mensuales**.
-    *   **Payback Period:** **13 meses** para recuperar la inversión total del desarrollo.
-*   **Modelo B: Comisión por Intermediación Justa (2% por venta)**
-    *   Uso de la aplicación 100% gratuito. Se cobra una tasa de servicio del **2%** por cada transacción exitosa realizada por los clientes finales a través del catálogo web.
-    *   Con **200 productores activos** vendiendo un promedio de $\$3,000.00$ MXN mensuales cada uno, el volumen de comercio local total es de $\$600,000.00$ MXN mensuales.
-    *   La comisión del 2% genera un ingreso bruto de $\$12,000.00$ MXN mensuales.
-    *   Restando el costo operativo, el beneficio neto para la plataforma es de **$8,840.00 MXN mensuales**.
-    *   **Payback Period:** **14 meses** para el retorno completo de la inversión.
+### 2. Valor de Adquisición y Costo de Desarrollo del Proyecto (Venta del Software)
+
+Si una cooperativa agrícola, una entidad gubernamental (como la alcaldía de Xochimilco) o un inversor privado desea comprar el proyecto completo, se ha calculado una valorización profesional basada en horas de desarrollo y la participación de los **cuatro integrantes del equipo de proyecto** y el **desarrollador líder**:
+
+*   **Mano de Obra del Desarrollador Líder (Ingeniería de Software & DevOps):**
+    *   3 meses de trabajo dedicados al diseño de la base de datos relacional MySQL, estructuración del backend API REST con Flask, lógica del chatbot con el SDK de Gemini, codificación matemática de los modelos y despliegue local/nube.
+    *   **Costo:** $30,000.00 MXN mensuales $\times$ 3 meses = **$90,000.00 MXN**.
+*   **Mano de Obra de los 4 Integrantes del Equipo (Gestión, Investigación Agronómica y QA):**
+    *   Trabajo multidisciplinario enfocado en:
+        1. *Investigación Agronómica:* Formulación matemática del Índice de Estrés Salino (IES) y recolección de pH/Salinidad óptimos de cultivos de Xochimilco.
+        2. *Matemáticas y Probabilidad:* Modelado Bayesiano y cálculo de riesgos de merma con distribución binomial.
+        3. *Diseño y Documentación:* Estructuración de requerimientos, diagramas de flujo y bases de datos.
+        4. *Aseguramiento de Calidad (QA):* Pruebas del software y validación con datos reales.
+    *   **Costo:** $15,000.00 MXN mensuales por integrante $\times$ 4 integrantes $\times$ 3 meses = **$180,000.00 MXN**.
+*   **VALOR DE VENTA / ADQUISICIÓN TOTAL DEL PROYECTO:**
+    $$\text{Costo Total} = \text{Mano de Obra Desarrollador} + \text{Mano de Obra de Integrantes} = \$90,000 + \$180,000 = \mathbf{\$270,000.00\text{ MXN}}$$
+
+---
+
+### 3. Modelos de Monetización y Cálculo Integral para la Reinversión
+
+Para garantizar el crecimiento sustentable de la plataforma (adquisición de hardware de monitoreo, sensores de suelo automatizados y optimización de servidores), se ha diseñado un modelo de reinversión basado en **Cálculo Integral**. 
+
+Definimos que el número de productores chinamperos en la plataforma crece de forma lineal a lo largo del tiempo $t$ (medido en meses):
+$$N(t) = N_0 + r \cdot t$$
+Donde:
+*   $N_0 = 100$ (Productores iniciales en el mes $0$).
+*   $r = 15$ (Crecimiento de $15$ nuevos productores al mes).
+*   $N(t) = 100 + 15t$.
+
+Definimos los costos fijos operativos mensuales como $C_{\text{fijo}} = \$3,200.00\text{ MXN}$ (infraestructura AWS/OCI + mantenimiento). El fondo de reinversión acumulado $R(T)$ después de $T$ meses es la integral del flujo neto de efectivo $I(t)$ desde el inicio hasta el mes $T$:
+$$R(T) = \int_{0}^{T} I(t) \, dt = \int_{0}^{T} \left( B(t) - C_{\text{fijo}} \right) \, dt$$
+Donde $B(t)$ representa los ingresos brutos generados por el modelo de negocio.
+
+#### Modelo A: Suscripción Mensual Fija
+Se establece una cuota de cooperativa de **$25.00 MXN mensuales** por productor.
+*   **Ingreso Bruto Mensual:** $B(t) = 25 \cdot N(t) = 25(100 + 15t) = 2500 + 375t\text{ MXN/mes}$.
+*   **Flujo Neto Mensual:** $I(t) = B(t) - C_{\text{fijo}} = (2500 + 375t) - 3200 = 375t - 700\text{ MXN/mes}$.
+*   **Punto de Equilibrio (Break-Even):** Ocurre cuando el flujo neto es cero, es decir:
+    $$375t - 700 = 0 \implies t_{\text{eq}} = \frac{700}{375} \approx 1.87\text{ meses}$$
+*   **Fondo de Reinversión Acumulado $R(T)$ (Integrando desde $t_{\text{eq}}$ hasta $T$):**
+    $$R(T) = \int_{1.87}^{T} (375t - 700) \, dt = \left[ 187.5 t^2 - 700t \right]_{1.87}^{T}$$
+*   **Proyección al Primer Año ($T = 12$ meses):**
+    $$R(12) = \left( 187.5(12)^2 - 700(12) \right) - \left( 187.5(1.87)^2 - 700(1.87) \right)$$
+    $$R(12) = (27,000 - 8,400) - (655.3 - 1,309) = 18,600 - (-653.7) \approx \mathbf{\$19,253.70\text{ MXN}}$$
+
+#### Modelo B: Comisión del 2% por Transacción (Tienda Local)
+El uso es gratuito para los productores, cobrando una comisión del **2% sobre cada venta** realizada por el cliente final. 
+*   Asumimos un volumen promedio de venta por productor de **$3,000.00 MXN mensuales** (hortalizas, flores, etc.).
+*   Esto genera una comisión de $\$3,000.00 \times 0.02 = \$60.00\text{ MXN}$ mensuales por productor activo.
+*   **Ingreso Bruto Mensual:** $B(t) = 60 \cdot N(t) = 60(100 + 15t) = 6000 + 900t\text{ MXN/mes}$.
+*   **Flujo Neto Mensual:** $I(t) = B(t) - C_{\text{fijo}} = (6000 + 900t) - 3200 = 2800 + 900t\text{ MXN/mes}$ (Flujo positivo desde el mes $0$).
+*   **Fondo de Reinversión Acumulado $R(T)$ (Integrando desde el mes $0$ hasta $T$):**
+    $$R(T) = \int_{0}^{T} (2800 + 900t) \, dt = \left[ 2800t + 450t^2 \right]_{0}^{T} = 2800T + 450T^2$$
+*   **Proyección al Primer Año ($T = 12$ meses):**
+    $$R(12) = 2800(12) + 450(12)^2 = 33,600 + 450(144) = 33,600 + 64,800 = \mathbf{\$98,400.00\text{ MXN}}$$
+
+> [!TIP]
+> **Comparativa y Conclusión de Reinversión:** El **Modelo B (Comisión del 2%)** es sustancialmente más lucrativo y sostenible, ya que al primer año de operación acumula un fondo de reinversión de **$98,400.00 MXN** frente a los **$19,253.70 MXN** del Modelo A, permitiendo comprar hardware de monitoreo IoT (como sensores de pH y salinidad de Arduino/Raspberry Pi) para repartirlos directamente a la comunidad chinampera.
+
+
 
 ---
 

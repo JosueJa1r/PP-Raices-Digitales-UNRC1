@@ -504,7 +504,8 @@ def obtener_analiticas_globales():
                     'Nombre_Categoria': cat,
                     'Total_Hectareas': 0.0,
                     'Valor_Semilla': val,
-                    'Valor_Ganado': 0.0
+                    'Valor_Ganado': 0.0,
+                    'Unidad_Medida': item['Unidad_Medida'] or 'Kg'
                 }
             
             qty = item['Cantidad'] if item['Cantidad'] is not None else 0.0

@@ -204,7 +204,7 @@ function poblarTabla(data) {
         tr.innerHTML = `
             <td>${item.Nombre_Semilla}</td>
             <td>${item.Nombre_Categoria || 'General'}</td>
-            <td>${item.Total_Hectareas}</td>
+            <td>${item.Total_Hectareas.toLocaleString('es-MX')} ${item.Unidad_Medida || ''}</td>
             <td>$${item.Valor_Semilla ? item.Valor_Semilla.toLocaleString('es-MX') : '--'} MXN</td>
         `;
         tbody.appendChild(tr);

@@ -120,7 +120,7 @@ async function cargarHistorialMonitoreos(estudianteId) {
                     <td>${mon.Salinidad}</td>
                     <td>${mon.Humedad}%</td>
                     <td>${mon.Temperatura}°C</td>
-                    <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${mon.Observaciones}">${mon.Observaciones}</td>
+                    <td style="max-width: 300px; word-break: break-word; white-space: normal; text-align: left;">${mon.Observaciones}</td>
                 `;
                 tbody.appendChild(tr);
             });

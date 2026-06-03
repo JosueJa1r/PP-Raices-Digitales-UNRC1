@@ -212,7 +212,7 @@ function renderizarMonitoreosEstudiantes(monitoreos) {
             <td>${mon.Salinidad}</td>
             <td>${mon.Humedad}%</td>
             <td>${mon.Temperatura}°C</td>
-            <td title="${mon.Observaciones}" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${mon.Observaciones}</td>
+            <td style="max-width: 300px; word-break: break-word; white-space: normal; text-align: left;">${mon.Observaciones}</td>
         `;
         tbody.appendChild(tr);
     });
