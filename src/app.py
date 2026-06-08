@@ -8,6 +8,7 @@ from src.contabilidad import calcular_roi, calcular_punto_equilibrio, calcular_u
 from src.agronomia import indice_estres_salino
 from src.probabilidad import probabilidad_bayesiana
 from src.integral import integral_acumulacion_precipitacion
+from src.regresion import calcular_regresion_lineal, proyectar_valores
 
 # Cargar variables de entorno (API Keys)
 load_dotenv()
@@ -514,6 +515,47 @@ def post_calculo_integral():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+@app.route('/api/calculos/regresion', methods=['POST'])
+def post_calculo_regresion():
+    try:
+        data = request.get_json()
+        x = data.get('x', [])
+        y = data.get('y', [])
+        periodos_futuros = int(data.get('periodos_futuros', 4))
+        
+        x_float = [float(val) for val in x]
+        y_float = [float(val) for val in y]
+        
+        if len(x_float) != len(y_float):
+            return jsonify({"error": "Las listas X e Y deben tener la misma longitud."}), 400
+            
+        res_reg = calcular_regresion_lineal(x_float, y_float)
+        
+        if "error" in res_reg:
+            return jsonify({"error": res_reg["error"]}), 400
+            
+        m = res_reg["pendiente"]
+        b = res_reg["interseccion"]
+        r2 = res_reg["r_cuadrado"]
+        
+        ultimo_x = x_float[-1] if x_float else 0
+        proyecciones = proyectar_valores(m, b, periodos_futuros, ultimo_x)
+        
+        # Calcular los valores ajustados para la línea histórica
+        valores_ajustados = [round(m * val + b, 2) for val in x_float]
+        
+        return jsonify({
+            "pendiente": m,
+            "interseccion": b,
+            "r_cuadrado": r2,
+            "valores_ajustados": valores_ajustados,
+            "proyecciones": proyecciones
+        })
+    except Exception as e:
+        print("Error en calculo de regresion lineal:", e)
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
 @app.route('/api/productor/publicar_cosecha', methods=['POST'])
 def post_publicar_cosecha_route():
     try:
@@ -812,4 +854,4 @@ def post_finalizar_cosecha():
 
 if __name__ == '__main__':
     # Inicia el servidor local en el puerto 5000
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)

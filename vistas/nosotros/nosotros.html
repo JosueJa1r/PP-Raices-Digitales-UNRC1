@@ -3,100 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunidad - Universidad Rosario Castellanos</title>
-    <!-- Integración de Tailwind CSS para el diseño rápido y responsivo -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configuración de los colores institucionales de la URC -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        urcMaroon: '#681635', 
-                        urcGold: '#DAB27C',  
-                        urcGray: '#6B7280',   
-                        urcLightGray: '#F3F4F6',
-                        urcDark: '#2D3748'
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Raíces Digitales | Comunidad URC</title>
+    <link rel="stylesheet" href="nosotros.css">
     <!-- Iconos para los avatares -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body class="bg-urcLightGray min-h-screen flex items-center justify-center p-6 font-sans">
+<body>
 
-    <div class="max-w-7xl w-full">
-        <!-- Encabezado -->
-        <header class="text-center mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-urcMaroon mb-3">Nuestra Comunidad</h1>
-            <p class="text-urcGray text-lg font-medium">Universidad Nacional Rosario Castellanos</p>
-            <div class="h-1 w-24 bg-urcGold mx-auto mt-4 rounded"></div>
-        </header>
+    <!-- Header / Navbar -->
+    <header class="store-header">
+        <div class="nav-container">
+            <a href="../../index.html" class="logo">
+                <img src="../../IMG/LOGO RAICES DIGITALES.png" alt="Logo" class="logo-icon">
+                Raíces Digitales
+            </a>
+            <a href="../Usuario/cliente_tienda.html" class="nav-link-btn">Volver a la Tienda</a>
+        </div>
+    </header>
 
-        <!-- Contenedor Principal (Grid para las 4 tarjetas) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <!-- Hero / Banner -->
+    <section class="hero-store">
+        <div class="hero-banner">
+            <div class="hero-bg-shape"></div>
+            <div class="hero-content">
+                <h1>Nuestra Comunidad</h1>
+                <p>Conoce al equipo multidisciplinario de la Universidad Nacional Rosario Castellanos (Licenciatura en Ciencia de Datos para Negocios) que ha diseñado y desarrollado esta plataforma.</p>
+            </div>
+            <div class="hero-image-wrapper">
+                <img src="../../IMG/LOGO RAICES DIGITALES.png" alt="Logo Raíces Digitales" class="hero-tree-img" onerror="this.style.display='none'">
+            </div>
+        </div>
+    </section>
+
+    <!-- Grid de la Comunidad -->
+    <main class="store-layout">
+        <div class="community-grid">
             
             <!-- Mauricio F. -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
-                <div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-urcGold flex items-center justify-center bg-urcGold p-1">
-                    <img src="../../IMG/mauricio_red.png" alt="Mauricio F." class="w-full h-full object-cover rounded-full">
+            <article class="product-card">
+                <div class="product-image-container">
+                    <img src="../../IMG/mauricio_gold.png" alt="Mauricio F." onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="avatar-icon-wrapper" style="display:none;">
+                        <i class="ph ph-user"></i>
+                    </div>
                 </div>
-                <h2 class="text-xl font-bold text-urcDark mb-1">Mauricio F.</h2>
-                <span class="text-xs font-bold text-urcMaroon mb-3 tracking-wide uppercase">Lic. Ciencia de Datos para Negocios</span>
-                <p class="text-urcGray text-sm flex-grow leading-relaxed">
-                    Estudiante destacado con un fuerte enfoque en el análisis financiero y la gestión de datos. Aporta su capacidad analítica para hacer que la información de costos y rentabilidad sea más accesible para los productores de Xochimilco.
-                </p>
-            </div>
+                <div class="product-info">
+                    <span class="product-category">Lic. Ciencia de Datos para Negocios</span>
+                    <h3 class="product-title">Mauricio F.</h3>
+                    <p class="product-description">
+                        Estudiante destacado con un fuerte enfoque en el análisis financiero y la gestión de datos. Aporta su capacidad analítica para hacer que la información de costos y rentabilidad sea más accesible para los productores de Xochimilco.
+                    </p>
+                </div>
+            </article>
 
             <!-- Axel J. -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
-                <div class="w-24 h-24 bg-urcGold/20 rounded-full flex items-center justify-center mb-4 text-urcGold border-2 border-urcGold">
-                    <i class="ph ph-chart-line-up text-4xl"></i>
+            <article class="product-card">
+                <div class="product-image-container">
+                    <img src="../../IMG/axel_gold.png" alt="Axel J." onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="avatar-icon-wrapper" style="display:none;">
+                        <i class="ph ph-chart-line-up"></i>
+                    </div>
                 </div>
-                <h2 class="text-xl font-bold text-urcDark mb-1">Axel J.</h2>
-                <span class="text-xs font-bold text-urcMaroon mb-3 tracking-wide uppercase">Lic. Ciencia de Datos para Negocios</span>
-                <p class="text-urcGray text-sm flex-grow leading-relaxed">
-                    Estudiante investigador apasionado por el modelado estadístico y matemático. Se encarga de traducir las variables del entorno agrícola en modelos analíticos de predicción y probabilidad, mitigando riesgos de pérdida y optimizando el rendimiento de los cultivos.
-                </p>
-            </div>
+                <div class="product-info">
+                    <span class="product-category">Lic. Ciencia de Datos para Negocios</span>
+                    <h3 class="product-title">Axel J.</h3>
+                    <p class="product-description">
+                        Estudiante investigador apasionado por el modelado estadístico y matemático. Se encarga de traducir las variables del entorno agrícola en modelos analíticos de predicción y probabilidad, mitigando riesgos de pérdida y optimizando el rendimiento de los cultivos.
+                    </p>
+                </div>
+            </article>
 
             <!-- Josué P. -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
-                <div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-urcGold flex items-center justify-center bg-urcGold p-1">
-                    <img src="../../IMG/josue_red.png" alt="Josué P." class="w-full h-full object-cover rounded-full">
+            <article class="product-card">
+                <div class="product-image-container">
+                    <img src="../../IMG/josue_gold.png" alt="Josué P." onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="avatar-icon-wrapper" style="display:none;">
+                        <i class="ph ph-user"></i>
+                    </div>
                 </div>
-                <h2 class="text-xl font-bold text-urcDark mb-1">Josué P.</h2>
-                <span class="text-xs font-bold text-urcMaroon mb-3 tracking-wide uppercase">Lic. Ciencia de Datos para Negocios</span>
-                <p class="text-urcGray text-sm flex-grow leading-relaxed">
-                    Estudiante especializado en ingeniería de datos y tecnologías en la nube. Aporta su visión técnica para garantizar la conectividad, estabilidad e infraestructura de la plataforma, asegurando que el sistema sea escalable y opere de manera fluida y confiable.
-                </p>
-            </div>
+                <div class="product-info">
+                    <span class="product-category">Lic. Ciencia de Datos para Negocios</span>
+                    <h3 class="product-title">Josué P.</h3>
+                    <p class="product-description">
+                        Estudiante especializado en ingeniería de datos y tecnologías en la nube. Aporta su visión técnica para garantizar la conectividad, estabilidad e infraestructura de la plataforma, asegurando que el sistema sea escalable y opere de manera fluida y confiable.
+                    </p>
+                </div>
+            </article>
 
             <!-- Alicia M. -->
-            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-urcMaroon hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center transform hover:-translate-y-1">
-                <div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-urcGold flex items-center justify-center bg-urcGold p-1">
-                    <img src="../../IMG/alicia_red.png?v=3" alt="Alicia M." class="w-full h-full object-cover rounded-full">
+            <article class="product-card">
+                <div class="product-image-container">
+                    <img src="../../IMG/alicia_gold.png" alt="Alicia M." onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="avatar-icon-wrapper" style="display:none;">
+                        <i class="ph ph-user"></i>
+                    </div>
                 </div>
-                <h2 class="text-xl font-bold text-urcDark mb-1">Alicia M.</h2>
-                <span class="text-xs font-bold text-urcMaroon mb-3 tracking-wide uppercase">Lic. Ciencia de Datos para Negocios</span>
-                <p class="text-urcGray text-sm flex-grow leading-relaxed">
-                    Estudiante enfocada en el análisis social, cualitativo y de experiencia de usuario. Aporta su visión humana investigando las necesidades reales de los productores de Xochimilco, asegurando que la tecnología sea empática, inclusiva y de fácil adopción.
-                </p>
-            </div>
+                <div class="product-info">
+                    <span class="product-category">Lic. Ciencia de Datos para Negocios</span>
+                    <h3 class="product-title">Alicia M.</h3>
+                    <p class="product-description">
+                        Estudiante enfocada en el análisis social, cualitativo y de experiencia de usuario. Aporta su visión humana investigando las necesidades reales de los productores de Xochimilco, asegurando que la tecnología sea empática, inclusiva y de fácil adopción.
+                    </p>
+                </div>
+            </article>
 
         </div>
 
-        <!-- Botón de Página Principal -->
-        <div class="mt-12 flex justify-center">
-            <a href="../../index.html" class="px-8 py-3 bg-urcMaroon text-white font-bold rounded-xl shadow-md hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex items-center gap-2">
-                <i class="ph ph-house text-2xl"></i>
+        <!-- Botón de Página Principal / Footer -->
+        <div class="bottom-actions">
+            <a href="../../index.html" class="btn-primary">
+                <i class="ph ph-house"></i>
                 Página Principal
             </a>
         </div>
-        
-    </div>
+    </main>
 
 </body>
 </html>

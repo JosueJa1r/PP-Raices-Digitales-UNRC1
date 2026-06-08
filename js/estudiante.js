@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Función para cargar los productores en el dropdown select
 async function cargarProductores() {
     const selectProductor = document.getElementById('select-productor');
+    const regresionProductor = document.getElementById('regresion-productor');
     if (!selectProductor) return;
 
     try {
@@ -81,11 +82,19 @@ async function cargarProductores() {
         if (response.ok) {
             // Limpiar opciones anteriores pero mantener el placeholder
             selectProductor.innerHTML = '<option value="" disabled selected>Seleccione productor...</option>';
+            if (regresionProductor) {
+                regresionProductor.innerHTML = '<option value="" disabled selected>Seleccione productor...</option>';
+            }
             productores.forEach(prod => {
                 const opt = document.createElement('option');
                 opt.value = prod.Id_Productor;
                 opt.textContent = prod.Nombre;
                 selectProductor.appendChild(opt);
+                
+                if (regresionProductor) {
+                    const optReg = opt.cloneNode(true);
+                    regresionProductor.appendChild(optReg);
+                }
             });
         } else {
             console.error('Error al obtener productores:', productores.error);
@@ -337,4 +346,265 @@ async function analizarAptitudSuelo() {
         console.error('Error al analizar aptitud del suelo:', error);
         alert('No se pudo conectar al catálogo de semillas del servidor.');
     }
+}
+
+// ─── Predicción de Humedad y Sequía (Regresión Lineal) ───
+
+let chartRegresionInstance = null;
+
+function toggleRegresionInputs(origen) {
+    const wrapperProductor = document.getElementById('wrapper-regresion-productor');
+    const wrapperManual = document.getElementById('wrapper-regresion-manual');
+    if (origen === 'dinamico') {
+        if (wrapperProductor) wrapperProductor.style.display = 'block';
+        if (wrapperManual) wrapperManual.style.display = 'none';
+    } else {
+        if (wrapperProductor) wrapperProductor.style.display = 'none';
+        if (wrapperManual) wrapperManual.style.display = 'block';
+    }
+}
+
+async function calcularRegresionPrediccion() {
+    const origen = document.getElementById('regresion-origen').value;
+    const periodos = parseInt(document.getElementById('regresion-periodos').value) || 4;
+    
+    let x = [];
+    let y = [];
+    let labels = [];
+    
+    if (origen === 'dinamico') {
+        const idProductor = document.getElementById('regresion-productor').value;
+        if (!idProductor) {
+            alert('Por favor, selecciona un productor chinampero.');
+            return;
+        }
+        
+        try {
+            // Cargar los monitoreos históricos del productor
+            const response = await fetch(`${API_BASE_URL}/api/productor/monitoreos?id_productor=${idProductor}`);
+            const monitoreos = await response.json();
+            
+            if (!response.ok) {
+                alert('No se pudieron obtener los monitoreos de esta chinampa.');
+                return;
+            }
+            
+            if (monitoreos.length < 2) {
+                alert('La chinampa seleccionada tiene menos de 2 registros de monitoreo. Para realizar una regresión lineal, por favor registra más mediciones o utiliza la opción de "Entrada Manual".');
+                return;
+            }
+            
+            // Ordenar los monitoreos por fecha ascendente
+            monitoreos.sort((a, b) => new Date(a.Fecha) - new Date(b.Fecha));
+            
+            monitoreos.forEach((mon, index) => {
+                x.push(index + 1); // 1, 2, 3... semanas/periodos
+                y.push(parseFloat(mon.Humedad));
+                const fecha = new Date(mon.Fecha);
+                labels.push(fecha.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' }));
+            });
+            
+        } catch (error) {
+            console.error('Error al cargar monitoreos dinámicos:', error);
+            alert('Error de red al cargar el historial del productor.');
+            return;
+        }
+    } else {
+        // Modo manual
+        const datosStr = document.getElementById('regresion-datos-manual').value;
+        if (!datosStr) {
+            alert('Por favor, introduce una serie de valores de humedad o lluvia separados por comas.');
+            return;
+        }
+        
+        const vals = datosStr.split(',').map(val => parseFloat(val.trim()));
+        if (vals.some(isNaN)) {
+            alert('Asegúrate de que todos los valores ingresados sean números válidos.');
+            return;
+        }
+        
+        if (vals.length < 2) {
+            alert('Por favor, ingresa al menos 2 valores históricos.');
+            return;
+        }
+        
+        vals.forEach((val, index) => {
+            x.push(index + 1);
+            y.push(val);
+            labels.push(`P${index + 1}`);
+        });
+    }
+    
+    // Enviar datos al endpoint del backend para calcular regresión lineal
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/calculos/regresion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ x: x, y: y, periodos_futuros: periodos })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            alert('Error al calcular regresión: ' + (result.error || 'Intente nuevamente.'));
+            return;
+        }
+        
+        // Mostrar contenedor de resultados
+        document.getElementById('regresion-resultados-container').style.display = 'block';
+        
+        // Renderizar detalles matemáticos
+        const sign = result.interseccion >= 0 ? '+' : '';
+        document.getElementById('regresion-ecuacion').innerText = `y = ${result.pendiente.toFixed(3)}x ${sign} ${result.interseccion.toFixed(2)}`;
+        document.getElementById('regresion-r2').innerText = `${(result.r_cuadrado * 100).toFixed(1)}%`;
+        
+        // Generar labels y datos para las predicciones futuras
+        const labelsCompletos = [...labels];
+        const datosHistoricosY = [...y];
+        const datosAjustadosY = [...result.valores_ajustados];
+        const datosProyectadosY = Array(x.length).fill(null); // Rellenar histórico con nulos para la línea de predicción
+        
+        // Agregar el último punto histórico a la línea de proyección para conectarla visualmente
+        datosProyectadosY[x.length - 1] = y[y.length - 1];
+        
+        result.proyecciones.forEach(proj => {
+            labelsCompletos.push(`Proy ${proj.periodo}`);
+            datosHistoricosY.push(null);
+            datosAjustadosY.push(null);
+            datosProyectadosY.push(proj.valor);
+        });
+        
+        // Renderizar gráfica
+        renderizarGraficoRegresion(labelsCompletos, datosHistoricosY, datosAjustadosY, datosProyectadosY);
+        
+        // Generar diagnóstico de factibilidad
+        hacerDiagnosticoFactibilidad(result.pendiente, result.proyecciones, result.r_cuadrado);
+        
+    } catch (error) {
+        console.error('Error en fetch regresión lineal:', error);
+        alert('Error al conectar con el servidor.');
+    }
+}
+
+function renderizarGraficoRegresion(labels, historico, ajustado, proyectado) {
+    const ctx = document.getElementById('chartRegresion').getContext('2d');
+    
+    if (chartRegresionInstance) {
+        chartRegresionInstance.destroy();
+    }
+    
+    chartRegresionInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Datos Reales Observados',
+                    data: historico,
+                    borderColor: '#2ec4b6',
+                    backgroundColor: 'rgba(46, 196, 182, 0.2)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    showLine: false, // Solo puntos
+                    fill: false
+                },
+                {
+                    label: 'Recta Ajustada (Tendencia)',
+                    data: ajustado,
+                    borderColor: '#718096',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false,
+                    spanGaps: true
+                },
+                {
+                    label: 'Pronóstico / Proyección Futura',
+                    data: proyectado,
+                    borderColor: '#ff9f43',
+                    backgroundColor: 'rgba(255, 159, 67, 0.15)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    fill: false,
+                    spanGaps: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Humedad (%) / Lluvia (mm)',
+                        color: '#4b5563',
+                        font: { weight: 'bold' }
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Período (Tiempo)',
+                        color: '#4b5563',
+                        font: { weight: 'bold' }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { boxWidth: 12, font: { family: 'Inter' } }
+                }
+            }
+        }
+    });
+}
+
+function hacerDiagnosticoFactibilidad(pendiente, proyecciones, r2) {
+    const card = document.getElementById('regresion-diagnostico-card');
+    const titulo = document.getElementById('regresion-diagnostico-titulo');
+    const desc = document.getElementById('regresion-diagnostico-desc');
+    
+    if (!card || !titulo || !desc) return;
+    
+    const ultimoValor = proyecciones[proyecciones.length - 1].valor;
+    
+    let colorFondo = '';
+    let colorTexto = '';
+    let diagnosticoTitulo = '';
+    let diagnosticoDesc = '';
+    
+    if (pendiente < -1.5 && ultimoValor < 40.0) {
+        // Riesgo de sequía grave
+        colorFondo = 'rgba(239, 68, 68, 0.1)';
+        colorTexto = '#ef4444';
+        diagnosticoTitulo = '⚠️ ALERTA: Riesgo de Sequía Grave';
+        diagnosticoDesc = `La pendiente de humedad es negativa (<strong>${pendiente.toFixed(2)}%</strong> por periodo) y el pronóstico apunta a niveles críticos por debajo del **40%** (<strong>${ultimoValor}%</strong>). <br><br><strong>Recomendación Agrícola:</strong> No es factible sembrar nuevos lotes sin un sistema de riego asistido activo o acolchado orgánico para conservar humedad. Prioriza cultivos de baja demanda hídrica.`;
+    } else if (pendiente < 0) {
+        // Tendencia de secado moderado
+        colorFondo = 'rgba(245, 158, 11, 0.1)';
+        colorTexto = '#d97706';
+        diagnosticoTitulo = '📊 TENDENCIA: Suelo Secándose';
+        diagnosticoDesc = `La humedad del suelo está disminuyendo moderadamente (<strong>${pendiente.toFixed(2)}%</strong> por periodo) hasta situarse en <strong>${ultimoValor}%</strong> al final de la proyección. <br><br><strong>Recomendación Agrícola:</strong> Viabilidad regular. Programa riegos complementarios y considera plantas resistentes a sequías ligeras (como nopalitos o plantas aromáticas).`;
+    } else if (ultimoValor > 85.0) {
+        // Riesgo de exceso de agua / inundación
+        colorFondo = 'rgba(59, 130, 246, 0.1)';
+        colorTexto = '#3b82f6';
+        diagnosticoTitulo = '🌧️ ALERTA: Exceso de Agua / Humedad';
+        diagnosticoDesc = `El suelo presenta una acumulación excesiva de humedad (<strong>${ultimoValor}%</strong>). <br><br><strong>Recomendación Agrícola:</strong> Riesgo de asfixia radicular u hongos. Asegura canales de drenaje despejados y evita riegos. Ideal para especies semiacuáticas o cultivos con alta tolerancia al encharcamiento.`;
+    } else {
+        // Humedad estable y óptima
+        colorFondo = 'rgba(16, 185, 129, 0.1)';
+        colorTexto = '#10b981';
+        diagnosticoTitulo = '✅ EXCELENTE: Alta Factibilidad';
+        diagnosticoDesc = `La humedad proyectada es estable y saludable (<strong>${ultimoValor}%</strong>), con un R² de confiabilidad del <strong>${(r2 * 100).toFixed(1)}%</strong>. <br><br><strong>Recomendación Agrícola:</strong> Muy factible cultivar hortalizas de hoja (lechuga, espinaca) y flores (caléndula). Las condiciones son óptimas para la germinación y crecimiento vegetal.`;
+    }
+    
+    card.style.backgroundColor = colorFondo;
+    card.style.borderColor = colorTexto;
+    titulo.style.color = colorTexto;
+    titulo.innerHTML = diagnosticoTitulo;
+    desc.innerHTML = diagnosticoDesc;
 }

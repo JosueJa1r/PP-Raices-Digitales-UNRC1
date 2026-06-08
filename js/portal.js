@@ -329,3 +329,85 @@ if (formLoginCliente) {
         }
     });
 }
+
+// Función para el Acceso Rápido / Demo del proyecto
+async function loginDemo(role) {
+    if (role === 'productor') {
+        const form = document.getElementById('login-productor');
+        form.querySelector('input[name="correo"]').value = 'productor@josue.com';
+        form.querySelector('input[name="password"]').value = '123456';
+        form.querySelector('button[type="submit"]').click();
+    } else if (role === 'estudiante') {
+        const form = document.getElementById('login-estudiante');
+        form.querySelector('input[name="correo"]').value = 'estudiante@josue.com';
+        form.querySelector('input[name="password"]').value = '123456';
+        form.querySelector('button[type="submit"]').click();
+    } else if (role === 'cliente') {
+        const email = 'cliente.demo@unrc.edu.mx';
+        const password = '123456';
+        const form = document.getElementById('login-cliente');
+        
+        // Mostrar animación de carga en el formulario
+        const btn = form.querySelector('.submit-btn');
+        const origText = btn.innerText;
+        btn.innerText = 'Cargando Demo...';
+        btn.disabled = true;
+        
+        try {
+            // 1. Intentar Login
+            let response = await fetch(`${API_BASE_URL}/api/login/cliente`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: email, password: password })
+            });
+            
+            let result = await response.json();
+            
+            if (response.ok) {
+                localStorage.setItem('cliente_id', result.user.Id_Cliente);
+                localStorage.setItem('cliente_nombre', result.user.Nombre);
+                localStorage.setItem('cliente_correo', result.user.Correo);
+                window.location.href = `vistas/Usuario/cliente_tienda.html`;
+            } else {
+                // 2. Si el usuario de prueba no existe, lo registramos silenciosamente
+                let regResponse = await fetch(`${API_BASE_URL}/api/register/cliente`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: 'Cliente Demo',
+                        telefono: '5500000000',
+                        localidad: 'CDMX',
+                        correo: email,
+                        password: password
+                    })
+                });
+                
+                if (regResponse.ok) {
+                    // 3. Reintentar Login tras registro exitoso
+                    let loginResponse = await fetch(`${API_BASE_URL}/api/login/cliente`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ correo: email, password: password })
+                    });
+                    let loginResult = await loginResponse.json();
+                    if (loginResponse.ok) {
+                        localStorage.setItem('cliente_id', loginResult.user.Id_Cliente);
+                        localStorage.setItem('cliente_nombre', loginResult.user.Nombre);
+                        localStorage.setItem('cliente_correo', loginResult.user.Correo);
+                        window.location.href = `vistas/Usuario/cliente_tienda.html`;
+                    } else {
+                        alert('Error al autenticar cliente demo.');
+                    }
+                } else {
+                    alert('Error al inicializar cliente demo en la base de datos.');
+                }
+            }
+        } catch (error) {
+            console.error('Error en login demo:', error);
+            alert('Error al conectar con el servidor para el acceso demo.');
+        } finally {
+            btn.innerText = origText;
+            btn.disabled = false;
+        }
+    }
+}
