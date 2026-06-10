@@ -31,9 +31,9 @@ El sistema implementa una Arquitectura Multicapa acoplada mediante una API RESTf
 
 ### 1. Capa de Presentación (Frontend)
 Desarrollada bajo estándares modernos, prioriza un diseño web responsivo, limpio y estéticamente premium que evoca la identidad ecológica de los canales de Xochimilco.
-*   **Vistas HTML5 Semánticas:** Estructura modular independiente para Productores, Clientes e Investigadores.
-*   **CSS3 Vanilla:** Sistema de variables HSL unificado, con efectos de desenfoque de fondo (glassmorphism), transiciones animadas y un modo oscuro con colores orgánicos verdes y tierra.
-*   **JavaScript ES6:** Manejo dinámico del DOM, llamadas asíncronas HTTP, y renderizado de gráficos avanzados con Chart.js.
+*   **Vistas HTML5 Semánticas:** Estructura modular independiente para Productores, Clientes, Estudiantes de Monitoreo e Investigadores.
+*   **CSS3 Vanilla y Neobrutalismo:** Sistema de variables HSL unificado para la tienda y paneles, junto con un diseño neobrutalista (bordes negros gruesos y sombras sólidas) con una navegación compacta por pestañas para las herramientas estudiantiles.
+*   **JavaScript ES6:** Manejo dinámico del DOM (interactividad de pestañas y carga de clima por API Open-Meteo), llamadas asíncronas HTTP (fetch), y renderizado de gráficos avanzados con Chart.js optimizados para redimensionamiento en vistas ocultas.
 
 ### 2. Capa de Negocio (Backend)
 Construida en Python sobre la microestructura Flask. Administra el enrutamiento del sistema, la persistencia de sesiones seguras mediante hashing criptográfico y encapsula los cálculos científicos del sistema.
@@ -66,9 +66,10 @@ PP-Raices-Digitales-UNRC/
 │   │   ├── productor_cosechas.html    # Ciclos de cultivo (Pre-Cosecha a Venta)
 │   │   ├── productor_analiticas.html  # Reportes de ROI y tendencias
 │   │   └── productor_ajustes.html     # Configuración de perfil y terreno
-│   ├── Usuario/                # Módulo de Comercio Local (Cliente)
+│   ├── Usuario/                # Módulo de Comercio Local y Estudiantil
 │   │   ├── cliente_tienda.html        # Ecommerce de hortalizas locales
-│   │   └── cliente_style.css          # Estilos visuales de la tienda
+│   │   ├── cliente_style.css          # Estilos visuales de la tienda
+│   │   └── estudiante_dashboard.html  # Panel de monitoreo estudiantil y herramientas técnicas
 │   └── nosotros/               # Información Institucional
 ├── js/                         # LÓGICA DE CLIENTE (Frontend Dinámico)
 │   ├── portal.js               # Control de accesos y formularios de login
@@ -76,6 +77,7 @@ PP-Raices-Digitales-UNRC/
 │   ├── chatbot.js              # Interfaz de chat flotante para RaícesBot
 │   ├── clima.js                # Integración con API de Clima (Open-Meteo)
 │   ├── analiticas.js           # Renderizado de gráficas financieras (Chart.js)
+│   ├── estudiante.js           # Lógica del panel estudiantil, recomendador, regresión y Riemann
 │   ├── alertas.js              # Notificaciones visuales tipo Toast
 │   └── responsive.js           # Adaptabilidad de navegación móvil
 ├── css/                        # SISTEMA DE DISEÑO (Estilos Globales)
@@ -129,6 +131,20 @@ Utilizando una **Distribución Binomial**, el sistema estima la probabilidad acu
 $$P(X < k) = \sum_{x=0}^{k-1} \binom{n}{x} p^x (1-p)^{n-x}$$
 
 Donde $n$ es la cantidad de semillas proyectadas, $k$ es el pedido mínimo y $p$ es la probabilidad de germinación ajustada por Bayes. Esto permite generar un indicador visual del **Riesgo de Desabasto** antes de cosechar el lote.
+
+### 4. Volumen de Acumulación Hídrica y Biomasa (Cálculo Integral - Suma de Riemann)
+El sistema aproxima integrales definidas en tiempo real utilizando la Suma de Riemann izquierda para cuantificar variables acumulativas a partir de tasas de variación diarias (con un intervalo de tiempo fijo $\Delta t = 1$ día):
+
+$$A \approx \sum_{i=1}^{n} f(t_i) \Delta t = \sum_{i=1}^{n} f(t_i) \cdot 1$$
+
+*   **Precipitación Acumulada:** Integra la tasa diaria de lluvia en mm o $L/m^2$ para calcular el riego pasivo acumulado que recibió la chinampa a lo largo del tiempo:
+    $$V_{\text{agua}} = \sum_{i=1}^{n} P(t_i) \quad [\text{L/m}^2]$$
+*   **Acumulación de Biomasa:** Integra la tasa diaria de crecimiento de biomasa ($g/\text{día}$) de las plantas para proyectar el peso / biomasa neta total obtenida en el ciclo:
+    $$M_{\text{biomasa}} = \sum_{i=1}^{n} B(t_i) \quad [\text{g}]$$
+
+En el backend de Python (`src/integral.py`), estas sumas discretas se calculan en las funciones:
+- `integral_acumulacion_precipitacion(tasa_lluvia_diaria)` $\rightarrow$ Aproxima el volumen total de agua recibida.
+- `integral_volumen_biomasa(tasa_crecimiento_diario)` $\rightarrow$ Aproxima el peso neto acumulado de la planta.
 
 ---
 

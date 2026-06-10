@@ -608,3 +608,248 @@ function hacerDiagnosticoFactibilidad(pendiente, proyecciones, r2) {
     titulo.innerHTML = diagnosticoTitulo;
     desc.innerHTML = diagnosticoDesc;
 }
+
+// ─── Cálculo Integral (Suma de Riemann) ───
+
+let chartIntegralInstance = null;
+
+async function calcularRiemannIntegral() {
+    const tipo = document.getElementById('integral-tipo').value;
+    const datosStr = document.getElementById('integral-datos').value;
+    
+    if (!datosStr) {
+        alert('Por favor, introduce una serie de valores diarios separados por comas.');
+        return;
+    }
+    
+    const tasas = datosStr.split(',').map(val => parseFloat(val.trim()));
+    if (tasas.some(isNaN)) {
+        alert('Asegúrate de que todos los valores ingresados sean números válidos.');
+        return;
+    }
+    
+    if (tasas.length === 0) {
+        alert('Por favor, ingresa al menos un valor.');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/calculos/integral`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tasas: tasas })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            alert('Error al calcular la integral: ' + (result.error || 'Intente nuevamente.'));
+            return;
+        }
+        
+        // Mostrar contenedor de resultados
+        document.getElementById('integral-resultados-container').style.display = 'block';
+        
+        // Renderizar el valor final acumulado con unidades apropiadas
+        const valorFinal = result.resultado;
+        const unidad = tipo === 'lluvia' ? 'L/m² (mm)' : 'g (Gramos por planta)';
+        document.getElementById('integral-valor-final').innerText = `${valorFinal.toFixed(2)} ${unidad}`;
+        
+        // Generar explicación
+        let explicacionText = '';
+        if (tipo === 'lluvia') {
+            explicacionText = `Aproximación de Riemann con $\\Delta t = 1$ día. La precipitación total acumulada es de <strong>${valorFinal.toFixed(2)} litros por metro cuadrado</strong>. Esto indica el volumen de riego pasivo por lluvia recibido por el suelo de las chinampas durante el ciclo.`;
+        } else {
+            explicacionText = `Aproximación de Riemann con $\\Delta t = 1$ día. El incremento neto acumulado de biomasa de la planta es de <strong>${valorFinal.toFixed(2)} gramos</strong>. Útil para estimar el rendimiento de peso en cosecha y proyectar el volumen de venta final.`;
+        }
+        document.getElementById('integral-explicacion').innerHTML = explicacionText;
+        
+        // Calcular los valores de acumulación acumulados paso a paso para la gráfica
+        // Riemann suma acumulativa: F(k) = sum_{i=1}^k f(t_i)
+        let acumulado = 0;
+        const datosAcumulados = tasas.map(tasa => {
+            acumulado += tasa;
+            return parseFloat(acumulado.toFixed(2));
+        });
+        
+        // Generar etiquetas de días: Día 1, Día 2, ...
+        const labels = tasas.map((_, index) => `Día ${index + 1}`);
+        
+        // Renderizar gráfica
+        renderizarGraficoIntegral(labels, tasas, datosAcumulados, tipo);
+        
+    } catch (error) {
+        console.error('Error al calcular la integral:', error);
+        alert('Error de red al conectar con el servidor.');
+    }
+}
+
+function renderizarGraficoIntegral(labels, tasas, acumulados, tipo) {
+    const ctx = document.getElementById('chartIntegral').getContext('2d');
+    
+    if (chartIntegralInstance) {
+        chartIntegralInstance.destroy();
+    }
+    
+    const labelTasa = tipo === 'lluvia' ? 'Lluvia Diaria (mm/día)' : 'Crecimiento Diario (g/día)';
+    const labelAcumulado = tipo === 'lluvia' ? 'Precipitación Acumulada (L/m²)' : 'Biomasa Acumulada Total (g)';
+    const colorPrimario = tipo === 'lluvia' ? 'rgba(0, 150, 199, 0.85)' : 'rgba(45, 106, 79, 0.85)';
+    const colorLinea = tipo === 'lluvia' ? '#0077b6' : '#2d6a4f';
+    
+    // Crear gradiente premium para el área bajo la curva (integral)
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    if (tipo === 'lluvia') {
+        gradient.addColorStop(0, 'rgba(0, 150, 199, 0.45)');
+        gradient.addColorStop(1, 'rgba(0, 150, 199, 0.02)');
+    } else {
+        gradient.addColorStop(0, 'rgba(45, 106, 79, 0.45)');
+        gradient.addColorStop(1, 'rgba(45, 106, 79, 0.02)');
+    }
+    
+    chartIntegralInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: labelTasa,
+                    data: tasas,
+                    backgroundColor: colorPrimario,
+                    borderColor: '#000000',
+                    borderWidth: 2,
+                    borderRadius: { topLeft: 5, topRight: 5 }, // Barras redondeadas premium
+                    order: 2,
+                    yAxisID: 'y' // Eje izquierdo
+                },
+                {
+                    type: 'line',
+                    label: labelAcumulado,
+                    data: acumulados,
+                    borderColor: colorLinea,
+                    backgroundColor: gradient,
+                    borderWidth: 3.5,
+                    fill: true,
+                    tension: 0.15,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: colorLinea,
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    order: 1,
+                    yAxisID: 'y1' // Eje derecho para evitar deformaciones por escalas distintas
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: tipo === 'lluvia' ? 'Tasa de Lluvia (mm/día)' : 'Tasa de Crecimiento (g/día)',
+                        color: '#1e293b',
+                        font: { family: 'Inter', weight: 'bold', size: 11 }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: tipo === 'lluvia' ? 'Acumulado Total (L/m²)' : 'Biomasa Acumulada (g)',
+                        color: colorLinea,
+                        font: { family: 'Inter', weight: 'bold', size: 11 }
+                    },
+                    grid: {
+                        drawOnChartArea: false // Evita cruce de líneas de rejilla
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Días del Ciclo (Intervalos Δt = 1 día)',
+                        color: '#1e293b',
+                        font: { family: 'Inter', weight: 'bold', size: 11 }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        boxWidth: 15,
+                        font: { family: 'Inter', size: 11, weight: '500' },
+                        color: '#1e293b'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#ffffff',
+                    titleFont: { family: 'Inter', weight: 'bold' },
+                    bodyColor: '#ffffff',
+                    bodyFont: { family: 'Inter' },
+                    borderColor: '#475569',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                    boxPadding: 6
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Cambia la pestaña activa en las herramientas de asesoría técnica del estudiante.
+ * @param {string} tabId - El ID del panel de la pestaña a activar (e.g., 'tab-aptitud').
+ */
+function switchTab(tabId) {
+    // 1. Quitar la clase active de todos los botones de pestaña y paneles
+    const buttons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    panels.forEach(panel => panel.classList.remove('active'));
+    
+    // 2. Activar el panel seleccionado
+    const selectedPanel = document.getElementById(tabId);
+    if (selectedPanel) {
+        selectedPanel.classList.add('active');
+    }
+    
+    // 3. Activar el botón correspondiente
+    const selectedBtn = document.getElementById('btn-' + tabId);
+    if (selectedBtn) {
+        selectedBtn.classList.add('active');
+    }
+    
+    // 4. Redimensionar/actualizar gráficos activos si se cambia a su pestaña
+    // Esto previene que Chart.js dibuje con un ancho incorrecto (0px o deformado) 
+    // cuando el lienzo estaba oculto en display: none durante su creación.
+    if (tabId === 'tab-regresion' && chartRegresionInstance) {
+        chartRegresionInstance.resize();
+        chartRegresionInstance.update();
+    } else if (tabId === 'tab-riemann' && chartIntegralInstance) {
+        chartIntegralInstance.resize();
+        chartIntegralInstance.update();
+    }
+}
+
