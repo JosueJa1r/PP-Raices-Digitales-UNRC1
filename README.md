@@ -132,19 +132,16 @@ $$P(X < k) = \sum_{x=0}^{k-1} \binom{n}{x} p^x (1-p)^{n-x}$$
 
 Donde $n$ es la cantidad de semillas proyectadas, $k$ es el pedido mínimo y $p$ es la probabilidad de germinación ajustada por Bayes. Esto permite generar un indicador visual del **Riesgo de Desabasto** antes de cosechar el lote.
 
-### 4. Volumen de Acumulación Hídrica y Biomasa (Cálculo Integral - Suma de Riemann)
+### 4. Volumen de Acumulación Hídrica (Cálculo Integral - Suma de Riemann)
 El sistema aproxima integrales definidas en tiempo real utilizando la Suma de Riemann izquierda para cuantificar variables acumulativas a partir de tasas de variación diarias (con un intervalo de tiempo fijo $\Delta t = 1$ día):
 
 $$A \approx \sum_{i=1}^{n} f(t_i) \Delta t = \sum_{i=1}^{n} f(t_i) \cdot 1$$
 
 *   **Precipitación Acumulada:** Integra la tasa diaria de lluvia en mm o $L/m^2$ para calcular el riego pasivo acumulado que recibió la chinampa a lo largo del tiempo:
     $$V_{\text{agua}} = \sum_{i=1}^{n} P(t_i) \quad [\text{L/m}^2]$$
-*   **Acumulación de Biomasa:** Integra la tasa diaria de crecimiento de biomasa ($g/\text{día}$) de las plantas para proyectar el peso / biomasa neta total obtenida en el ciclo:
-    $$M_{\text{biomasa}} = \sum_{i=1}^{n} B(t_i) \quad [\text{g}]$$
 
-En el backend de Python (`src/integral.py`), estas sumas discretas se calculan en las funciones:
+En el backend de Python (`src/integral.py`), esta suma discreta se calcula en la función:
 - `integral_acumulacion_precipitacion(tasa_lluvia_diaria)` $\rightarrow$ Aproxima el volumen total de agua recibida.
-- `integral_volumen_biomasa(tasa_crecimiento_diario)` $\rightarrow$ Aproxima el peso neto acumulado de la planta.
 
 ---
 
@@ -292,44 +289,72 @@ El diseño desacoplado de Raíces Digitales permite la escalabilidad del sistema
 
 ## Requisitos e Instalación
 
-Para ejecutar Raíces Digitales localmente en entorno de desarrollo, sigue estos pasos:
+Para ejecutar Raíces Digitales localmente en tu entorno de desarrollo, sigue las siguientes instrucciones detalladas para levantar tanto el backend como el frontend.
 
-1.  **Clona el repositorio**
-    ```bash
-    git clone https://github.com/JosueJa1r/PP-Raices-Digitales-UNRC.git
-    cd PP-Raices-Digitales-UNRC
-    ```
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/JosueJa1r/PP-Raices-Digitales-UNRC.git
+cd PP-Raices-Digitales-UNRC
+```
 
-2.  **Crea y activa un entorno virtual de Python**
-    ```bash
-    python -m venv .venv
-    # En Windows:
-    .venv\Scripts\activate
-    # En macOS/Linux:
-    source .venv/bin/activate
-    ```
+### 2. Configurar el Entorno Virtual de Python (Backend)
+Crea y activa un entorno virtual de Python para mantener las dependencias aisladas:
+```bash
+# Crear entorno virtual
+python -m venv .venv
 
-3.  **Instala las dependencias necesarias**
-    ```bash
-    pip install -r requirements.txt
-    ```
+# Activar entorno virtual
+# En Windows (PowerShell):
+.venv\Scripts\Activate.ps1
+# En Windows (CMD):
+.venv\Scripts\activate.bat
+# En macOS/Linux:
+source .venv/bin/activate
+```
 
-4.  **Configura las variables de entorno**
-    Crea un archivo llamado `.env` en la raíz del proyecto y configura tus credenciales de base de datos MySQL y la llave API del bot de inteligencia artificial:
-    ```ini
-    MYSQL_HOST=tu-host-mysql.com
-    MYSQL_PORT=3306
-    MYSQL_USER=tu-usuario
-    MYSQL_PASSWORD=tu-contraseña
-    MYSQL_DATABASE=raices_digitales
-    BOT_CHAT=tu-api-key-gemini
-    ```
+### 3. Instalar dependencias
+Instala los paquetes necesarios definidos en `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
 
-5.  **Inicia el servidor Flask**
-    ```bash
-    python -m src.app
-    ```
-    El servidor backend estará disponible en `http://127.0.0.1:5000`. Puedes abrir los archivos HTML locales en un navegador (o levantando un servidor local en el puerto `5501` para evitar bloqueos CORS) para interactuar con la plataforma completa.
+### 4. Configurar las Variables de Entorno
+Crea un archivo llamado `.env` en la raíz del proyecto. Este archivo debe apuntar a las credenciales de tu base de datos (ya sea local o en la nube de **Aiven**) y configurar la clave de API para el asistente RaícesBot:
+```ini
+MYSQL_HOST=tu-host-mysql-en-aiven.com
+MYSQL_PORT=tu-puerto-mysql
+MYSQL_USER=tu-usuario
+MYSQL_PASSWORD=tu-contraseña
+MYSQL_DATABASE=raices_digitales
+BOT_CHAT=tu-api-key-gemini
+```
+
+> [!NOTE]
+> Si deseas montar el esquema desde cero en una base de datos nueva, puedes ejecutar el script SQL de migración y semillas provisto en el repositorio: `raices_digitales_setup.sql`.
+
+### 5. Iniciar el Servidor API Flask
+Ejecuta el backend como un módulo de Python desde la raíz del proyecto para evitar problemas con las rutas de importación:
+```bash
+python -m src.app
+```
+El servidor de backend se levantará en modo de desarrollo en `http://127.0.0.1:5000`.
+
+### 6. Levantar el Servidor Frontend (Localhost)
+Para interactuar con la interfaz gráfica del usuario de forma correcta y evitar problemas de políticas de seguridad del navegador (como bloqueos de CORS o de lectura de archivos locales), debes levantar un servidor HTTP local para el frontend.
+
+#### Opción A: Usar la extensión "Live Server" de VS Code
+1. Abre el proyecto en **Visual Studio Code**.
+2. Instala la extensión **Live Server** (creada por Ritwick Dey).
+3. Haz clic derecho sobre el archivo `index.html` en el explorador de archivos y selecciona **"Open with Live Server"**.
+4. El portal se abrirá automáticamente en tu navegador predeterminado (normalmente en `http://127.0.0.1:5500` o `http://127.0.0.1:5501`).
+
+#### Opción B: Levantar un servidor rápido con Python
+Si prefieres usar la terminal, abre otra pestaña de consola en la raíz del proyecto y corre:
+```bash
+# Iniciar un servidor HTTP local en el puerto 5501
+python -m http.server 5501
+```
+Luego, abre tu navegador e ingresa a `http://127.0.0.1:5501` para ver el portal.
 
 ---
 

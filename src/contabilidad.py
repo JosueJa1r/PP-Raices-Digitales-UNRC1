@@ -4,14 +4,6 @@ import math
 # 1. CONTABILIDAD FINANCIERA
 # ==========================================
 
-def calcular_utilidad_neta(ingresos_totales, costos_insumos, costos_operativos):
-    """
-    Calcula el Valor Estimado Neto de las cosechas.
-    """
-    costos_totales = costos_insumos + costos_operativos
-    utilidad = ingresos_totales - costos_totales
-    return round(utilidad, 2)
-
 def calcular_roi(ganancia_cosecha, costo_siembra):
     """
     Retorno de Inversión (ROI). Devuelve el porcentaje de rentabilidad.
@@ -31,12 +23,7 @@ def calcular_punto_equilibrio(costos_fijos, precio_venta_unidad, costo_variable_
     pef = costos_fijos / (precio_venta_unidad - costo_variable_unidad)
     return math.ceil(pef) # Redondeamos hacia arriba porque no puedes vender "media" lechuga
 
-def calcular_merma_economica(volumen_esperado, probabilidad_perdida, precio_venta):
-    """
-    Cálculo de Merma Económica Proyectada (ME) por clima o plagas.
-    """
-    merma = (volumen_esperado * probabilidad_perdida) * precio_venta
-    return round(merma, 2)
+
 
 
 # ==========================================
@@ -47,15 +34,7 @@ PESO_COSTAL = 55.0      # Peso de un costal de semilla en Kg
 
 
 #JORNADAS DE TRABAJO 
-def costo_mano_obra_m2(costo_jornales, area_m2):
-    """
-    Calcula cuántos pesos se invierten en mano de obra por metro cuadrado.
-    """
-    if area_m2 <= 0:
-        return 0.0
-        
-    costo_por_m2 = costo_jornales / area_m2
-    return round(costo_por_m2, 2)
+
 
 
 #COSTO DE SEMILLA
@@ -71,15 +50,7 @@ def calcular_costo_semilla(precio_costal, peso_costal, densidad_m2, area_m2):
 
 
 #COSTO DE HERRAMIENTAS 
-def calcular_costo_herramientas(costo_total_herramientas, vida_util_ciclos):
-    """
-    Calcula cuánto se desgasta económicamente la herramienta en un solo ciclo.
-    """
-    if vida_util_ciclos <= 0:
-        return 0.0
-        
-    costo_por_ciclo = costo_total_herramientas / vida_util_ciclos
-    return costo_por_ciclo
+
 
 
 def calcular_costo_siembra_realista(precio_costal, area_m2, densidad_m2=0.02):

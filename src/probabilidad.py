@@ -40,26 +40,5 @@ def probabilidad_binomial_pmf(n, k, p):
         return 0.0
     return coeficiente_binomial(n, k) * (p**k) * ((1 - p)**(n - k))
 
-def calcular_riesgo_germinacion_completo(semillas, pedido, ph, p_base=0.85):
-    """
-    Calcula la probabilidad acumulada de no cumplir con el pedido: P(X < pedido).
-    Frecuencia clásica del lado del riesgo.
-    """
-    p_ajustada = calcular_p_germinacion(ph, p_base)
-    
-    if pedido <= 0:
-        return {"riesgo": 0.0, "p_germinacion": p_ajustada, "esperados": semillas * p_ajustada}
-    if pedido > semillas:
-        return {"riesgo": 100.0, "p_germinacion": p_ajustada, "esperados": semillas * p_ajustada}
-        
-    # Suma acumulada de las probabilidades de fallar (obtener menos que el pedido)
-    prob_falla = 0.0
-    for x in range(pedido):
-        prob_falla += probabilidad_binomial_pmf(semillas, x, p_ajustada)
-        
-    return {
-        "riesgo": round(prob_falla * 100, 2),  # Riesgo expresado en %
-        "p_germinacion": round(p_ajustada, 4),
-        "plantas_esperadas": round(semillas * p_ajustada, 1)
-    }
+
 

@@ -1,10 +1,9 @@
-import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from src.bd import registrar_productor, login_productor, registrar_cliente, login_cliente, obtener_cosechas_productor, obtener_semillas, obtener_stats_productor, obtener_inventario_productor, registrar_producto_inventario, obtener_analiticas_globales, registrar_publicacion_cosecha, obtener_categorias, eliminar_producto_inventario, obtener_catalogo_publicado, descontar_stock_inventario, obtener_perfil_productor, actualizar_perfil_productor, eliminar_cuenta_productor, registrar_estudiante, login_estudiante, registrar_monitoreo, obtener_monitoreos_estudiante, obtener_productores, obtener_monitoreos_productor, obtener_notificaciones_productor, registrar_siembra, cosechar_cultivo, eliminar_cosecha
 from src.ia.bot import generar_respuesta_bot
-from src.contabilidad import calcular_roi, calcular_punto_equilibrio, calcular_utilidad_neta, calcular_costo_siembra_realista
+from src.contabilidad import calcular_roi, calcular_punto_equilibrio, calcular_costo_siembra_realista
 from src.agronomia import indice_estres_salino
 from src.probabilidad import probabilidad_bayesiana
 from src.integral import integral_acumulacion_precipitacion

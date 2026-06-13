@@ -11,10 +11,4 @@ def integral_acumulacion_precipitacion(tasa_lluvia_diaria):
     acumulacion_total = sum(tasa_lluvia_diaria)
     return round(acumulacion_total, 2)
 
-def integral_volumen_biomasa(tasa_crecimiento_diario):
-    """
-    Aproxima el volumen / peso de la planta integrando su tasa de crecimiento.
-    tasa_crecimiento_diario: Lista de gramos/cm crecidos por día.
-    """
-    volumen_final = sum(tasa_crecimiento_diario)
-    return round(volumen_final, 2)
+
